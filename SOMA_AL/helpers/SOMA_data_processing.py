@@ -53,6 +53,19 @@ class SOMAALPipeline:
         self.data = self.data.rename(columns = {'Unnamed: 0': 'participant_index'})
         self.data['group_code'] = self.data['group_code'].replace({0: 'No pain', 1: 'Acute pain', 2: 'Chronic pain'})
 
+        #Add computations to determine accuracy #TODO: THIS ONLY WORKS FOR LEARNING TRIALS
+        self.data['symbol_L_prob'] = self.data['symbol_L_name'].str[:2]
+        self.data['symbol_R_prob'] = self.data['symbol_R_name'].str[:2]
+        self.data['larger_prob'] = self.data['symbol_R_prob'] > self.data['symbol_L_prob'] #1 = Right has larger prob, 0 = Left has larger prob
+        self.data['larger_prob'] = self.data['larger_prob'].astype(int)
+        self.data['larger_prob'] = self.data['larger_prob'].where(self.data['context_val_name'] == 'Reward', 1 - self.data['larger_prob']) #Reverse coding for punishing trials
+        self.data['accuracy'] = self.data['larger_prob'] == self.data['choice_made'] #1 = Correct, 0 = Incorrect
+        self.data['accuracy'] = self.data['accuracy'].astype(int)
+
+        #Filter data
+        self.learning_data = self.data[self.data['trial_type'] == 'learning-trials']
+        self.transfer_data = self.data[self.data['trial_type'] == 'probe']
+
         #Summarize data
         self.summarize_data()
         self.groupby_summary('group_code')
@@ -84,4 +97,14 @@ class SOMAALPipeline:
         self.print_data('Data Head:', self.data.head())
         #self.print_data('Data Summary:', self.data_summary) #TODO: Removed because it collapses across all conditions and groups
         self.print_data('Grouped Summary of Pain:', self.grouped_summary)
+
+
+    #TODO: INSERT FOLLOWING INTO DESCRIPTIVES CLASS 
+    def compute_learning_accuracy(self):
+        pass
+        #GROUP x REWARD/PUNISH across trials
+        #GrouP learning data by group_code and context_val_name
+
+
+
     
