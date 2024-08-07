@@ -50,11 +50,32 @@ class SOMAALPipeline:
         #Create variables to store the file path and file name
         self.file_path = file_path
         self.file_name = file_name
-        self.file = os.path.join(file_path, file_name)
-        self.print_filename = f'{self.print_filename.replace(".txt","")}_{file_name.replace(".csv","")}.txt'
+        
+        #check if file name is a list and if so, load each dataset and concatenate them, adding NAs if columns are missing
+        if isinstance(file_name, list):
+            data = []
+            self.file = []
+            for file in file_name:
+                self.file.append(os.path.join(file_path, file))
+                data.append(pd.read_csv(os.path.join(file_path, file)))
 
-        #Load data
-        self.data = pd.read_csv(self.file)
+            #Drop any columns that do not exist in the first dataset and reorganize columns to match the first dataset
+            for i in range(1, len(data)):
+                data[i] = data[i].drop(columns = [col for col in data[i].columns if col not in data[0].columns])
+                data[i] = data[i][data[0].columns]
+            
+            #Concatenate the data
+            self.data = pd.concat(data, axis=0)
+            file_name = '_AND_'.join([file.split('\\')[-1] for file in file_name])
+
+        else:
+            
+            self.file = os.path.join(file_path, file_name)
+            self.data = pd.read_csv(self.file)
+            file_name = file_name.split('\\')[-1]
+
+        #Modify the print filename to include the file name
+        self.print_filename = f'{self.print_filename.replace(".txt","")}_{file_name.replace(".csv","")}.txt'
 
         #Modify unnamed column
         self.data = self.data.drop(columns = ['Unnamed: 0'])
@@ -179,8 +200,8 @@ def main():
     SOMA_pipeline = SOMAALPipeline()
 
     #Load data
-    SOMA_pipeline.load_data(file_path=r'D:\BM_Carney_Petzschner_Lab\SOMAStudyTracking\SOMAV1\database_exports\avoid_learn_prolific\v1a_avoid_pain', 
-                    file_name='v1a_avoid_pain.csv')
+    SOMA_pipeline.load_data(file_path=r'D:\BM_Carney_Petzschner_Lab\SOMAStudyTracking\SOMAV1\database_exports\avoid_learn_prolific', 
+                    file_name= [r'v1a_avoid_pain\v1a_avoid_pain.csv',r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv'])
     
     #Process data
     SOMA_pipeline.process_data()
