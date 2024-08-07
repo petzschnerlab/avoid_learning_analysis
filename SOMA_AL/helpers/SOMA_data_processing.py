@@ -193,7 +193,7 @@ class SOMAALPipeline:
             group_choice_rate = choice_rate.loc[group]
             #create a boxplot of the choice rate for each symbol
             bplot = ax[i].boxplot([group_choice_rate.loc[0], group_choice_rate.loc[1], group_choice_rate.loc[2], group_choice_rate.loc[3], group_choice_rate.loc[4]], 
-                                  patch_artist=True, meanline=True, showmeans=True, notch=True, conf_intervals=True, showfliers=False,
+                                  patch_artist=True, meanline=True, showmeans=True, showfliers=False,
                                   tick_labels=['Novel', 'High\nPunish', 'Low\nPunish', 'Low\nReward', 'High\nReward'])            
             colors = ['#D3D3D3', '#FF0000', '#FFB6C1', '#90EE90', '#00FF00']
             for patch, color in zip(bplot['boxes'], colors):
