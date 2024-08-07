@@ -1,5 +1,7 @@
 import os
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 #SOMAALPipeline class
 class SOMAALPipeline:
@@ -49,27 +51,33 @@ class SOMAALPipeline:
         #Load data
         self.data = pd.read_csv(self.file)
 
-        #Modify data
-        self.data = self.data.rename(columns = {'Unnamed: 0': 'participant_index'})
-        self.data['group_code'] = self.data['group_code'].replace({0: 'No pain', 1: 'Acute pain', 2: 'Chronic pain'})
+        #Modify unnamed column
+        self.data = self.data.drop(columns = ['Unnamed: 0'])
+    
+    def process_data(self):
+        #Create a dictionary to replace the group code with the group name
+        self.data['group_code'] = self.data['group_code'].replace({0: 'no pain', 1: 'acute pain', 2: 'chronic pain'})
 
         #Add computations to determine accuracy #TODO: THIS ONLY WORKS FOR LEARNING TRIALS
-        self.data['symbol_L_prob'] = self.data['symbol_L_name'].str[:2]
-        self.data['symbol_R_prob'] = self.data['symbol_R_name'].str[:2]
-        self.data['larger_prob'] = self.data['symbol_R_prob'] > self.data['symbol_L_prob'] #1 = Right has larger prob, 0 = Left has larger prob
-        self.data['larger_prob'] = self.data['larger_prob'].astype(int)
-        self.data['larger_prob'] = self.data['larger_prob'].where(self.data['context_val_name'] == 'Reward', 1 - self.data['larger_prob']) #Reverse coding for punishing trials
-        self.data['accuracy'] = self.data['larger_prob'] == self.data['choice_made'] #1 = Correct, 0 = Incorrect
-        self.data['accuracy'] = self.data['accuracy'].astype(int)
+        self.data['symbol_L_value'] = self.data['symbol_L_name'].replace({'75R1': 4, '75R2': 4, '25R1': 3, '25R2': 3, '25P1': 2, '25P2': 2, '75P1': 1, '75P2': 1, 'Zero': 0})
+        self.data['symbol_R_value'] = self.data['symbol_R_name'].replace({'75R1': 4, '75R2': 4, '25R1': 3, '25R2': 3, '25P1': 2, '25P2': 2, '75P1': 1, '75P2': 1, 'Zero': 0})
+        self.data['larger_value'] = (self.data['symbol_R_value'] > self.data['symbol_L_value']).astype(int) #1 = Right has larger value, 0 = Left has larger value
+        self.data['accuracy'] = (self.data['larger_value'] == self.data['choice_made']).astype(int) #1 = Correct, 0 = Incorrect
 
         #Filter data
         self.learning_data = self.data[self.data['trial_type'] == 'learning-trials']
         self.transfer_data = self.data[self.data['trial_type'] == 'probe']
 
-        #Summarize data
-        self.summarize_data()
-        self.groupby_summary('group_code')
-    
+        #Create trial indices
+        #For the learning_data data create an increasing trial count for each participant and for each level of context_val_name (Reward, Loss Avoid)
+        self.learning_data['trial_number'] = self.learning_data.groupby(['participant_id', 'context_val_name']).cumcount() + 1
+
+    def save_processed_data(self):
+        #Save the processed data to a new file
+        self.data.to_csv(self.file.replace('.csv', '_processed.csv'))
+        self.learning_data.to_csv(self.file.replace('.csv', '_learning_processed.csv'))
+        self.transfer_data.to_csv(self.file.replace('.csv', '_transfer_processed.csv'))
+
     #Create a method to summarize the data
     def summarize_data(self):
 
@@ -80,7 +88,7 @@ class SOMAALPipeline:
     def groupby_summary(self, groupby_column):
 
         self.grouped_summary = self.data.groupby(groupby_column)[['intensity', 'unpleasant', 'interference']].agg(['mean', 'std'])
-        self.grouped_summary = self.grouped_summary.reindex(['No pain', 'Acute pain', 'Chronic pain'])
+        self.grouped_summary = self.grouped_summary.reindex(['no pain', 'acute pain', 'chronic pain'])
     
     def print_report(self):
 
@@ -93,18 +101,93 @@ class SOMAALPipeline:
         self.print_data('Column Names:', ', '.join(self.data.columns))
         self.print_data('Data Dimensions:', 
                         [['Rows', 'Columns', 'Number of Participants'],
-                         [self.data.shape[0], self.data.shape[1], self.data['participant_index'].nunique()]])
+                         [self.data.shape[0], self.data.shape[1], self.data['participant_id'].nunique()]])
         self.print_data('Data Head:', self.data.head())
         #self.print_data('Data Summary:', self.data_summary) #TODO: Removed because it collapses across all conditions and groups
         self.print_data('Grouped Summary of Pain:', self.grouped_summary)
 
+    #### PLOTS ####
+    def print_plots(self):
+        self.plot_learning_accuracy(rolling_mean=True)
 
-    #TODO: INSERT FOLLOWING INTO DESCRIPTIVES CLASS 
+    def plot_learning_accuracy(self, rolling_mean=False, CIs=False):
+        #Add three sublpots, one for each group (group_code), which shows the average accuracy over trials (trial_number) for each of the two contexts (context_val_name)
+        fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+        for i, group in enumerate(['no pain', 'acute pain', 'chronic pain']):
+            group_data = self.learning_data[self.learning_data['group_code'] == group]
+            for context_index, context in enumerate(['Reward', 'Loss Avoid']):
+                context_data = group_data[group_data['context_val_name'] == context]
+                mean_accuracy = context_data.groupby('trial_number')['accuracy'].mean()*100
+                if rolling_mean:
+                    mean_accuracy = mean_accuracy.rolling(5).mean()
+                std_accuracy = context_data.groupby('trial_number')['accuracy'].std()
+                if CIs:
+                    ax[i].fill_between(mean_accuracy.index, mean_accuracy - 1.96*std_accuracy, mean_accuracy + 1.96*std_accuracy, alpha=0.2, color=['C0', 'C1'][context_index])
+                ax[i].plot(mean_accuracy, label=context, color=['C0', 'C1'][context_index])
+
+            ax[i].set_title(f'{group.capitalize()}')
+            ax[i].set_xlabel('Trial Number')
+            ax[i].set_ylabel('Accuracy')
+            ax[i].legend()
+
+        #Save the plot
+        plt.savefig('SOMA_AL/plots/Figure 2A - Accuracy Across Learning.png')
+
+    #### TESTS ####
+    def run_tests(self):
+        self.test_trial_counts()
+
+    def test_trial_counts(self):
+
+        #for each articiant plot the trial indexes as the y axis using matlpotlib
+        for participant in self.learning_data['participant_id'].unique():
+            participant_data = self.learning_data[self.learning_data['participant_id'] == participant]
+            participant_trial_counts = []
+            for context in participant_data['context_val_name'].unique():
+                context_data = participant_data[participant_data['context_val_name'] == context]
+                participant_trial_counts.append(context_data.shape[0])
+
+            if participant_trial_counts[0] != 48 or participant_trial_counts[1] != 48:
+                raise ValueError(f'Participant {participant} has incorrect number of trials: {participant_trial_counts}')     
+
+    #### DESCRIPTIVES ####
     def compute_learning_accuracy(self):
         pass
         #GROUP x REWARD/PUNISH across trials
         #GrouP learning data by group_code and context_val_name
 
+def main():
+    #Initiate pipeline
+    SOMA_pipeline = SOMAALPipeline()
+
+    #Load data
+    SOMA_pipeline.load_data(file_path=r'D:\BM_Carney_Petzschner_Lab\SOMAStudyTracking\SOMAV1\database_exports\avoid_learn_prolific\v1a_avoid_pain', 
+                    file_name='v1a_avoid_pain.csv')
+    
+    #Process data
+    SOMA_pipeline.process_data()
+    #SOMA_pipeline.save_processed_data()
+
+    #Compute summary statistics
+    SOMA_pipeline.summarize_data()
+    SOMA_pipeline.groupby_summary('group_code')
+
+    #Test code
+    SOMA_pipeline.run_tests()
+
+    #Report data
+    SOMA_pipeline.print_report()
+    SOMA_pipeline.print_plots()
+
+    #Compute descriptives
+    SOMA_pipeline.compute_learning_accuracy()
+
+    #Debug tag
+    print()
+
+if __name__ == '__main__':
+    main()
+    print()
 
 
     
