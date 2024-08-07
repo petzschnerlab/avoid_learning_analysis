@@ -117,7 +117,7 @@ class SOMAALPipeline:
 
     def plot_learning_accuracy(self, rolling_mean=False, CIs=False):
         #Add three sublpots, one for each group (group_code), which shows the average accuracy over trials (trial_number) for each of the two contexts (context_val_name)
-        fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+        fig, ax = plt.subplots(1, 4, figsize=(15, 5))
         for i, group in enumerate(['no pain', 'acute pain', 'chronic pain']):
             group_data = self.learning_data[self.learning_data['group_code'] == group]
             for context_index, context in enumerate(['Reward', 'Loss Avoid']):
@@ -130,11 +130,24 @@ class SOMAALPipeline:
                     ax[i].fill_between(mean_accuracy.index, mean_accuracy - 1.96*std_accuracy, mean_accuracy + 1.96*std_accuracy, alpha=0.2, color=['C0', 'C1'][context_index])
                 ax[i].plot(mean_accuracy, label=context, color=['C0', 'C1'][context_index])
 
+            ax[i].set_ylim(50, 90)
             ax[i].set_title(f'{group.capitalize()}')
             ax[i].set_xlabel('Trial Number')
             ax[i].set_ylabel('Accuracy')
             ax[i].legend()
 
+        #Add a fourth subplot to show the difference in accuracy between the two contexts for each group across trials
+        for i, group in enumerate(['no pain', 'acute pain', 'chronic pain']):
+            group_data = self.learning_data[self.learning_data['group_code'] == group]
+            context_data = group_data.groupby(['trial_number', 'context_val_name'])['accuracy'].mean().unstack()
+            context_data['Difference'] = context_data['Loss Avoid'] - context_data['Reward']
+            ax[3].plot(context_data['Difference'], label=group)
+
+        ax[3].set_title('Difference in Accuracy')
+        ax[3].set_xlabel('Trial Number')
+        ax[3].set_ylabel('Accuracy Difference')
+        ax[3].legend()
+        
         #Save the plot
         plt.savefig('SOMA_AL/plots/Figure 2A - Accuracy Across Learning.png')
 
