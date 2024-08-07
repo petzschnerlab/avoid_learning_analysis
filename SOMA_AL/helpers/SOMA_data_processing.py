@@ -1,3 +1,8 @@
+#System settings
+import sys
+sys.dont_write_bytecode = True
+
+#Import modules
 import os
 import pandas as pd
 import numpy as np
