@@ -69,7 +69,7 @@ class SOMAALPipeline:
             file_name = '_AND_'.join([file.split('\\')[-1] for file in file_name])
 
         else:
-            
+
             self.file = os.path.join(file_path, file_name)
             self.data = pd.read_csv(self.file)
             file_name = file_name.split('\\')[-1]
@@ -91,12 +91,17 @@ class SOMAALPipeline:
         self.data['accuracy'] = (self.data['larger_value'] == self.data['choice_made']).astype(int) #1 = Correct, 0 = Incorrect
 
         #Filter data
-        self.learning_data = self.data[self.data['trial_type'] == 'learning-trials']
-        self.transfer_data = self.data[self.data['trial_type'] == 'probe']
+        self.learning_data = self.data[self.data['trial_type'] == 'learning-trials'].reset_index(drop=True)
+        self.transfer_data = self.data[self.data['trial_type'] == 'probe'].reset_index(drop=True)
 
         #Create trial indices
-        #For the learning_data data create an increasing trial count for each participant and for each level of context_val_name (Reward, Loss Avoid)
         self.learning_data['trial_number'] = self.learning_data.groupby(['participant_id', 'context_val_name']).cumcount() + 1
+
+        #Determine which symbol_n_value was chosen using the choice_made column where 1 = Right, 0 = Left in the transfer data
+        self.transfer_data['symbol_chosen'] = self.transfer_data['symbol_L_value']
+        self.transfer_data.loc[self.transfer_data['choice_made'] == 1, 'symbol_chosen'] = self.transfer_data['symbol_R_value']
+        self.transfer_data['symbol_ignored'] = self.transfer_data['symbol_R_value']
+        self.transfer_data.loc[self.transfer_data['choice_made'] == 1, 'symbol_ignored'] = self.transfer_data['symbol_L_value']
 
     def save_processed_data(self):
         #Save the processed data to a new file
@@ -135,6 +140,7 @@ class SOMAALPipeline:
     #### PLOTS ####
     def print_plots(self):
         self.plot_learning_accuracy(rolling_mean=True)
+        self.plot_transfer_accuracy()
 
     def plot_learning_accuracy(self, rolling_mean=False, CIs=False):
         #Add three sublpots, one for each group (group_code), which shows the average accuracy over trials (trial_number) for each of the two contexts (context_val_name)
@@ -171,6 +177,38 @@ class SOMAALPipeline:
         
         #Save the plot
         plt.savefig('SOMA_AL/plots/Figure 2A - Accuracy Across Learning.png')
+
+        #Close figure
+        plt.close()
+
+    def plot_transfer_accuracy(self):
+        #Determine how often each symbol was chosen in the transfr trials and divide by the number of times it was shown to get the probability of choosing each symbol but split per group per participant_id within each group
+        symbol_chosen_counts = self.transfer_data.groupby(['group_code', 'symbol_chosen', 'participant_id'])['symbol_chosen'].count()
+        symbol_shown_counts = self.transfer_data.groupby(['group_code', 'symbol_chosen', 'participant_id'])['symbol_chosen'].count() + self.transfer_data.groupby(['group_code', 'symbol_ignored', 'participant_id'])['symbol_ignored'].count()
+        choice_rate = (symbol_chosen_counts / symbol_shown_counts) * 100
+
+        #Create a bar plot of the choice rate for each symbol
+        fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+        for i, group in enumerate(['no pain', 'acute pain', 'chronic pain']):
+            group_choice_rate = choice_rate.loc[group]
+            #create a boxplot of the choice rate for each symbol
+            bplot = ax[i].boxplot([group_choice_rate.loc[0], group_choice_rate.loc[1], group_choice_rate.loc[2], group_choice_rate.loc[3], group_choice_rate.loc[4]], 
+                                  patch_artist=True, meanline=True, showmeans=True, notch=True, conf_intervals=True, showfliers=False,
+                                  tick_labels=['Novel', 'High\nPunish', 'Low\nPunish', 'Low\nReward', 'High\nReward'])            
+            colors = ['#D3D3D3', '#FF0000', '#FFB6C1', '#90EE90', '#00FF00']
+            for patch, color in zip(bplot['boxes'], colors):
+                patch.set_facecolor(color)            
+            ax[i].invert_xaxis()
+            ax[i].set_xlabel('')
+            ax[i].set_ylabel('Choice Rate (%)')
+            ax[i].set_ylim(0, 90)
+            ax[i].set_title(group.capitalize())
+
+        #Save the plot
+        plt.savefig('SOMA_AL/plots/Figure 2B - Transfer Choice Rate.png')
+
+        #Close figure
+        plt.close()
 
     #### TESTS ####
     def run_tests(self):
