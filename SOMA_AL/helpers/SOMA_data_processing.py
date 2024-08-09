@@ -96,8 +96,27 @@ class SOMAALPipeline:
     
     #### PRINTING REPORTS ####
 
-    def add_data_pdf(self, content:list, toc:bool=True):
-        self.pdf.add_section(Section(' \n '.join(content), toc=toc))
+    def add_data_pdf(self, content:list, toc:bool=True, center:bool=False):
+        #Formatting
+        user_css = 'h1 {text-align:center;}' if center else None
+        section = Section(' \n '.join(content), toc=toc)
+        self.pdf.add_section(section, user_css=user_css)
+
+    def table_to_pdf(self, table:pd.DataFrame, floatfmt=".2f"):
+        table = table.transpose()
+        table = table.reset_index(level=[0,1])
+        for i in range(1, table.shape[0]):
+            if table['level_0'][i] == table['level_0'][i-1]:
+                table['level_0'][i] = ''
+        for i in range(table.shape[0]):
+            table['level_0'][i] = f'**{table["level_0"][i].capitalize()}**' if table['level_0'][i] != '' else ''
+        for i in range(table.shape[0]):
+            table['level_1'][i] = f'**{table["level_1"][i].capitalize()}**'
+        table.columns = table.columns.str.title()
+        table.columns.values[0] = ''
+        table.columns.values[1] = ''
+
+        return table.to_markdown(floatfmt=floatfmt, index=False)
 
     def save_report(self):
         try:
@@ -145,8 +164,8 @@ class SOMAALPipeline:
 
         #Add data summary
         section_text = [f'## Participant Characteristics',
-                        f'**Grouped Summary of Pain**\n{self.grouped_summary.to_markdown()}']
-        self.add_data_pdf(section_text, toc=True)
+                        f'**Grouped Summary of Pain**\n{self.table_to_pdf(self.grouped_summary)}']
+        self.add_data_pdf(section_text, toc=True,center=True)
 
         #Save to pdf
         self.save_report()
