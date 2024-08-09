@@ -143,7 +143,9 @@ class SOMAALPipeline:
         self.pdf = MarkdownPdf(toc_level=3)
 
         #Add title Page
-        self.add_data_pdf(['# SOMA Report'], toc=True)
+        section_text = [f'# SOMA Report',
+                        f'![SOMA_logo](SOMA_AL/media/SOMA_preview.png)']
+        self.add_data_pdf(section_text, toc=True)
 
         #Add report details
         section_text = [f'## SOMA Report Details',
@@ -164,7 +166,12 @@ class SOMAALPipeline:
 
         #Add data summary
         section_text = [f'## Participant Characteristics',
-                        f'**Grouped Summary of Pain**\n{self.table_to_pdf(self.grouped_summary)}']
+                        f'**Grouped Summary of Pain**',
+                        #f'<center>',
+                        f'{self.table_to_pdf(self.grouped_summary)}',
+                        #f'</center>'
+                        ]
+
         self.add_data_pdf(section_text, toc=True,center=True)
 
         #Save to pdf
