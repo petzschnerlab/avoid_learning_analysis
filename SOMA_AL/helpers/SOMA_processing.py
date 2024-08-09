@@ -8,6 +8,7 @@ class SOMAProcessing:
     """
     Class to hold processing functions for the SOMA project
     """
+
     #Create a method to load the data
     def load_data(self, file_path, file_name):
         #Create variables to store the file path and file name
@@ -84,7 +85,7 @@ class SOMAProcessing:
         
         #Add computations to determine accuracy #TODO: THIS ONLY WORKS FOR LEARNING TRIALS
         self.learning_data['larger_value'] = (self.learning_data['symbol_R_value'] > self.learning_data['symbol_L_value']).astype(int) #1 = Right has larger value, 0 = Left has larger value
-        self.learning_data['accuracy'] = (self.learning_data['larger_value'] == self.learning_data['choice_made']).astype(int) #1 = Correct, 0 = Incorrect
+        self.learning_data['accuracy'] = (self.learning_data['larger_value'] == self.learning_data['choice_made']).astype(int)*100 #100 = Correct, 0 = Incorrect
 
     def compute_choice_rate(self):
 

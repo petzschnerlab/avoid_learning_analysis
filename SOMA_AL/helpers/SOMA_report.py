@@ -95,9 +95,7 @@ class SOMAReport:
         figure_1_caption = '**Figure 1.** Behavioral performance across learning trials for the rich and poor contexts for each group.'
         if self.fig1_rolling_mean is not None:
             figure_1_caption += f' For visualization, the accuracy is smoothed using a rolling mean of {self.fig1_rolling_mean} trials.'
-
-        if self.fig1_CIs is not False:
-            figure_1_caption += ' Shaded regions represent 95\% confidence intervals.'
+        figure_1_caption += ' Shaded regions represent 95\% confidence intervals.'
 
         figure_2_caption = """**Figure 2.** Choice rate for each symbol during transfer trials for each group.
         Choice rate is computed as the number of times a symbol was chosen given the number of times it was presented.

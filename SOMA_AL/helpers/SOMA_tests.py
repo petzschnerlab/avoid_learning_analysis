@@ -4,9 +4,6 @@ class SOMATests:
     Class to run tests for the SOMA project
     """
 
-    def __init__(self):
-        pass
-
     def run_tests(self):
         self.test_trial_counts()
 

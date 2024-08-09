@@ -2,54 +2,46 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy import stats
 
 class SOMAPlotting:
+
     """
     Class to hold plotting functions for the SOMA project
     """
 
     def print_plots(self):
-        self.plot_learning_accuracy(rolling_mean=3, CIs=True)
+        self.plot_learning_accuracy(rolling_mean=5)
         self.plot_transfer_accuracy()
 
-    def plot_learning_accuracy(self, rolling_mean=None, CIs=False):
-        #Track the rolling mean
+    def plot_learning_accuracy(self, rolling_mean=None):
+
+        #Track parameters
         self.fig1_rolling_mean = rolling_mean
-        self.fig1_CIs = CIs
 
         #Add three sublpots, one for each group (group_code), which shows the average accuracy over trials (trial_number) for each of the two contexts (context_val_name)
         fig, ax = plt.subplots(1, 3, figsize=(15, 5))
         for i, group in enumerate(['no pain', 'acute pain', 'chronic pain']):
             group_data = self.learning_data[self.learning_data['group_code'] == group]
+
+            #Get descriptive statistics for the group
+            sample_size = group_data['participant_id'].nunique()
+            t_score = stats.t.ppf(0.975, sample_size-1)
+
             for context_index, context in enumerate(['Reward', 'Loss Avoid']):
                 context_data = group_data[group_data['context_val_name'] == context]
-                mean_accuracy = context_data.groupby('trial_number')['accuracy'].mean()*100
+                mean_accuracy = context_data.groupby('trial_number')['accuracy'].mean()
+                CIs = context_data.groupby('trial_number')['accuracy'].sem()*t_score
                 if rolling_mean is not None:
                     mean_accuracy = mean_accuracy.rolling(rolling_mean).mean()
-                std_accuracy = context_data.groupby('trial_number')['accuracy'].std()
-                if CIs: #TODO: CHECK THESE
-                    ax[i].fill_between(mean_accuracy.index, mean_accuracy - 1.96*std_accuracy, mean_accuracy + 1.96*std_accuracy, alpha=0.2, color=['C0', 'C1'][context_index])
-                ax[i].plot(mean_accuracy, label=context, color=['C0', 'C1'][context_index])
+                ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.2, color=['#B2DF8A', '#FB9A99'][context_index], edgecolor='none')
+                ax[i].plot(mean_accuracy, color=['#B2DF8A', '#FB9A99'][context_index], label=['Reward' if context == 'Reward' else 'Punish'])
 
             ax[i].set_ylim(40, 100)
             ax[i].set_title(f'{group.capitalize()}')
             ax[i].set_xlabel('Trial Number')
             ax[i].set_ylabel('Accuracy')
             ax[i].legend(loc='lower right', frameon=False)
-
-        #Add a fourth subplot to show the difference in accuracy between the two contexts for each group across trials
-        '''
-        for i, group in enumerate(['no pain', 'acute pain', 'chronic pain']):
-            group_data = self.learning_data[self.learning_data['group_code'] == group]
-            context_data = group_data.groupby(['trial_number', 'context_val_name'])['accuracy'].mean().unstack()
-            context_data['Difference'] = context_data['Loss Avoid'] - context_data['Reward']
-            ax[3].plot(context_data['Difference'], label=group)
-
-        ax[3].set_title('Difference in Accuracy')
-        ax[3].set_xlabel('Trial Number')
-        ax[3].set_ylabel('Accuracy Difference')
-        ax[3].legend()
-        '''
 
         #Save the plot
         plt.savefig('SOMA_AL/plots/Figure_1_Accuracy_Across_Learning.png')
@@ -67,6 +59,10 @@ class SOMAPlotting:
         fig, ax = plt.subplots(1, 3, figsize=(15, 5))
         for i, group in enumerate(['no pain', 'acute pain', 'chronic pain']):
             group_choice_rate = choice_rate.loc[group].reset_index()
+
+            #Get descriptive statistics for the group
+            sample_size = group_choice_rate['participant'].nunique()
+            t_score = stats.t.ppf(0.975, sample_size-1)
             group_choice_rate = group_choice_rate.pivot(index='participant', columns='symbol', values='choice_rate').astype(float)
 
             vp = ax[i].violinplot(group_choice_rate, showmeans=False, showmedians=False, showextrema=False)
@@ -83,7 +79,7 @@ class SOMAPlotting:
             
             #Compute the mean and 95% CIs for the choice rate for each symbol
             mean_choice_rate = group_choice_rate.mean()
-            CIs = group_choice_rate.sem() * 1.96
+            CIs = group_choice_rate.sem() * t_score
 
             #Draw rectangle for each symbol that rerpesents the top and bottom of the 95% CI that has no fill and a black outline
             for symbol in [0, 1, 2, 3, 4]:

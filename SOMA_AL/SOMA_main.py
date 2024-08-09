@@ -7,6 +7,10 @@ from helpers import SOMAMaster
 
 class SOMAPipeline(SOMAMaster):
 
+    """
+    Class to run the SOMA project pipeline
+    """
+
     def __init__(self, print_filename=r'SOMA_AL/reports/SOMA_report.pdf'):
         super().__init__()
 
