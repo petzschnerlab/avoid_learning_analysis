@@ -1,4 +1,6 @@
 #Import modules
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 class SOMAPlotting:
@@ -50,36 +52,56 @@ class SOMAPlotting:
         '''
 
         #Save the plot
-        plt.savefig('SOMA_AL/plots/Figure_2A_Accuracy_Across_Learning.png')
+        plt.savefig('SOMA_AL/plots/Figure_1_Accuracy_Across_Learning.png')
 
         #Close figure
         plt.close()
 
     def plot_transfer_accuracy(self):
-        #Determine how often each symbol was chosen in the transfr trials and divide by the number of times it was shown to get the probability of choosing each symbol but split per group per participant_id within each group
-        symbol_chosen_counts = self.transfer_data.groupby(['group_code', 'symbol_chosen', 'participant_id'])['symbol_chosen'].count()
-        symbol_shown_counts = self.transfer_data.groupby(['group_code', 'symbol_chosen', 'participant_id'])['symbol_chosen'].count() + self.transfer_data.groupby(['group_code', 'symbol_ignored', 'participant_id'])['symbol_ignored'].count()
-        choice_rate = (symbol_chosen_counts / symbol_shown_counts) * 100
 
+        #Copy choice rate data
+        choice_rate = self.choice_rate
+        
         #Create a bar plot of the choice rate for each symbol
+        colors = ['#D3D3D3', '#E31A1C', '#FB9A99', '#B2DF8A', '#33A02C']
         fig, ax = plt.subplots(1, 3, figsize=(15, 5))
         for i, group in enumerate(['no pain', 'acute pain', 'chronic pain']):
-            group_choice_rate = choice_rate.loc[group]
-            #create a boxplot of the choice rate for each symbol
-            bplot = ax[i].boxplot([group_choice_rate.loc[0], group_choice_rate.loc[1], group_choice_rate.loc[2], group_choice_rate.loc[3], group_choice_rate.loc[4]], 
-                                  patch_artist=True, meanline=True, showmeans=True, showfliers=False,
-                                  tick_labels=['Novel', 'High\nPunish', 'Low\nPunish', 'Low\nReward', 'High\nReward'])            
-            colors = ['#D3D3D3', '#FF0000', '#FFB6C1', '#90EE90', '#00FF00']
-            for patch, color in zip(bplot['boxes'], colors):
-                patch.set_facecolor(color)            
+            group_choice_rate = choice_rate.loc[group].reset_index()
+            group_choice_rate = group_choice_rate.pivot(index='participant', columns='symbol', values='choice_rate').astype(float)
+
+            vp = ax[i].violinplot(group_choice_rate, showmeans=False, showmedians=False, showextrema=False)
+            
+            for bi, b in enumerate(vp['bodies']):
+                m = np.mean(b.get_paths()[0].vertices[:, 0])
+                b.get_paths()[0].vertices[:, 0] = np.clip(b.get_paths()[0].vertices[:, 0], -np.inf, m)
+                b.set_color(colors[bi])
+
+            #Add jittered scatter plot of the choice rate for each column
+            for symbol in [0, 1, 2, 3, 4]:
+                x = np.random.normal([symbol+1+.2]*group_choice_rate.shape[0], 0.02)
+                ax[i].scatter(x-.02, group_choice_rate[symbol], color=colors[symbol], s=10, alpha=0.25)
+            
+            #Compute the mean and 95% CIs for the choice rate for each symbol
+            mean_choice_rate = group_choice_rate.mean()
+            CIs = group_choice_rate.sem() * 1.96
+
+            #Draw rectangle for each symbol that rerpesents the top and bottom of the 95% CI that has no fill and a black outline
+            for symbol in [0, 1, 2, 3, 4]:
+                ax[i].add_patch(plt.Rectangle((symbol+1-0.4, mean_choice_rate.loc[symbol] - CIs.loc[symbol]), 0.8, 2*CIs.loc[symbol], fill=None, edgecolor='darkgrey'))
+
+            #Add a horizontal **line** for the mean choice rate for each symbol that is the same width as the 95% CI and is darkgrey
+            ax[i].hlines(mean_choice_rate, [h-0.4 for h in [1, 2, 3, 4, 5]], [h+0.4 for h in [1, 2, 3, 4, 5]], color='darkgrey')
+
+            #Create horizontal line for the mean the same width
+            ax[i].set_xticks([1, 2, 3, 4, 5], ['Novel', 'High\nPunish', 'Low\nPunish', 'Low\nReward', 'High\nReward'])
             ax[i].invert_xaxis()
             ax[i].set_xlabel('')
             ax[i].set_ylabel('Choice Rate (%)')
-            ax[i].set_ylim(0, 90)
+            ax[i].set_ylim(-4, 104)
             ax[i].set_title(group.capitalize())
 
         #Save the plot
-        plt.savefig('SOMA_AL/plots/Figure_2B_Transfer_Choice_Rate.png')
+        plt.savefig('SOMA_AL/plots/Figure_2_Transfer_Choice_Rate.png')
 
         #Close figure
         plt.close()

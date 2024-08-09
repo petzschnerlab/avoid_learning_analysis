@@ -99,15 +99,20 @@ class SOMAReport:
         if self.fig1_CIs is not False:
             figure_1_caption += ' Shaded regions represent 95\% confidence intervals.'
 
+        figure_2_caption = """**Figure 2.** Choice rate for each symbol during transfer trials for each group.
+        Choice rate is computed as the number of times a symbol was chosen given the number of times it was presented.
+        Boxplots show the mean and 95\% confidence intervals of the choice rate for each symbol type across participants within each group.
+        Half-violin plots show the distribution of choice rates for each symbol type across participants within each group.
+        Scatter points show the choice rate for each participant within each symbol type."""
+
         section_text = [f'## Behavioural Findings',
                         f'### Learning Accuracy',
-                        f'![learning_accuracy](SOMA_AL/plots/Figure_2A_Accuracy_Across_Learning.png)',
+                        f'![learning_accuracy](SOMA_AL/plots/Figure_1_Accuracy_Across_Learning.png)',
                         f'{figure_1_caption}',
                         f'### Transfer Accuracy',
-                        f'![transfer_choice](SOMA_AL/plots/Figure_2B_Transfer_Choice_Rate.png)',
-                        f"""**Figure 2.** Choice rate for each symbol during transfer trials for each group.
-                        Choice rate is computed as the number of times a symbol was chosen given the number of times it was presented.
-                        Boxlpots show the mean and standard deviation of the choice rate for each symbol type across participants within each group."""]
+                        f'![transfer_choice](SOMA_AL/plots/Figure_2_Transfer_Choice_Rate.png)',
+                        f'{figure_2_caption}']
+        
         self.add_data_pdf(section_text)
 
         #Save to pdf

@@ -42,23 +42,37 @@ class SOMAProcessing:
 
         #Modify unnamed column
         self.data = self.data.drop(columns = ['Unnamed: 0'])
-    
-    def process_data(self):
-        #Create a dictionary to replace the group code with the group name
-        self.data['group_code'] = self.data['group_code'].replace({0: 'no pain', 1: 'acute pain', 2: 'chronic pain'})
 
-        #Add computations to determine accuracy #TODO: THIS ONLY WORKS FOR LEARNING TRIALS
+        #Modify codes
+        self.data['group_code'] = self.data['group_code'].replace({0: 'no pain', 1: 'acute pain', 2: 'chronic pain'})
         self.data['symbol_L_value'] = self.data['symbol_L_name'].replace({'75R1': 4, '75R2': 4, '25R1': 3, '25R2': 3, '25P1': 2, '25P2': 2, '75P1': 1, '75P2': 1, 'Zero': 0})
         self.data['symbol_R_value'] = self.data['symbol_R_name'].replace({'75R1': 4, '75R2': 4, '25R1': 3, '25R2': 3, '25P1': 2, '25P2': 2, '75P1': 1, '75P2': 1, 'Zero': 0})
-        self.data['larger_value'] = (self.data['symbol_R_value'] > self.data['symbol_L_value']).astype(int) #1 = Right has larger value, 0 = Left has larger value
-        self.data['accuracy'] = (self.data['larger_value'] == self.data['choice_made']).astype(int) #1 = Correct, 0 = Incorrect
+
+    def process_data(self):
+        
+        #Filter the learning and transfer data
+        self.filter_learning_data()
+        self.filter_transfer_data()
+
+        #Compute accuracy for learning data
+        self.compute_accuracy()
+
+        #Compute choice rate for transfer data
+        self.compute_choice_rate()
+
+    def filter_learning_data(self):
 
         #Filter data
         self.learning_data = self.data[self.data['trial_type'] == 'learning-trials'].reset_index(drop=True)
-        self.transfer_data = self.data[self.data['trial_type'] == 'probe'].reset_index(drop=True)
 
         #Create trial indices
         self.learning_data['trial_number'] = self.learning_data.groupby(['participant_id', 'context_val_name']).cumcount() + 1
+        
+
+    def filter_transfer_data(self):
+
+        #Filter data
+        self.transfer_data = self.data[self.data['trial_type'] == 'probe'].reset_index(drop=True)
 
         #Determine which symbol_n_value was chosen using the choice_made column where 1 = Right, 0 = Left in the transfer data
         self.transfer_data['symbol_chosen'] = self.transfer_data['symbol_L_value']
@@ -66,17 +80,35 @@ class SOMAProcessing:
         self.transfer_data['symbol_ignored'] = self.transfer_data['symbol_R_value']
         self.transfer_data.loc[self.transfer_data['choice_made'] == 1, 'symbol_ignored'] = self.transfer_data['symbol_L_value']
 
+    def compute_accuracy(self):
+        
+        #Add computations to determine accuracy #TODO: THIS ONLY WORKS FOR LEARNING TRIALS
+        self.learning_data['larger_value'] = (self.learning_data['symbol_R_value'] > self.learning_data['symbol_L_value']).astype(int) #1 = Right has larger value, 0 = Left has larger value
+        self.learning_data['accuracy'] = (self.learning_data['larger_value'] == self.learning_data['choice_made']).astype(int) #1 = Correct, 0 = Incorrect
+
+    def compute_choice_rate(self):
+
+        #Compute choice rates for each participant and symbol within each group
+        choice_rate = pd.DataFrame(columns=['choice_rate'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=['group', 'participant', 'symbol']))
+        for group in ['no pain', 'acute pain', 'chronic pain']:
+            group_data = self.transfer_data[self.transfer_data['group_code'] == group]
+            for participant in group_data['participant_id'].unique():
+                participant_data = group_data[group_data['participant_id'] == participant]
+                for symbol in [0, 1, 2, 3, 4]:
+                    symbol_chosen = participant_data[participant_data['symbol_chosen'] == symbol].shape[0]
+                    symbol_ignored = participant_data[participant_data['symbol_ignored'] == symbol].shape[0]
+                    symbol_choice_rate = symbol_chosen / (symbol_chosen + symbol_ignored) * 100
+
+                    #Insert symbol_choice_rate into a new dataframe with index levels [group, participant, symbol]
+                    choice_rate.loc[(group, participant, symbol), 'choice_rate'] = symbol_choice_rate
+
+        self.choice_rate = choice_rate
+
     def save_processed_data(self):
         #Save the processed data to a new file
         self.data.to_csv(self.file.replace('.csv', '_processed.csv'))
         self.learning_data.to_csv(self.file.replace('.csv', '_learning_processed.csv'))
         self.transfer_data.to_csv(self.file.replace('.csv', '_transfer_processed.csv'))
-
-    #Create a method to summarize the data
-    def summarize_data(self):
-
-        #Create a variable named summary and assign it the value of self.data.describe()
-        self.data_summary = self.data.describe()
 
     #pandas create a summary of data using groupby
     def groupby_summary(self, groupby_column):
