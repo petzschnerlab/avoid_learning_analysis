@@ -95,7 +95,8 @@ class SOMAReport:
 
         #Add demographics
         demo_title = pd.DataFrame([['', '', '']], columns=self.demographics_summary.columns, index=['Demographics'])
-        pain_title = pd.DataFrame([['', '', '']], columns=self.pain_summary.columns, index=['Pain Scores'])
+        pain_title = pd.DataFrame([['', '', '']], columns=self.demographics_summary.columns, index=['Pain Scores'])
+        depression_title = pd.DataFrame([['', '', '']], columns=self.demographics_summary.columns, index=['Depression Scores'])
         blank_row = pd.DataFrame([['', '', '']], columns=self.demographics_summary.columns, index=[''])
         self.demographics = pd.concat([blank_row,
                                         demo_title,
@@ -103,8 +104,15 @@ class SOMAReport:
                                         blank_row,
                                         pain_title, 
                                         self.pain_summary], axis=0)
+        
+        if self.depression_summary is not None:
+            self.demographics = pd.concat([self.demographics, 
+                                           blank_row, 
+                                           depression_title, 
+                                           self.depression_summary], axis=0)
 
-        table_1_caption = '**Table 1.** Participant demographics and pain scores. Metrics reported as mean (standard deviation). F = Female, M = Male, N = Not Specified.'
+        table_1_caption = f"""**Table 1.** Participant demographics{" and " if self.depression_summary is None else ", "}pain scores{"" if self.depression_summary is None else " and depression scores"}. 
+                            Metrics reported as mean (standard deviation). F = Female, M = Male, N = Not Specified."""
         table_1_filename = self.table_to_pdf(self.demographics, save_name="SOMA_AL/plots/Table_1_Demographics.png")
         section_text = [f'## Participant Demographics',
                         f'{table_1_caption}',

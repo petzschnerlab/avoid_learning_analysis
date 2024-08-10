@@ -58,6 +58,7 @@ class SOMAProcessing:
         #Compute demographics
         self.compute_demographics()
         self.compute_pain_scores()
+        self.compute_depression_scores()
 
         #Compute accuracy for learning data
         self.compute_accuracy()
@@ -140,7 +141,7 @@ class SOMAProcessing:
         self.demographics_summary = self.demographics_summary.reindex(['no pain', 'acute pain', 'chronic pain'])
         self.demographics_summary = self.demographics_summary.T
 
-    #pandas create a summary of data using groupby
+    #Compute pain scores
     def compute_pain_scores(self):
 
         self.mean_pain = self.data.groupby('group_code')[['intensity', 'unpleasant', 'interference']].mean()
@@ -149,4 +150,15 @@ class SOMAProcessing:
         self.pain_summary = self.pain_summary.reindex(['no pain', 'acute pain', 'chronic pain'])
         self.pain_summary = self.pain_summary.T
 
-    
+    #Compute depression scores
+    def compute_depression_scores(self):
+
+        #Check if PHQ8 is in the data
+        if 'PHQ8' in self.data.columns:
+            self.mean_depression = self.data.groupby('group_code')['PHQ8'].mean()
+            self.std_depression = self.data.groupby('group_code')['PHQ8'].std()
+            self.depression_summary = self.mean_depression.round(2).astype(str) + ' (' + self.std_depression.round(2).astype(str) + ')'
+            self.depression_summary = self.depression_summary.reindex(['no pain', 'acute pain', 'chronic pain'])
+            self.depression_summary = self.depression_summary.to_frame().T
+        else:
+            self.depression_summary = None
