@@ -55,6 +55,9 @@ class SOMAProcessing:
         self.filter_learning_data()
         self.filter_transfer_data()
 
+        #Compute demographics
+        self.compute_demographics()
+
         #Compute accuracy for learning data
         self.compute_accuracy()
 
@@ -104,6 +107,32 @@ class SOMAProcessing:
                     choice_rate.loc[(group, participant, symbol), 'choice_rate'] = symbol_choice_rate
 
         self.choice_rate = choice_rate
+
+    def compute_demographics(self):
+
+        #Compute the demographics of the participants
+        self.demographics = self.data.groupby(['group_code','participant_id'])[['age', 'sex']].first().reset_index()
+
+        #Compute demographics statistics
+        self.mean_age = self.demographics.groupby('group_code')['age'].mean()
+        self.std_age = self.demographics.groupby('group_code')['age'].std()
+
+        self.female_counts = self.demographics[self.demographics['sex'] == 'Female'].groupby('group_code')['participant_id'].nunique()
+        self.male_counts = self.demographics[self.demographics['sex'] == 'Male'].groupby('group_code')['participant_id'].nunique()
+        self.not_specified_counts = self.demographics[self.demographics['sex'] == 'Prefer not to say'].groupby('group_code')['participant_id'].nunique()
+        self.not_specified_counts = self.not_specified_counts.reindex(['acute pain', 'chronic pain', 'no pain'], fill_value=0)
+
+        #combine female counts, male counts, not specified into strings separated by slashes
+        self.demo_sample_size = self.demographics.groupby('group_code')['participant_id'].nunique()
+        self.demo_age = self.mean_age.round(2).astype(str) + ' (' + self.std_age.round(2).astype(str) + ')'
+        self.demo_gender = self.female_counts.astype(str) + ' / ' + self.male_counts.astype(str) + ' / ' + self.not_specified_counts.astype(str)
+
+        #Combine all demographics statistics into a single dataframe
+        self.demographics_summary = pd.concat([self.demo_sample_size, self.demo_age, self.demo_gender], axis=1)
+        self.demographics_summary.columns = ['Sample Size', 'Age (Mean [SD])', 'Gender (F/M/NS)']
+        self.demographics_summary = self.demographics_summary.reindex(['no pain', 'acute pain', 'chronic pain'])
+        self.demographics_summary = self.demographics_summary.T
+                                                
 
     def save_processed_data(self):
         #Save the processed data to a new file
