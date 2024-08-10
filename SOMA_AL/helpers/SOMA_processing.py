@@ -57,12 +57,19 @@ class SOMAProcessing:
 
         #Compute demographics
         self.compute_demographics()
+        self.compute_pain_scores()
 
         #Compute accuracy for learning data
         self.compute_accuracy()
 
         #Compute choice rate for transfer data
         self.compute_choice_rate()
+
+    def save_processed_data(self):
+        #Save the processed data to a new file
+        self.data.to_csv(self.file.replace('.csv', '_processed.csv'))
+        self.learning_data.to_csv(self.file.replace('.csv', '_learning_processed.csv'))
+        self.transfer_data.to_csv(self.file.replace('.csv', '_transfer_processed.csv'))
 
     def filter_learning_data(self):
 
@@ -129,20 +136,17 @@ class SOMAProcessing:
 
         #Combine all demographics statistics into a single dataframe
         self.demographics_summary = pd.concat([self.demo_sample_size, self.demo_age, self.demo_gender], axis=1)
-        self.demographics_summary.columns = ['Sample Size', 'Age (Mean [SD])', 'Gender (F/M/NS)']
+        self.demographics_summary.columns = ['Sample Size', 'Age', 'Gender (F/M/N)']
         self.demographics_summary = self.demographics_summary.reindex(['no pain', 'acute pain', 'chronic pain'])
         self.demographics_summary = self.demographics_summary.T
-                                                
-
-    def save_processed_data(self):
-        #Save the processed data to a new file
-        self.data.to_csv(self.file.replace('.csv', '_processed.csv'))
-        self.learning_data.to_csv(self.file.replace('.csv', '_learning_processed.csv'))
-        self.transfer_data.to_csv(self.file.replace('.csv', '_transfer_processed.csv'))
 
     #pandas create a summary of data using groupby
-    def groupby_summary(self, groupby_column):
+    def compute_pain_scores(self):
 
-        self.grouped_summary = self.data.groupby(groupby_column)[['intensity', 'unpleasant', 'interference']].agg(['mean', 'std'])
-        self.grouped_summary = self.grouped_summary.reindex(['no pain', 'acute pain', 'chronic pain'])
+        self.mean_pain = self.data.groupby('group_code')[['intensity', 'unpleasant', 'interference']].mean()
+        self.std_pain = self.data.groupby('group_code')[['intensity', 'unpleasant', 'interference']].std()
+        self.pain_summary = self.mean_pain.round(2).astype(str) + ' (' + self.std_pain.round(2).astype(str) + ')'
+        self.pain_summary = self.pain_summary.reindex(['no pain', 'acute pain', 'chronic pain'])
+        self.pain_summary = self.pain_summary.T
+
     

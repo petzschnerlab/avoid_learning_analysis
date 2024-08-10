@@ -25,9 +25,6 @@ class SOMAPipeline(SOMAMaster):
         self.process_data()
         #SOMA_pipeline.save_processed_data()
 
-        #Compute summary statistics
-        self.groupby_summary('group_code')
-
         #Test code
         self.run_tests()
 

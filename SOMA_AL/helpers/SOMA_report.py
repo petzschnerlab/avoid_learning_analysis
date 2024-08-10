@@ -2,6 +2,7 @@
 import os
 import warnings
 import pandas as pd
+import dataframe_image as dfi
 from markdown_pdf import MarkdownPdf, Section
 
 class SOMAReport:
@@ -16,21 +17,32 @@ class SOMAReport:
         section = Section(' \n '.join(content), toc=toc)
         self.pdf.add_section(section, user_css=user_css)
 
-    def table_to_pdf(self, table:pd.DataFrame, floatfmt=".2f"):
-        table = table.transpose()
-        table = table.reset_index(level=[0,1])
-        for i in range(1, table.shape[0]):
-            if table['level_0'][i] == table['level_0'][i-1]:
-                table['level_0'][i] = ''
-        for i in range(table.shape[0]):
-            table['level_0'][i] = f'**{table["level_0"][i].capitalize()}**' if table['level_0'][i] != '' else ''
-        for i in range(table.shape[0]):
-            table['level_1'][i] = f'**{table["level_1"][i].capitalize()}**'
-        table.columns = table.columns.str.title()
-        table.columns.values[0] = ''
-        table.columns.values[1] = ''
+    def table_to_pdf(self, table:pd.DataFrame, save_name="SOMA_AL/plots/Table.png"):
+        
+        #Format titles as titles
+        for i in range(len(table)):
+            table.index.values[i] = table.index.values[i].title()  
+        table.columns = table.columns.str.title()   
+        table.columns.name = None   
 
-        return table.to_markdown(floatfmt=floatfmt, index=False)
+        #Format the table
+        table = table.style.set_table_styles([{'selector': 'th', 'props': [('font-size', '10pt'), 
+                                                                           ('text-align', 'center'), 
+                                                                           ('background-color', '#FFFFFF')]},
+
+                                                {'selector': 'td', 'props': [('font-size', '10pt'), 
+                                                                             ('text-align', 'center'), 
+                                                                             ('background-color', '#FFFFFF')]},
+
+                                                {'selector': '', 'props': [('border-top', '1px solid black'), 
+                                                                           ('border-bottom', '1px solid black'),
+                                                                           ('border-left', '1px solid white'),
+                                                                           ('border-right', '1px solid white')]},])
+        
+        #Save the table as a png
+        dfi.export(table, save_name)
+
+        return save_name
 
     def save_report(self):
         try:
@@ -81,14 +93,22 @@ class SOMAReport:
                         f'**Number of Participants:** {self.data["participant_id"].nunique()}']
         self.add_data_pdf(section_text)
 
-        #Add data summary
-        section_text = [f'## Participant Characteristics',
-                        f'**Grouped Summary of Pain**',
-                        #f'<center>',
-                        f'{self.table_to_pdf(self.grouped_summary)}',
-                        #f'</center>'
-                        ]
+        #Add demographics
+        demo_title = pd.DataFrame([['', '', '']], columns=self.demographics_summary.columns, index=['Demographics'])
+        pain_title = pd.DataFrame([['', '', '']], columns=self.pain_summary.columns, index=['Pain Scores'])
+        blank_row = pd.DataFrame([['', '', '']], columns=self.demographics_summary.columns, index=[''])
+        self.demographics = pd.concat([blank_row,
+                                        demo_title,
+                                        self.demographics_summary, 
+                                        blank_row,
+                                        pain_title, 
+                                        self.pain_summary], axis=0)
 
+        table_1_caption = '**Table 1.** Participant demographics and pain scores. Metrics reported as mean (standard deviation). F = Female, M = Male, N = Not Specified.'
+        table_1_filename = self.table_to_pdf(self.demographics, save_name="SOMA_AL/plots/Table_1_Demographics.png")
+        section_text = [f'## Participant Demographics',
+                        f'{table_1_caption}',
+                        f'# ![Table 1]({table_1_filename})']
         self.add_data_pdf(section_text, center=True)
 
         #Add behavioural findings
