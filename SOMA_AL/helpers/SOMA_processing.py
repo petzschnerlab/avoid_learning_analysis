@@ -144,6 +144,7 @@ class SOMAProcessing:
     #Compute pain scores
     def compute_pain_scores(self):
 
+        self.pain_scores = self.data.groupby(['group_code', 'participant_id'])[['intensity', 'unpleasant', 'interference']].first().reset_index()
         self.mean_pain = self.data.groupby('group_code')[['intensity', 'unpleasant', 'interference']].mean()
         self.std_pain = self.data.groupby('group_code')[['intensity', 'unpleasant', 'interference']].std()
         self.pain_summary = self.mean_pain.round(2).astype(str) + ' (' + self.std_pain.round(2).astype(str) + ')'
@@ -155,10 +156,12 @@ class SOMAProcessing:
 
         #Check if PHQ8 is in the data
         if 'PHQ8' in self.data.columns:
+            self.depression_scores = self.data.groupby(['group_code', 'participant_id'])['PHQ8'].first().reset_index()
             self.mean_depression = self.data.groupby('group_code')['PHQ8'].mean()
             self.std_depression = self.data.groupby('group_code')['PHQ8'].std()
             self.depression_summary = self.mean_depression.round(2).astype(str) + ' (' + self.std_depression.round(2).astype(str) + ')'
             self.depression_summary = self.depression_summary.reindex(['no pain', 'acute pain', 'chronic pain'])
             self.depression_summary = self.depression_summary.to_frame().T
         else:
+            self.depression_scores = None
             self.depression_summary = None

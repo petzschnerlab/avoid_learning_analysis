@@ -114,9 +114,12 @@ class SOMAReport:
         table_1_caption = f"""**Table 1.** Participant demographics{" and " if self.depression_summary is None else ", "}pain scores{"" if self.depression_summary is None else " and depression scores"}. 
                             Metrics reported as mean (standard deviation). F = Female, M = Male, N = Not Specified."""
         table_1_filename = self.table_to_pdf(self.demographics, save_name="SOMA_AL/plots/Table_1_Demographics.png")
+        figure_1_caption = '**Figure 1. TODO ADD CAPTION** ' #TODO: Add figure caption and automate figure number
         section_text = [f'## Participant Demographics',
                         f'{table_1_caption}',
-                        f'# ![Table 1]({table_1_filename})']
+                        f'# ![Table 1]({table_1_filename})',
+                        f'{figure_1_caption}'
+                        f'![clinical_plot](SOMA_AL/plots/Figure_N_Clinical_Scores.png)']
         self.add_data_pdf(section_text, center=True)
 
         #Add behavioural findings
@@ -139,7 +142,7 @@ class SOMAReport:
                         f'![transfer_choice](SOMA_AL/plots/Figure_2_Transfer_Choice_Rate.png)',
                         f'{figure_2_caption}']
         
-        self.add_data_pdf(section_text)
+        self.add_data_pdf(section_text, center=True)
 
         #Save to pdf
         self.save_report()

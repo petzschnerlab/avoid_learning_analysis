@@ -34,8 +34,8 @@ class SOMAPipeline(SOMAMaster):
 if __name__ == '__main__':
 
     file_path = r'D:\BM_Carney_Petzschner_Lab\SOMAStudyTracking\SOMAV1\database_exports\avoid_learn_prolific'
-    #file_names = [r'v1a_avoid_pain\v1a_avoid_pain.csv', r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
-    file_names = [r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
+    file_names = [r'v1a_avoid_pain\v1a_avoid_pain.csv', r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
+    #file_names = [r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
 
     SOMA = SOMAPipeline()
     SOMA.run(file_path, file_names) 
