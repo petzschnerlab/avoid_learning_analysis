@@ -85,6 +85,8 @@ class SOMAReport:
         #Add data characteristics
         section_text = [f'## Data Characteristics',
                         f'**File{"s" if len(self.file_name) > 1 else ""}:** {", ".join(self.file_name)}',
+                        f'### Grouping',
+                        f'**Split by Group:** {self.split_by_group.capitalize()}',
                         f'### Column Names',
                         f'{", ".join(self.data.columns)}',
                         f'### Data Dimensions',
@@ -94,10 +96,11 @@ class SOMAReport:
         self.add_data_pdf(section_text)
 
         #Add demographics
-        demo_title = pd.DataFrame([['', '', '']], columns=self.demographics_summary.columns, index=['Demographics'])
-        pain_title = pd.DataFrame([['', '', '']], columns=self.demographics_summary.columns, index=['Pain Scores'])
-        depression_title = pd.DataFrame([['', '', '']], columns=self.demographics_summary.columns, index=['Depression Scores'])
-        blank_row = pd.DataFrame([['', '', '']], columns=self.demographics_summary.columns, index=[''])
+        column_blanks = ['','',''] if self.split_by_group == 'pain' else ['','']
+        demo_title = pd.DataFrame([column_blanks], columns=self.demographics_summary.columns, index=['Demographics'])
+        pain_title = pd.DataFrame([column_blanks], columns=self.demographics_summary.columns, index=['Pain Scores'])
+        depression_title = pd.DataFrame([column_blanks], columns=self.demographics_summary.columns, index=['Depression Scores'])
+        blank_row = pd.DataFrame([column_blanks], columns=self.demographics_summary.columns, index=[''])
         self.demographics = pd.concat([blank_row,
                                         demo_title,
                                         self.demographics_summary, 
@@ -114,21 +117,25 @@ class SOMAReport:
         table_1_caption = f"""**Table 1.** Participant demographics{" and " if self.depression_summary is None else ", "}pain scores{"" if self.depression_summary is None else " and depression scores"}. 
                             Metrics reported as mean (standard deviation). F = Female, M = Male, N = Not Specified."""
         table_1_filename = self.table_to_pdf(self.demographics, save_name="SOMA_AL/plots/Table_1_Demographics.png")
-        figure_1_caption = '**Figure 1. TODO ADD CAPTION** ' #TODO: Add figure caption and automate figure number
+        figure_1_caption = """**Figure 1.** Pain and depression metrics for each group.
+        Boxplots show the mean and 95\% confidence intervals of the corresponding metric for each group.
+        Half-violin plots show the distribution of the scores of the corresponding metric for each group.
+        Scatter points show the scores of the corresponding metric for each participant within each group."""
+
         section_text = [f'## Participant Demographics',
                         f'{table_1_caption}',
                         f'# ![Table 1]({table_1_filename})',
-                        f'{figure_1_caption}'
-                        f'![clinical_plot](SOMA_AL/plots/Figure_N_Clinical_Scores.png)']
+                        f'![clinical_plot](SOMA_AL/plots/Figure_N_Clinical_Scores.png)',
+                        f'{figure_1_caption}']
         self.add_data_pdf(section_text, center=True)
 
         #Add behavioural findings
-        figure_1_caption = '**Figure 1.** Behavioral performance across learning trials for the rich and poor contexts for each group.'
+        figure_1_caption = '**Figure 2.** Behavioral performance across learning trials for the rich and poor contexts for each group.'
         if self.fig1_rolling_mean is not None:
             figure_1_caption += f' For visualization, the accuracy is smoothed using a rolling mean of {self.fig1_rolling_mean} trials.'
         figure_1_caption += ' Shaded regions represent 95\% confidence intervals.'
 
-        figure_2_caption = """**Figure 2.** Choice rate for each symbol during transfer trials for each group.
+        figure_2_caption = """**Figure 3.** Choice rate for each symbol during transfer trials for each group.
         Choice rate is computed as the number of times a symbol was chosen given the number of times it was presented.
         Boxplots show the mean and 95\% confidence intervals of the choice rate for each symbol type across participants within each group.
         Half-violin plots show the distribution of choice rates for each symbol type across participants within each group.
@@ -136,10 +143,10 @@ class SOMAReport:
 
         section_text = [f'## Behavioural Findings',
                         f'### Learning Accuracy',
-                        f'![learning_accuracy](SOMA_AL/plots/Figure_1_Accuracy_Across_Learning.png)',
+                        f'![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning.png)',
                         f'{figure_1_caption}',
                         f'### Transfer Accuracy',
-                        f'![transfer_choice](SOMA_AL/plots/Figure_2_Transfer_Choice_Rate.png)',
+                        f'![transfer_choice](SOMA_AL/plots/Figure_N_Transfer_Choice_Rate.png)',
                         f'{figure_2_caption}']
         
         self.add_data_pdf(section_text, center=True)

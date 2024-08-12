@@ -1,5 +1,6 @@
 #Import modules
 import os
+import warnings
 import pandas as pd
 
 #SOMAALPipeline class
@@ -38,16 +39,24 @@ class SOMAProcessing:
             self.data = pd.read_csv(self.file)
             file_name = file_name.split('\\')[-1]
 
-        #Modify the print filename to include the file name
-        self.print_filename = f'{self.print_filename.replace(".pdf","")}_{file_name.replace(".csv","")}.pdf'
-
         #Modify unnamed column
         self.data = self.data.drop(columns = ['Unnamed: 0'])
 
         #Modify codes
-        self.data['group_code'] = self.data['group_code'].replace({0: 'no pain', 1: 'acute pain', 2: 'chronic pain'})
+        if self.split_by_group == 'pain':
+            self.data[self.group_code] = self.data[self.group_code].replace({0: 'no pain', 1: 'acute pain', 2: 'chronic pain'})
+        else:
+            self.data[self.group_code] = self.data[self.group_code].replace({0: 'healthy', 1: 'depressed'})
+
         self.data['symbol_L_value'] = self.data['symbol_L_name'].replace({'75R1': 4, '75R2': 4, '25R1': 3, '25R2': 3, '25P1': 2, '25P2': 2, '75P1': 1, '75P2': 1, 'Zero': 0})
         self.data['symbol_R_value'] = self.data['symbol_R_name'].replace({'75R1': 4, '75R2': 4, '25R1': 3, '25R2': 3, '25P1': 2, '25P2': 2, '75P1': 1, '75P2': 1, 'Zero': 0})
+
+    def check_data(self):
+        if 'depression' not in self.data.columns and self.split_by_group == 'depression':
+            warnings.warn('No depression scores found in the data. Skipping depression score computation.')
+            return False
+
+        return True
 
     def process_data(self):
         
@@ -55,7 +64,7 @@ class SOMAProcessing:
         self.filter_learning_data()
         self.filter_transfer_data()
 
-        #Compute demographics
+        #Compute demographics and scores
         self.compute_demographics()
         self.compute_pain_scores()
         self.compute_depression_scores()
@@ -102,8 +111,8 @@ class SOMAProcessing:
 
         #Compute choice rates for each participant and symbol within each group
         choice_rate = pd.DataFrame(columns=['choice_rate'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=['group', 'participant', 'symbol']))
-        for group in ['no pain', 'acute pain', 'chronic pain']:
-            group_data = self.transfer_data[self.transfer_data['group_code'] == group]
+        for group in self.group_labels:
+            group_data = self.transfer_data[self.transfer_data[self.group_code] == group]
             for participant in group_data['participant_id'].unique():
                 participant_data = group_data[group_data['participant_id'] == participant]
                 for symbol in [0, 1, 2, 3, 4]:
@@ -119,48 +128,48 @@ class SOMAProcessing:
     def compute_demographics(self):
 
         #Compute the demographics of the participants
-        self.demographics = self.data.groupby(['group_code','participant_id'])[['age', 'sex']].first().reset_index()
+        self.demographics = self.data.groupby([self.group_code,'participant_id'])[['age', 'sex']].first().reset_index()
 
         #Compute demographics statistics
-        self.mean_age = self.demographics.groupby('group_code')['age'].mean()
-        self.std_age = self.demographics.groupby('group_code')['age'].std()
+        self.mean_age = self.demographics.groupby(self.group_code)['age'].mean()
+        self.std_age = self.demographics.groupby(self.group_code)['age'].std()
 
-        self.female_counts = self.demographics[self.demographics['sex'] == 'Female'].groupby('group_code')['participant_id'].nunique()
-        self.male_counts = self.demographics[self.demographics['sex'] == 'Male'].groupby('group_code')['participant_id'].nunique()
-        self.not_specified_counts = self.demographics[self.demographics['sex'] == 'Prefer not to say'].groupby('group_code')['participant_id'].nunique()
-        self.not_specified_counts = self.not_specified_counts.reindex(['acute pain', 'chronic pain', 'no pain'], fill_value=0)
+        self.female_counts = self.demographics[self.demographics['sex'] == 'Female'].groupby(self.group_code)['participant_id'].nunique()
+        self.male_counts = self.demographics[self.demographics['sex'] == 'Male'].groupby(self.group_code)['participant_id'].nunique()
+        self.not_specified_counts = self.demographics[self.demographics['sex'] == 'Prefer not to say'].groupby(self.group_code)['participant_id'].nunique()
+        self.not_specified_counts = self.not_specified_counts.reindex(self.group_labels, fill_value=0)
 
         #combine female counts, male counts, not specified into strings separated by slashes
-        self.demo_sample_size = self.demographics.groupby('group_code')['participant_id'].nunique()
+        self.demo_sample_size = self.demographics.groupby(self.group_code)['participant_id'].nunique()
         self.demo_age = self.mean_age.round(2).astype(str) + ' (' + self.std_age.round(2).astype(str) + ')'
         self.demo_gender = self.female_counts.astype(str) + ' / ' + self.male_counts.astype(str) + ' / ' + self.not_specified_counts.astype(str)
 
         #Combine all demographics statistics into a single dataframe
         self.demographics_summary = pd.concat([self.demo_sample_size, self.demo_age, self.demo_gender], axis=1)
         self.demographics_summary.columns = ['Sample Size', 'Age', 'Gender (F/M/N)']
-        self.demographics_summary = self.demographics_summary.reindex(['no pain', 'acute pain', 'chronic pain'])
+        self.demographics_summary = self.demographics_summary.reindex(self.group_labels)
         self.demographics_summary = self.demographics_summary.T
 
     #Compute pain scores
     def compute_pain_scores(self):
 
-        self.pain_scores = self.data.groupby(['group_code', 'participant_id'])[['intensity', 'unpleasant', 'interference']].first().reset_index()
-        self.mean_pain = self.data.groupby('group_code')[['intensity', 'unpleasant', 'interference']].mean()
-        self.std_pain = self.data.groupby('group_code')[['intensity', 'unpleasant', 'interference']].std()
+        self.pain_scores = self.data.groupby([self.group_code, 'participant_id'])[['intensity', 'unpleasant', 'interference']].first().reset_index()
+        self.mean_pain = self.data.groupby(self.group_code)[['intensity', 'unpleasant', 'interference']].mean()
+        self.std_pain = self.data.groupby(self.group_code)[['intensity', 'unpleasant', 'interference']].std()
         self.pain_summary = self.mean_pain.round(2).astype(str) + ' (' + self.std_pain.round(2).astype(str) + ')'
-        self.pain_summary = self.pain_summary.reindex(['no pain', 'acute pain', 'chronic pain'])
+        self.pain_summary = self.pain_summary.reindex(self.group_labels)
         self.pain_summary = self.pain_summary.T
 
     #Compute depression scores
     def compute_depression_scores(self):
-
+        
         #Check if PHQ8 is in the data
         if 'PHQ8' in self.data.columns:
-            self.depression_scores = self.data.groupby(['group_code', 'participant_id'])['PHQ8'].first().reset_index()
-            self.mean_depression = self.data.groupby('group_code')['PHQ8'].mean()
-            self.std_depression = self.data.groupby('group_code')['PHQ8'].std()
+            self.depression_scores = self.data.groupby([self.group_code, 'participant_id'])['PHQ8'].first().reset_index()
+            self.mean_depression = self.data.groupby(self.group_code)['PHQ8'].mean()
+            self.std_depression = self.data.groupby(self.group_code)['PHQ8'].std()
             self.depression_summary = self.mean_depression.round(2).astype(str) + ' (' + self.std_depression.round(2).astype(str) + ')'
-            self.depression_summary = self.depression_summary.reindex(['no pain', 'acute pain', 'chronic pain'])
+            self.depression_summary = self.depression_summary.reindex(self.group_labels)
             self.depression_summary = self.depression_summary.to_frame().T
         else:
             self.depression_scores = None

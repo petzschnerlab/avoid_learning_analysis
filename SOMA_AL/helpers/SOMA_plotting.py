@@ -21,9 +21,10 @@ class SOMAPlotting:
         self.fig1_rolling_mean = rolling_mean
 
         #Add three sublpots, one for each group (group_code), which shows the average accuracy over trials (trial_number) for each of the two contexts (context_val_name)
-        fig, ax = plt.subplots(1, 3, figsize=(15, 5))
-        for i, group in enumerate(['no pain', 'acute pain', 'chronic pain']):
-            group_data = self.learning_data[self.learning_data['group_code'] == group]
+        num_subplots = 3 if self.split_by_group == 'pain' else 2
+        fig, ax = plt.subplots(1, num_subplots, figsize=(5*num_subplots, 5))
+        for i, group in enumerate(self.group_labels):
+            group_data = self.learning_data[self.learning_data[self.group_code] == group]
 
             #Get descriptive statistics for the group
             sample_size = group_data['participant_id'].nunique()
@@ -53,7 +54,9 @@ class SOMAPlotting:
     def raincloud_plot(self, data, ax, t_scores, alpha=0.25):
             
             #Set parameters
-            if data.index.nunique() == 3:
+            if data.index.nunique() == 2:
+                colors = ['#B2DF8A', '#FB9A99']
+            elif data.index.nunique() == 3:
                 colors = ['#B2DF8A', '#FFD92F', '#FB9A99']
             else:
                 colors = ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C', '#D3D3D3']
@@ -96,8 +99,9 @@ class SOMAPlotting:
         choice_rate = self.choice_rate
         
         #Create a bar plot of the choice rate for each symbol
-        fig, ax = plt.subplots(1, 3, figsize=(15, 5))
-        for group_index, group in enumerate(['no pain', 'acute pain', 'chronic pain']):
+        num_subplots = 3 if self.split_by_group == 'pain' else 2
+        fig, ax = plt.subplots(1, num_subplots, figsize=(5*num_subplots, 5))
+        for group_index, group in enumerate(self.group_labels):
             group_choice_rate = choice_rate.loc[group].reset_index()
             group_choice_rate['symbol'] = pd.Categorical(group_choice_rate['symbol'], [4, 3, 2, 1, 0])
             group_choice_rate = group_choice_rate.sort_values('symbol')
@@ -132,17 +136,16 @@ class SOMAPlotting:
         if self.depression_scores is not None:
             clinical_data = clinical_data.merge(self.depression_scores[['participant_id','PHQ8']], on='participant_id', how='outer')
             metrics.append('PHQ8')
-        clinical_data = clinical_data.melt(id_vars=['group_code', 'participant_id'], value_vars=metrics, var_name='metric', value_name='metric_value')
-        clinical_data['group_code'] = pd.Categorical(clinical_data['group_code'], ["no pain", "acute pain", "chronic pain"])
-        clinical_data = clinical_data.sort_values('group_code')
+        clinical_data = clinical_data.melt(id_vars=[self.group_code, 'participant_id'], value_vars=metrics, var_name='metric', value_name='metric_value')
+        clinical_data[self.group_code] = pd.Categorical(clinical_data[self.group_code], self.group_labels)
+        clinical_data = clinical_data.sort_values(self.group_code)
         clinical_data = clinical_data.set_index('metric')        
 
         #Create a bar plot of the choice rate for each symbol
         number_metrics = 4 if self.depression_scores is not None else 3
         fig, ax = plt.subplots(1, number_metrics, figsize=(5*number_metrics, 5))
         for metric_index, metric in enumerate(metrics):
-            metric_scores = clinical_data.loc[metric].set_index('group_code')['metric_value'].astype(float)
-            #metric_scores = metric_scores.reindex(['no pain', 'acute pain', 'chronic pain'])
+            metric_scores = clinical_data.loc[metric].set_index(self.group_code)['metric_value'].astype(float)
             sample_sizes = [len(metric_scores.loc[group]) for group in metric_scores.index.unique()]
             t_scores = [stats.t.ppf(0.975, s-1) for s in sample_sizes]
 
@@ -150,7 +153,8 @@ class SOMAPlotting:
             self.raincloud_plot(data=metric_scores, ax=ax[metric_index], t_scores=t_scores, alpha=0.5)
 
             #Create horizontal line for the mean the same width
-            ax[metric_index].set_xticks([1,2,3], ['No\nPain', 'Acute\nPain', 'Chronic\nPain'])
+            num_groups = 3 if self.split_by_group == 'pain' else 2
+            ax[metric_index].set_xticks(list(np.arange(1,num_groups+1)), self.group_labels_formatted)
             ax[metric_index].set_xlabel('')
             ax[metric_index].set_ylabel('Score')
             #ax[metric_index].set_ylim(-4, 104)
