@@ -12,9 +12,17 @@ class SOMAPipeline(SOMAMaster):
     Class to run the SOMA project pipeline
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
 
+        #Warning of unknown params
+        accepted_params = ['author']
+        for key in kwargs:
+            if key not in accepted_params:
+                warnings.warn(f'Unknown parameter {key} is being ignored', stacklevel=2)
+
+        #Set parameters
+        self.author = kwargs.get('author', 'SOMA_Team')
         self.figure_count = 1
         self.table_count = 1
 
@@ -75,8 +83,10 @@ if __name__ == '__main__':
     split_by_groups = ['pain', 'depression'] #'pain' or 'depression'
 
     for split_by_group in split_by_groups:
-        SOMA = SOMAPipeline()
-        SOMA.run(file_path=file_path, file_name=file_name, split_by_group=split_by_group) 
+        SOMA = SOMAPipeline(author='Chad C. Williams')
+        SOMA.run(file_path=file_path, 
+                 file_name=file_name, 
+                 split_by_group=split_by_group) 
 
     #Debug stop
     print()
