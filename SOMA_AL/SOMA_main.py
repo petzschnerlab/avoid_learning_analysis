@@ -12,15 +12,36 @@ class SOMAPipeline(SOMAMaster):
     Class to run the SOMA project pipeline
     """
 
-    def __init__(self, print_filename=r'SOMA_AL/reports/SOMA_report.pdf'):
+    def __init__(self):
         super().__init__()
 
-        self.print_filename = print_filename
         self.figure_count = 1
         self.table_count = 1
 
-    def run(self, file_path: str, file_name: list, split_by_group: str = 'pain'):
+    def run(self, **kwargs):
 
+        #Warning of unknown params
+        accepted_params = ['file_path', 
+                           'file_name', 
+                           'print_filename', 
+                           'split_by_group']
+        for key in kwargs:
+            if key not in accepted_params:
+                warnings.warn(f'Unknown parameter {key} is being ignored', stacklevel=2)
+
+        #Warning of missing required params
+        required_params = ['file_path', 
+                           'file_name']
+        for param in required_params:
+            if param not in kwargs:
+                raise ValueError(f'Missing required parameter {param}, which does not contain a default. Please provide a value for this parameter.')
+
+        #Turn parameters into a kwargs dictionary #file_path: str, file_name: list, split_by_group: str = 'pain'
+        self.file_path = kwargs.get('file_path', None)
+        self.file_name = kwargs.get('file_name', None)
+        self.print_filename = kwargs.get('print_filename', r'SOMA_AL/reports/SOMA_report.pdf')
+        self.split_by_group = kwargs.get('split_by_group', 'pain')
+        
         #Set parameters
         self.split_by_group = split_by_group
         self.print_filename = self.print_filename.replace('.pdf', f'_{split_by_group}.pdf')
