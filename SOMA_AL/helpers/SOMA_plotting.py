@@ -14,6 +14,18 @@ class SOMAPlotting:
         self.plot_clinical_scores()
         self.plot_learning_accuracy(rolling_mean=5)
         self.plot_transfer_accuracy()
+        self.plot_neutral_transfer_accuracy()
+
+    def compute_n_and_t(self, data, splitting_column):
+
+        #Reset index to allow access to all columns
+        data = data.reset_index()
+
+        #Compute the sample size and t-score for each group
+        sample_sizes = [data[data[splitting_column] == group].shape[0] for group in data[splitting_column].unique()]
+        t_scores = [stats.t.ppf(0.975, s-1) for s in sample_sizes]
+
+        return sample_sizes, t_scores
 
     def plot_learning_accuracy(self, rolling_mean=None):
 
@@ -89,9 +101,7 @@ class SOMAPlotting:
             #Draw rectangle for each symbol that rerpesents the top and bottom of the 95% CI that has no fill and a black outline
             for factor_index, factor in enumerate(data.index.unique()):
                 ax.add_patch(plt.Rectangle((factor_index+1-0.4, (mean_data.loc[factor] - CIs.loc[factor])['score']), 0.8, 2*CIs.loc[factor], fill=None, edgecolor='darkgrey'))
-
-            #Add a horizontal **line** for the mean for each factor that is the same width as the 95% CI and is darkgrey
-            ax.hlines(mean_data, [h+1-0.4 for h in range(data.index.nunique())], [h+1+0.4 for h in range(data.index.nunique())], color='darkgrey')
+                ax.hlines(mean_data.loc[factor], factor_index+1-0.4, factor_index+1+0.4, color='darkgrey')            
 
     def plot_transfer_accuracy(self):
 
@@ -106,8 +116,8 @@ class SOMAPlotting:
             group_choice_rate['symbol'] = pd.Categorical(group_choice_rate['symbol'], [4, 3, 2, 1, 0])
             group_choice_rate = group_choice_rate.sort_values('symbol')
 
-            sample_size = group_choice_rate['participant'].nunique()
-            t_scores = [stats.t.ppf(0.975, sample_size-1)]*5
+            #Compute t-statistic
+            _, t_scores = self.compute_n_and_t(group_choice_rate, 'symbol')
 
             #Get descriptive statistics for the group
             group_choice_rate = group_choice_rate.set_index('symbol')['choice_rate'].astype(float)
@@ -124,6 +134,45 @@ class SOMAPlotting:
 
         #Save the plot
         plt.savefig('SOMA_AL/plots/Figure_N_Transfer_Choice_Rate.png')
+
+        #Close figure
+        plt.close()
+
+    def plot_neutral_transfer_accuracy(self):
+
+        #Copy choice rate data
+        choice_rate = self.neutral_choice_rate
+        choice_rate = choice_rate.reset_index()
+        
+        #Create a bar plot of the choice rate for each symbol
+
+        fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+        choice_rate['symbol'] = pd.Categorical(choice_rate['group'], self.group_labels)
+
+        #Compute t-statistic
+        _, t_scores = self.compute_n_and_t(choice_rate, 'group')
+
+        #Get descriptive statistics for the group
+        choice_rate = choice_rate.set_index('group')['choice_rate'].astype(float)
+
+        #Create plot
+        self.raincloud_plot(data=choice_rate, ax=ax, t_scores=t_scores)
+
+        #Create horizontal line for the mean the same width
+        x_indexes = [1, 2, 3] if self.split_by_group == 'pain' else [1, 2]
+        x_labels = ['No\nPain', 'Acute\nPain', 'Chronic\nPain'] if self.split_by_group == 'pain' else ['Healthy', 'Depressed']
+        ax.set_xticks(x_indexes, x_labels)
+        ax.set_xlabel('')
+        ax.set_ylabel('Choice Rate (%)')
+        ax.set_ylim(-4, 104)
+        ax.axhline(y=50, color='darkgrey', linestyle='--')
+
+        #Add vertical annotations on the top and bottom of the plot near the y-axis that says 'Reward' (on the top) and 'Punish' (on the bottom)
+        ax.annotate('Reward', xy=(0.55, 95), xytext=(0.55, 95), rotation=90, textcoords='data', ha='center', va='center', color='darkgrey')
+        ax.annotate('Punish', xy=(0.55, 5), xytext=(0.55, 5), rotation=90, textcoords='data', ha='center', va='center', color='darkgrey')
+
+        #Save the plot
+        plt.savefig('SOMA_AL/plots/Figure_N_Neutral_Transfer_Choice_Rate.png')
 
         #Close figure
         plt.close()
@@ -146,8 +195,9 @@ class SOMAPlotting:
         fig, ax = plt.subplots(1, number_metrics, figsize=(5*number_metrics, 5))
         for metric_index, metric in enumerate(metrics):
             metric_scores = clinical_data.loc[metric].set_index(self.group_code)['metric_value'].astype(float)
-            sample_sizes = [len(metric_scores.loc[group]) for group in metric_scores.index.unique()]
-            t_scores = [stats.t.ppf(0.975, s-1) for s in sample_sizes]
+
+            #Compute t-statistic
+            _, t_scores = self.compute_n_and_t(metric_scores, self.group_code)
 
             #Create plot
             self.raincloud_plot(data=metric_scores, ax=ax[metric_index], t_scores=t_scores, alpha=0.5)

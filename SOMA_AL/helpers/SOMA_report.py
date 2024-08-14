@@ -13,7 +13,7 @@ class SOMAReport:
 
     def add_data_pdf(self, content:list, toc:bool=True, center:bool=False):
         #Formatting
-        user_css = 'h1 {text-align:center;}' if center else None
+        user_css = 'h4 {text-align:center;}' if center else None
         section = Section(' \n '.join(content), toc=toc)
         self.pdf.add_section(section, user_css=user_css)
 
@@ -124,8 +124,8 @@ class SOMAReport:
 
         section_text = [f'## Participant Demographics',
                         f'{table_1_caption}',
-                        f'# ![Table 1]({table_1_filename})',
-                        f'![clinical_plot](SOMA_AL/plots/Figure_N_Clinical_Scores.png)',
+                        f'#### ![Table 1]({table_1_filename})',
+                        f'![clinical_plot](SOMA_AL/plots/Figure_N_Clinical_Scores.png)\n',
                         f'{figure_1_caption}']
         self.add_data_pdf(section_text, center=True)
 
@@ -141,13 +141,21 @@ class SOMAReport:
         Half-violin plots show the distribution of choice rates for each symbol type across participants within each group.
         Scatter points show the choice rate for each participant within each symbol type."""
 
+        figure_3_caption = """**Figure 4.** Choice rates for cases where the low reward was compared to the low punishment symbols in the transfer trials. 
+        Choice rates represent the percentage of times the low reward was chosen, thus 50\% indicates equal choice rates for both symbols,
+        while greater than 50% indicates a preference for the low reward symbol. 
+        Boxplots show the mean and 95\% confidence intervals of the choice rate for each group."""
+
         section_text = [f'## Behavioural Findings',
                         f'### Learning Accuracy',
-                        f'![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning.png)',
+                        f'#### ![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning.png)\n',
                         f'{figure_1_caption}',
                         f'### Transfer Accuracy',
-                        f'![transfer_choice](SOMA_AL/plots/Figure_N_Transfer_Choice_Rate.png)',
-                        f'{figure_2_caption}']
+                        f'#### ![transfer_choice](SOMA_AL/plots/Figure_N_Transfer_Choice_Rate.png)\n',
+                        f'{figure_2_caption}',
+                        f'### Neutral Transfer Accuracy',
+                        f'#### ![neutral_transfer_choice](SOMA_AL/plots/Figure_N_Neutral_Transfer_Choice_Rate.png)\n',
+                        f'{figure_3_caption}']
         
         self.add_data_pdf(section_text, center=True)
 

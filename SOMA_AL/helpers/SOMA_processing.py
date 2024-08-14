@@ -50,6 +50,7 @@ class SOMAProcessing:
 
         self.data['symbol_L_value'] = self.data['symbol_L_name'].replace({'75R1': 4, '75R2': 4, '25R1': 3, '25R2': 3, '25P1': 2, '25P2': 2, '75P1': 1, '75P2': 1, 'Zero': 0})
         self.data['symbol_R_value'] = self.data['symbol_R_name'].replace({'75R1': 4, '75R2': 4, '25R1': 3, '25R2': 3, '25P1': 2, '25P2': 2, '75P1': 1, '75P2': 1, 'Zero': 0})
+        self.data['neutral_values'] = ((self.data['symbol_L_value'] == 3) | (self.data['symbol_L_value'] == 2)) & ((self.data['symbol_R_value'] == 3) | (self.data['symbol_R_value'] == 2))
 
     def check_data(self):
         if 'depression' not in self.data.columns and self.split_by_group == 'depression':
@@ -74,6 +75,7 @@ class SOMAProcessing:
 
         #Compute choice rate for transfer data
         self.compute_choice_rate()
+        self.compute_choice_rate(neutral=True)
 
     def save_processed_data(self):
         #Save the processed data to a new file
@@ -107,15 +109,22 @@ class SOMAProcessing:
         self.learning_data['larger_value'] = (self.learning_data['symbol_R_value'] > self.learning_data['symbol_L_value']).astype(int) #1 = Right has larger value, 0 = Left has larger value
         self.learning_data['accuracy'] = (self.learning_data['larger_value'] == self.learning_data['choice_made']).astype(int)*100 #100 = Correct, 0 = Incorrect
 
-    def compute_choice_rate(self):
+    def compute_choice_rate(self, neutral = False):
+
+        '''
+        Neutral: Processing specific to the 25R and 25P symbols being compared
+        '''
+
+        data = self.transfer_data if not neutral else self.transfer_data[self.transfer_data['neutral_values']]
 
         #Compute choice rates for each participant and symbol within each group
         choice_rate = pd.DataFrame(columns=['choice_rate'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=['group', 'participant', 'symbol']))
         for group in self.group_labels:
-            group_data = self.transfer_data[self.transfer_data[self.group_code] == group]
+            group_data = data[data[self.group_code] == group]
             for participant in group_data['participant_id'].unique():
                 participant_data = group_data[group_data['participant_id'] == participant]
-                for symbol in [0, 1, 2, 3, 4]:
+                symbols = [0, 1, 2, 3, 4] if not neutral else [2, 3]
+                for symbol in symbols:
                     symbol_chosen = participant_data[participant_data['symbol_chosen'] == symbol].shape[0]
                     symbol_ignored = participant_data[participant_data['symbol_ignored'] == symbol].shape[0]
                     symbol_choice_rate = symbol_chosen / (symbol_chosen + symbol_ignored) * 100
@@ -123,7 +132,13 @@ class SOMAProcessing:
                     #Insert symbol_choice_rate into a new dataframe with index levels [group, participant, symbol]
                     choice_rate.loc[(group, participant, symbol), 'choice_rate'] = symbol_choice_rate
 
-        self.choice_rate = choice_rate
+        if not neutral:
+            self.choice_rate = choice_rate
+        else:
+            choice_rate = choice_rate.reset_index()
+            choice_rate = choice_rate[choice_rate['symbol'] == 3] #Choose rewarding 
+            choice_rate = choice_rate.set_index(['group', 'participant', 'symbol'])
+            self.neutral_choice_rate = choice_rate
 
     def compute_demographics(self):
 
