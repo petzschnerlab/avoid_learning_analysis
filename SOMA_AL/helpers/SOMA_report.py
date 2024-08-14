@@ -43,6 +43,18 @@ class SOMAReport:
         dfi.export(table, save_name)
 
         return save_name
+    
+    def add_figure_caption(self, text):
+        section_text = f'**Figure {self.figure_count}.** {text}'
+        self.figure_count += 1
+
+        return section_text
+    
+    def add_table_caption(self, text):
+        section_text = f'**Table {self.table_count}.** {text}'
+        self.table_count += 1
+        
+        return section_text
 
     def save_report(self):
         try:
@@ -114,48 +126,56 @@ class SOMAReport:
                                            depression_title, 
                                            self.depression_summary], axis=0)
 
-        table_1_caption = f"""**Table 1.** Participant demographics{" and " if self.depression_summary is None else ", "}pain scores{"" if self.depression_summary is None else " and depression scores"}. 
+        section_table1_caption = f"""Participant demographics{" and " if self.depression_summary is None else ", "}pain scores{"" if self.depression_summary is None else " and depression scores"}. 
                             Metrics reported as mean (standard deviation). F = Female, M = Male, N = Not Specified."""
         table_1_filename = self.table_to_pdf(self.demographics, save_name="SOMA_AL/plots/Table_1_Demographics.png")
-        figure_1_caption = """**Figure 1.** Pain and depression metrics for each group.
+        
+        section_figure1_caption = """Pain and depression metrics for each group.
         Boxplots show the mean and 95\% confidence intervals of the corresponding metric for each group.
         Half-violin plots show the distribution of the scores of the corresponding metric for each group.
         Scatter points show the scores of the corresponding metric for each participant within each group."""
 
+        section_figure1_caption = self.add_figure_caption(section_figure1_caption)
+        section_table1_caption = self.add_table_caption(section_table1_caption)
+        
         section_text = [f'## Participant Demographics',
-                        f'{table_1_caption}',
+                        f'{section_table1_caption}',
                         f'#### ![Table 1]({table_1_filename})',
                         f'![clinical_plot](SOMA_AL/plots/Figure_N_Clinical_Scores.png)\n',
-                        f'{figure_1_caption}']
+                        f'{section_figure1_caption}']
         self.add_data_pdf(section_text, center=True)
 
         #Add behavioural findings
-        figure_1_caption = '**Figure 2.** Behavioral performance across learning trials for the rich and poor contexts for each group.'
+        section_figure1_caption = 'Behavioral performance across learning trials for the rich and poor contexts for each group.'
         if self.fig1_rolling_mean is not None:
-            figure_1_caption += f' For visualization, the accuracy is smoothed using a rolling mean of {self.fig1_rolling_mean} trials.'
-        figure_1_caption += ' Shaded regions represent 95\% confidence intervals.'
+            section_figure1_caption += f' For visualization, the accuracy is smoothed using a rolling mean of {self.fig1_rolling_mean} trials.'
+        section_figure1_caption += ' Shaded regions represent 95\% confidence intervals.'
 
-        figure_2_caption = """**Figure 3.** Choice rate for each symbol during transfer trials for each group.
+        section_figure2_caption = """Choice rate for each symbol during transfer trials for each group.
         Choice rate is computed as the number of times a symbol was chosen given the number of times it was presented.
         Boxplots show the mean and 95\% confidence intervals of the choice rate for each symbol type across participants within each group.
         Half-violin plots show the distribution of choice rates for each symbol type across participants within each group.
         Scatter points show the choice rate for each participant within each symbol type."""
 
-        figure_3_caption = """**Figure 4.** Choice rates for cases where the low reward was compared to the low punishment symbols in the transfer trials. 
+        section_figure3_caption = """Choice rates for cases where the low reward was compared to the low punishment symbols in the transfer trials. 
         Choice rates represent the percentage of times the low reward was chosen, thus 50\% indicates equal choice rates for both symbols,
         while greater than 50% indicates a preference for the low reward symbol. 
         Boxplots show the mean and 95\% confidence intervals of the choice rate for each group."""
 
+        section_figure1_caption = self.add_figure_caption(section_figure1_caption)
+        section_figure2_caption = self.add_figure_caption(section_figure2_caption)
+        section_figure3_caption = self.add_figure_caption(section_figure3_caption)
+
         section_text = [f'## Behavioural Findings',
                         f'### Learning Accuracy',
                         f'#### ![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning.png)\n',
-                        f'{figure_1_caption}',
+                        f'{section_figure1_caption}',
                         f'### Transfer Accuracy',
                         f'#### ![transfer_choice](SOMA_AL/plots/Figure_N_Transfer_Choice_Rate.png)\n',
-                        f'{figure_2_caption}',
+                        f'{section_figure2_caption}',
                         f'### Neutral Transfer Accuracy',
                         f'#### ![neutral_transfer_choice](SOMA_AL/plots/Figure_N_Neutral_Transfer_Choice_Rate.png)\n',
-                        f'{figure_3_caption}']
+                        f'{section_figure3_caption}']
         
         self.add_data_pdf(section_text, center=True)
 

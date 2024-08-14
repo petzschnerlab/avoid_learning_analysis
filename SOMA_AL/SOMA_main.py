@@ -16,6 +16,8 @@ class SOMAPipeline(SOMAMaster):
         super().__init__()
 
         self.print_filename = print_filename
+        self.figure_count = 1
+        self.table_count = 1
 
     def run(self, file_path: str, file_name: list, split_by_group: str = 'pain'):
 
