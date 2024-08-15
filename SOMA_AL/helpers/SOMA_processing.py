@@ -96,6 +96,7 @@ class SOMAProcessing:
 
         #Filter data
         self.transfer_data = self.data[self.data['trial_type'] == 'probe'].reset_index(drop=True)
+        self.transfer_data = self.transfer_data[self.transfer_data['symbol_L_value'] != self.transfer_data['symbol_R_value']] #Remove trials where the same valued symbol was presented together
 
         #Determine which symbol_n_value was chosen using the choice_made column where 1 = Right, 0 = Left in the transfer data
         self.transfer_data['symbol_chosen'] = self.transfer_data['symbol_L_value']

@@ -78,9 +78,12 @@ class SOMAPipeline(SOMAMaster):
 if __name__ == '__main__':
 
     file_path = r'D:\BM_Carney_Petzschner_Lab\SOMAStudyTracking\SOMAV1\database_exports\avoid_learn_prolific'
-    #file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv', r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
-    file_name = [r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
-    split_by_groups = ['pain', 'depression'] #'pain' or 'depression'
+    file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv', r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
+    #file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv']
+    #file_name = [r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
+
+    #Set analyses dependent on whether there is only depression groups
+    split_by_groups = ['pain'] if any("v1a" in s for s in file_name) else ['pain', 'depression'] #'pain' or 'depression'
 
     for split_by_group in split_by_groups:
         SOMA = SOMAPipeline(author='Chad C. Williams')
