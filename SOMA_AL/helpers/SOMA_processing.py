@@ -67,15 +67,15 @@ class SOMAProcessing:
         #Filter the learning and transfer data
         self.filter_learning_data()
         self.filter_transfer_data()
+        
+        #Compute accuracy for learning data and exclude participants with low accuracy
+        self.compute_accuracy()
+        self.exclude_low_accuracy(threshold=60)
 
         #Compute demographics and scores
         self.compute_demographics()
         self.compute_pain_scores()
         self.compute_depression_scores()
-
-        #Compute accuracy for learning data and exclude participants with low accuracy
-        self.compute_accuracy()
-        self.exclude_low_accuracy(threshold=60)
 
         #Compute choice rate for transfer data
         self.compute_choice_rate()
