@@ -32,7 +32,12 @@ class SOMAPipeline(SOMAMaster):
         accepted_params = ['file_path', 
                            'file_name', 
                            'print_filename', 
-                           'split_by_group']
+                           'split_by_group',
+                           'accuracy_exclusion_threshold',
+                           'RT_low_threshold',
+                           'RT_high_threshold',
+                           'rolling_mean',
+                           'tests']
         for key in kwargs:
             if key not in accepted_params:
                 warnings.warn(f'Unknown parameter {key} is being ignored', stacklevel=2)
@@ -49,6 +54,11 @@ class SOMAPipeline(SOMAMaster):
         self.file_name = kwargs.get('file_name', None)
         self.print_filename = kwargs.get('print_filename', r'SOMA_AL/reports/SOMA_report.pdf')
         self.split_by_group = kwargs.get('split_by_group', 'pain')
+        self.accuracy_exclusion_threshold = kwargs.get('accuracy_exclusion_threshold', 55)
+        self.RT_low_threshold = kwargs.get('RT_low_threshold', 200)
+        self.RT_high_threshold = kwargs.get('RT_high_threshold', 5000)
+        self.rolling_mean = kwargs.get('rolling_mean', 5)
+        self.tests = kwargs.get('tests', 'basic') #'basic' or 'extensive'
         
         #Set parameters
         self.split_by_group = split_by_group
@@ -78,9 +88,9 @@ class SOMAPipeline(SOMAMaster):
 if __name__ == '__main__':
 
     file_path = r'D:\BM_Carney_Petzschner_Lab\SOMAStudyTracking\SOMAV1\database_exports\avoid_learn_prolific'
-    file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv', r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
+    #file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv', r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
     #file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv']
-    #file_name = [r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
+    file_name = [r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
 
     #Set analyses dependent on whether there is only depression groups
     split_by_groups = ['pain'] if any("v1a" in s for s in file_name) else ['pain', 'depression'] #'pain' or 'depression'

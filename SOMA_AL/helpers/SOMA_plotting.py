@@ -12,7 +12,8 @@ class SOMAPlotting:
 
     def print_plots(self):
         self.plot_clinical_scores()
-        self.plot_learning_accuracy(rolling_mean=5)
+        self.plot_learning_accuracy(rolling_mean=self.rolling_mean)
+        self.plot_rt_distributions()
         self.plot_transfer_accuracy()
         self.plot_neutral_transfer_accuracy()
 
@@ -22,15 +23,16 @@ class SOMAPlotting:
         data = data.reset_index()
 
         #Compute the sample size and t-score for each group
-        sample_sizes = [data[data[splitting_column] == group].shape[0] for group in data[splitting_column].unique()]
-        t_scores = [stats.t.ppf(0.975, s-1) for s in sample_sizes]
+        if splitting_column == None:
+            sample_sizes = data.shape[0]
+            t_scores = stats.t.ppf(0.975, sample_size-1)
+        else:
+            sample_sizes = [data[data[splitting_column] == group].shape[0] for group in data[splitting_column].unique()]
+            t_scores = [stats.t.ppf(0.975, s-1) for s in sample_sizes]
 
         return sample_sizes, t_scores
 
     def plot_learning_accuracy(self, rolling_mean=None):
-
-        #Track parameters
-        self.fig1_rolling_mean = rolling_mean
 
         #Add three sublpots, one for each group (group_code), which shows the average accuracy over trials (trial_number) for each of the two contexts (context_val_name)
         num_subplots = 3 if self.split_by_group == 'pain' else 2
@@ -59,6 +61,35 @@ class SOMAPlotting:
 
         #Save the plot
         plt.savefig('SOMA_AL/plots/Figure_N_Accuracy_Across_Learning.png')
+
+        #Close figure
+        plt.close()
+
+    def plot_rt_distributions(self):
+
+        #create histograms of reaction times for each self.learning_data and self.transfer_data for each group
+        fig, ax = plt.subplots(1, len(self.group_labels), figsize=(5*len(self.group_labels), 5))
+        for i, group in enumerate(self.group_labels):
+            group_data_learning = self.learning_data[self.learning_data[self.group_code] == group]
+            group_data_learning = group_data_learning[~group_data_learning['excluded_rt']]
+            group_data_transfer = self.transfer_data[self.transfer_data[self.group_code] == group]
+            group_data_transfer = group_data_transfer[~group_data_transfer['excluded_rt']]
+            
+            #normalize data in histogram
+            ax[i].hist(group_data_learning['rt'], bins=20, color='C0', alpha=0.5, label='Learning', density=True)
+            ax[i].hist(group_data_transfer['rt'], bins=20, color='C1', alpha=0.5, label='Transfer', density=True)
+            ax[i].set_title(f'{group.capitalize()}')
+            ax[i].set_xlabel('Reaction Time (ms)')
+            ax[i].set_ylabel('Density')
+            ax[i].legend(loc='upper right', frameon=False)
+            ax[i].ticklabel_format(axis='y', style='sci', scilimits=(4,4))
+
+            #Add a point at the mean of the reaction times for each group
+            ax[i].scatter(group_data_learning['rt'].mean(), 0, color='C0', s=100, zorder=10)
+            ax[i].scatter(group_data_transfer['rt'].mean(), 0, color='C1', s=100, zorder=10)
+
+        #Save the plot
+        plt.savefig('SOMA_AL/plots/Figure_N_RT_distributions.png')
 
         #Close figure
         plt.close()

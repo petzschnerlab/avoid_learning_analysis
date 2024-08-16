@@ -108,7 +108,7 @@ class SOMAReport:
                         f'**Number of Original Participants:** {self.participants_original}\n',
                         f'**Number of Participants Excluded (Accuracy Threshold: {self.accuracy_threshold}%):** {self.participants_excluded_accuracy}\n',
                         f'**Number of Participants Remaining:** {self.learning_data["participant_id"].nunique()}\n',
-                        f'**Percentage of Trials Excluded (Reaction Time Threshold: {self.rt_threshold}ms):** {self.trials_excluded_rt.round(2)}%\n',
+                        f'**Percentage of Trials Excluded (RT Threshold: < {self.RT_low_threshold}ms or > {self.RT_high_threshold}ms):** {self.trials_excluded_rt.round(2)}%\n',
                         ]
         self.add_data_pdf(section_text)
 
@@ -152,17 +152,21 @@ class SOMAReport:
 
         #Add behavioural findings
         section_figure1_caption = 'Behavioral performance across learning trials for the rich and poor contexts for each group.'
-        if self.fig1_rolling_mean is not None:
-            section_figure1_caption += f' For visualization, the accuracy is smoothed using a rolling mean of {self.fig1_rolling_mean} trials.'
+        if self.rolling_mean is not None:
+            section_figure1_caption += f' For visualization, the accuracy is smoothed using a rolling mean of {self.rolling_mean} trials.'
         section_figure1_caption += ' Shaded regions represent 95\% confidence intervals.'
 
-        section_figure2_caption = """Choice rate for each symbol during transfer trials for each group.
+        section_figure2_caption = f"""Reaction time distributions for each phase and group. Half circles represent the mean reaction time for each group.
+        Reaction times less than {self.RT_low_threshold}ms and greater than {self.RT_high_threshold}ms were excluded from the analysis.
+        """
+
+        section_figure3_caption = """Choice rate for each symbol during transfer trials for each group.
         Choice rate is computed as the number of times a symbol was chosen given the number of times it was presented.
         Boxplots show the mean and 95\% confidence intervals of the choice rate for each symbol type across participants within each group.
         Half-violin plots show the distribution of choice rates for each symbol type across participants within each group.
         Scatter points show the choice rate for each participant within each symbol type."""
 
-        section_figure3_caption = """Choice rates for cases where the low reward was compared to the low punishment symbols in the transfer trials. 
+        section_figure4_caption = """Choice rates for cases where the low reward was compared to the low punishment symbols in the transfer trials. 
         Choice rates represent the percentage of times the low reward was chosen, thus 50\% indicates equal choice rates for both symbols,
         while greater than 50% indicates a preference for the low reward symbol. 
         Boxplots show the mean and 95\% confidence intervals of the choice rate for each group."""
@@ -170,17 +174,21 @@ class SOMAReport:
         section_figure1_caption = self.add_figure_caption(section_figure1_caption)
         section_figure2_caption = self.add_figure_caption(section_figure2_caption)
         section_figure3_caption = self.add_figure_caption(section_figure3_caption)
+        section_figure4_caption = self.add_figure_caption(section_figure4_caption)
 
         section_text = [f'## Behavioural Findings',
                         f'### Learning Accuracy',
                         f'#### ![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning.png)\n',
                         f'{section_figure1_caption}',
+                        f'### Reaction Time Distributions',
+                        f'#### ![rt_distributions](SOMA_AL/plots/Figure_N_RT_Distributions.png)\n',
+                        f'{section_figure2_caption}',
                         f'### Transfer Accuracy',
                         f'#### ![transfer_choice](SOMA_AL/plots/Figure_N_Transfer_Choice_Rate.png)\n',
-                        f'{section_figure2_caption}',
+                        f'{section_figure3_caption}',
                         f'### Neutral Transfer Accuracy',
                         f'#### ![neutral_transfer_choice](SOMA_AL/plots/Figure_N_Neutral_Transfer_Choice_Rate.png)\n',
-                        f'{section_figure3_caption}']
+                        f'{section_figure4_caption}']
         
         self.add_data_pdf(section_text, center=True)
 

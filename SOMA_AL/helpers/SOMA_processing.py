@@ -73,8 +73,8 @@ class SOMAProcessing:
         self.compute_accuracy()
 
         #Exclude participants with low accuracy and trials with low reaction times
-        self.exclude_low_accuracy(threshold=60)
-        self.exclude_low_rt(threshold=200)
+        self.exclude_low_accuracy(self.accuracy_exclusion_threshold)
+        self.exclude_low_rt(self.RT_low_threshold, self.RT_high_threshold)
 
         #Compute demographics and scores
         self.compute_demographics()
@@ -138,13 +138,13 @@ class SOMAProcessing:
         self.participants_excluded_accuracy = len(low_accuracy)
         self.accuracy_threshold = threshold
 
-    def exclude_low_rt(self, threshold=200):
+    def exclude_low_rt(self, low_threshold=200, high_threshold=5000):
 
-        self.learning_data['excluded_rt'] = self.learning_data['rt'] < threshold
+        self.learning_data['excluded_rt'] = (self.learning_data['rt'] < low_threshold) | (self.learning_data['rt'] > high_threshold)
         self.learning_data.loc[self.learning_data['excluded_rt'] == True, 'rt'] = np.nan
         self.learning_data.loc[self.learning_data['excluded_rt'] == True, 'accuracy'] = np.nan
 
-        self.transfer_data['excluded_rt'] = self.transfer_data['rt'] < threshold
+        self.transfer_data['excluded_rt'] = (self.transfer_data['rt'] < low_threshold) | (self.transfer_data['rt'] > high_threshold)
         self.transfer_data.loc[self.transfer_data['excluded_rt'] == True, 'rt'] = np.nan
         self.transfer_data.loc[self.transfer_data['excluded_rt'] == True, 'symbol_chosen'] = np.nan
         self.transfer_data.loc[self.transfer_data['excluded_rt'] == True, 'symbol_ignored'] = np.nan
@@ -153,7 +153,6 @@ class SOMAProcessing:
         excluded_count = (self.learning_data['excluded_rt'].sum() + self.transfer_data['excluded_rt'].sum())
         total_trials = (self.learning_data.shape[0] + self.transfer_data.shape[0])
         self.trials_excluded_rt = excluded_count/total_trials * 100
-        self.rt_threshold = threshold
 
     def compute_choice_rate(self, neutral = False):
 

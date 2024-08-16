@@ -10,7 +10,8 @@ class SOMATests:
 
     def run_tests(self):
         self.test_trial_counts()
-        #self.test_plot_learning_accuracy()
+        if self.tests == 'extensive':
+            self.test_plot_learning_accuracy()
 
     def test_trial_counts(self):
 
@@ -63,7 +64,6 @@ class SOMATests:
 
                 #Close figure
                 plt.close()
-
 
 
             
