@@ -108,7 +108,7 @@ class SOMAReport:
                         f'**Number of Original Participants:** {self.participants_original}\n',
                         f'**Number of Participants Excluded (Accuracy Threshold: {self.accuracy_threshold}%):** {self.participants_excluded_accuracy}\n',
                         f'**Number of Participants Remaining:** {self.learning_data["participant_id"].nunique()}\n',
-                        f'**Percentage of Trials Excluded (Reaction Time Threshold: {self.rt_threshold}):** {self.trials_excluded_rt}%\n',
+                        f'**Percentage of Trials Excluded (Reaction Time Threshold: {self.rt_threshold}ms):** {self.trials_excluded_rt.round(2)}%\n',
                         ]
         self.add_data_pdf(section_text)
 
