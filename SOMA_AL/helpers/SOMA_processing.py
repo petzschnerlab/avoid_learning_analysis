@@ -126,6 +126,7 @@ class SOMAProcessing:
         low_accuracy = accuracy[accuracy['accuracy'] < threshold].reset_index()
 
         #Remove participants with accuracy less than 60%
+        self.data = self.data[~self.data['participant_id'].isin(low_accuracy['participant'])]
         self.learning_data = self.learning_data[~self.learning_data['participant_id'].isin(low_accuracy['participant'])]
         self.transfer_data = self.transfer_data[~self.transfer_data['participant_id'].isin(low_accuracy['participant'])]
 
