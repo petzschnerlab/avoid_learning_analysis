@@ -2,6 +2,7 @@
 import os
 import warnings
 import pandas as pd
+import numpy as np
 
 #SOMAALPipeline class
 class SOMAProcessing:
@@ -67,10 +68,13 @@ class SOMAProcessing:
         #Filter the learning and transfer data
         self.filter_learning_data()
         self.filter_transfer_data()
-        
-        #Compute accuracy for learning data and exclude participants with low accuracy
+
+        #Compute accuracy for learning data
         self.compute_accuracy()
+
+        #Exclude participants with low accuracy and trials with low reaction times
         self.exclude_low_accuracy(threshold=60)
+        self.exclude_low_rt(threshold=200)
 
         #Compute demographics and scores
         self.compute_demographics()
@@ -133,6 +137,23 @@ class SOMAProcessing:
         #Track number of participants excluded
         self.participants_excluded_accuracy = len(low_accuracy)
         self.accuracy_threshold = threshold
+
+    def exclude_low_rt(self, threshold=200):
+
+        self.learning_data['excluded_rt'] = self.learning_data['rt'] < threshold
+        self.learning_data.loc[self.learning_data['excluded_rt'] == True, 'rt'] = np.nan
+        self.learning_data.loc[self.learning_data['excluded_rt'] == True, 'accuracy'] = np.nan
+
+        self.transfer_data['excluded_rt'] = self.transfer_data['rt'] < threshold
+        self.transfer_data.loc[self.transfer_data['excluded_rt'] == True, 'rt'] = np.nan
+        self.transfer_data.loc[self.transfer_data['excluded_rt'] == True, 'symbol_chosen'] = np.nan
+        self.transfer_data.loc[self.transfer_data['excluded_rt'] == True, 'symbol_ignored'] = np.nan
+
+        #Track number of participants excluded
+        excluded_count = (self.learning_data['excluded_rt'].sum() + self.transfer_data['excluded_rt'].sum())
+        total_trials = (self.learning_data.shape[0] + self.transfer_data.shape[0])
+        self.trials_excluded_rt = excluded_count/total_trials * 100
+        self.rt_threshold = threshold
 
     def compute_choice_rate(self, neutral = False):
 
