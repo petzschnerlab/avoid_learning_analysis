@@ -104,7 +104,11 @@ class SOMAReport:
                         f'### Data Dimensions',
                         f'**Rows:** {self.data.shape[0]}\n',
                         f'**Columns:** {self.data.shape[1]}\n',
-                        f'**Number of Participants:** {self.data["participant_id"].nunique()}']
+                        f'**Number of Original Participants:** {self.participants_original}\n',
+                        f'**Number of Participants Excluded (Accuracy Threshold: {self.accuracy_threshold}%):** {self.participants_excluded_accuracy}\n',
+                        f'**Number of Participants Remaining:** {self.learning_data["participant_id"].nunique()}\n',
+                        f'**Number of Groups:** {len(self.group_labels)}',
+                        ]
         self.add_data_pdf(section_text)
 
         #Add demographics

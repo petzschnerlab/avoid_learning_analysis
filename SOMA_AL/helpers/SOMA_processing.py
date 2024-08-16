@@ -41,6 +41,9 @@ class SOMAProcessing:
 
         #Modify unnamed column
         self.data = self.data.drop(columns = ['Unnamed: 0'])
+        
+        #Determine number of participants
+        self.participants_original = self.data['participant_id'].nunique()
 
         #Modify codes
         if self.split_by_group == 'pain':
@@ -70,8 +73,9 @@ class SOMAProcessing:
         self.compute_pain_scores()
         self.compute_depression_scores()
 
-        #Compute accuracy for learning data
+        #Compute accuracy for learning data and exclude participants with low accuracy
         self.compute_accuracy()
+        self.exclude_low_accuracy(threshold=60)
 
         #Compute choice rate for transfer data
         self.compute_choice_rate()
@@ -106,9 +110,28 @@ class SOMAProcessing:
 
     def compute_accuracy(self):
         
-        #Add computations to determine accuracy #TODO: THIS ONLY WORKS FOR LEARNING TRIALS
+        #Add computations to determine accuracy
         self.learning_data['larger_value'] = (self.learning_data['symbol_R_value'] > self.learning_data['symbol_L_value']).astype(int) #1 = Right has larger value, 0 = Left has larger value
         self.learning_data['accuracy'] = (self.learning_data['larger_value'] == self.learning_data['choice_made']).astype(int)*100 #100 = Correct, 0 = Incorrect
+
+    def exclude_low_accuracy(self, threshold=60):
+        #Compute accuracy for each participant
+        accuracy = pd.DataFrame(columns=['accuracy'], index=pd.MultiIndex(levels=[[]], codes=[[]], names=['participant']))
+        for participant in self.learning_data['participant_id'].unique():
+            participant_data = self.learning_data[self.learning_data['participant_id'] == participant]
+            accuracy_rate = participant_data['accuracy'].mean()
+            accuracy.loc[participant, 'accuracy'] = accuracy_rate
+
+        #Find participants with accuracy less than 60%
+        low_accuracy = accuracy[accuracy['accuracy'] < threshold].reset_index()
+
+        #Remove participants with accuracy less than 60%
+        self.learning_data = self.learning_data[~self.learning_data['participant_id'].isin(low_accuracy['participant'])]
+        self.transfer_data = self.transfer_data[~self.transfer_data['participant_id'].isin(low_accuracy['participant'])]
+
+        #Track number of participants excluded
+        self.participants_excluded_accuracy = len(low_accuracy)
+        self.accuracy_threshold = threshold
 
     def compute_choice_rate(self, neutral = False):
 
