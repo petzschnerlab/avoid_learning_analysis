@@ -3,6 +3,7 @@ import os
 import warnings
 import pandas as pd
 import numpy as np
+pd.set_option("future.no_silent_downcasting", True)
 
 #SOMAALPipeline class
 class SOMAProcessing:

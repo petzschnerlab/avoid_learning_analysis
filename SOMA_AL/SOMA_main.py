@@ -2,10 +2,12 @@
 import sys
 sys.dont_write_bytecode = True
 import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 #Import modules
 from helpers import SOMAMaster
 
+#Pipeline class
 class SOMAPipeline(SOMAMaster):
 
     """
@@ -89,6 +91,7 @@ class SOMAPipeline(SOMAMaster):
 
 if __name__ == '__main__':
 
+    #Data parameters
     file_path = r'D:\BM_Carney_Petzschner_Lab\SOMAStudyTracking\SOMAV1\database_exports\avoid_learn_prolific'
     #file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv', r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
     #file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv']
@@ -97,6 +100,14 @@ if __name__ == '__main__':
     #Set analyses dependent on whether there is only depression groups
     split_by_groups = ['pain'] if any("v1a" in s for s in file_name) else ['pain', 'depression'] #'pain' or 'depression'
 
+    #Exclusion parameters
+    accuracy_exclusion_threshold = 55
+    RT_low_threshold = 200
+    RT_high_threshold = 5000
+
+    #Other parameters
+    tests = 'extensive'
+
     #Run the pipeline for each split_by_group
     for split_by_group in split_by_groups:
         
@@ -104,7 +115,10 @@ if __name__ == '__main__':
         kwargs = {'file_path': file_path,
             'file_name': file_name,
             'split_by_group': split_by_group,
-            'tests': 'extensive'}
+            'accuracy_exclusion_threshold': accuracy_exclusion_threshold,
+            'RT_low_threshold': RT_low_threshold,
+            'RT_high_threshold': RT_high_threshold,
+            'tests': tests}
 
         SOMA_pipeline = SOMAPipeline(author='Chad C. Williams')
         SOMA_pipeline.run(**kwargs)
