@@ -21,8 +21,10 @@ class SOMAPipeline(SOMAMaster):
             if key not in accepted_params:
                 warnings.warn(f'Unknown parameter {key} is being ignored', stacklevel=2)
 
-        #Set parameters
+        #Set input parameters
         self.author = kwargs.get('author', 'SOMA_Team')
+
+        #Set backend parameters
         self.figure_count = 1
         self.table_count = 1
 
@@ -95,11 +97,17 @@ if __name__ == '__main__':
     #Set analyses dependent on whether there is only depression groups
     split_by_groups = ['pain'] if any("v1a" in s for s in file_name) else ['pain', 'depression'] #'pain' or 'depression'
 
+    #Run the pipeline for each split_by_group
     for split_by_group in split_by_groups:
-        SOMA = SOMAPipeline(author='Chad C. Williams')
-        SOMA.run(file_path=file_path, 
-                 file_name=file_name, 
-                 split_by_group=split_by_group) 
+        
+        #Create a dict of args
+        kwargs = {'file_path': file_path,
+            'file_name': file_name,
+            'split_by_group': split_by_group,
+            'tests': 'extensive'}
+
+        SOMA_pipeline = SOMAPipeline(author='Chad C. Williams')
+        SOMA_pipeline.run(**kwargs)
 
     #Debug stop
     print()

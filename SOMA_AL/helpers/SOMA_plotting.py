@@ -25,7 +25,7 @@ class SOMAPlotting:
         #Compute the sample size and t-score for each group
         if splitting_column == None:
             sample_sizes = data.shape[0]
-            t_scores = stats.t.ppf(0.975, sample_size-1)
+            t_scores = stats.t.ppf(0.975, sample_sizes-1)
         else:
             sample_sizes = [data[data[splitting_column] == group].shape[0] for group in data[splitting_column].unique()]
             t_scores = [stats.t.ppf(0.975, s-1) for s in sample_sizes]
