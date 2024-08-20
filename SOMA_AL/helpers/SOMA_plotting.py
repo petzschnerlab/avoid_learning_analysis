@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib
 from scipy import stats
 
 class SOMAPlotting:
@@ -13,6 +14,7 @@ class SOMAPlotting:
     def print_plots(self):
         self.plot_clinical_scores()
         self.plot_learning_accuracy(rolling_mean=self.rolling_mean)
+        self.plot_learning_accuracy(rolling_mean=self.rolling_mean, context_type='symbol')
         self.plot_rt_distributions()
         self.plot_transfer_accuracy()
         self.plot_neutral_transfer_accuracy()
@@ -32,7 +34,7 @@ class SOMAPlotting:
 
         return sample_sizes, t_scores
 
-    def plot_learning_accuracy(self, rolling_mean=None):
+    def plot_learning_accuracy(self, rolling_mean=None, context_type='context'):
 
         #Add three sublpots, one for each group (group_code), which shows the average accuracy over trials (trial_number) for each of the two contexts (context_val_name)
         num_subplots = 3 if self.split_by_group == 'pain' else 2
@@ -40,18 +42,42 @@ class SOMAPlotting:
         for i, group in enumerate(self.group_labels):
             group_data = self.learning_data[self.learning_data[self.group_code] == group]
 
+            #Rename labels
+            group_data['context_val_name'] = group_data['context_val_name'].replace('Loss Avoid', 'Punish')
+            symbol_renames = {
+                '75R1': '75R1|25R1', 
+                '25R1': '75R1|25R1',
+                '75R2': '75R2|25R2',
+                '25R2': '75R2|25R2',
+                '75P1': '25P1|75P1',
+                '25P1': '25P1|75P1',
+                '75P2': '25P2|75P2',
+                '25P2': '25P2|75P2'
+            }
+            group_data['symbol_name'] = group_data['symbol_L_name']
+            for symbol in symbol_renames:
+                group_data['symbol_name'] = group_data['symbol_name'].replace(symbol, symbol_renames[symbol])
+
             #Get descriptive statistics for the group
-            sample_size = group_data['participant_id'].nunique()
+            sample_size = group_data['participant_id'].nunique() #TODO: FIX THIS
             t_score = stats.t.ppf(0.975, sample_size-1)
 
-            for context_index, context in enumerate(['Reward', 'Loss Avoid']):
-                context_data = group_data[group_data['context_val_name'] == context]
-                mean_accuracy = context_data.groupby('trial_number')['accuracy'].mean()
-                CIs = context_data.groupby('trial_number')['accuracy'].sem()*t_score
+            context_keys = ['Reward', 'Punish'] if context_type == 'context' else ['75R1|25R1', '75R2|25R2', '25P1|75P1', '25P2|75P2']
+            trial_index_name = 'trial_number' if context_type == 'context' else 'trial_number_symbol'
+            color = ['#B2DF8A', '#FB9A99'] if context_type == 'context' else ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C']
+            alpha = 1 if context_type == 'context' else 0.5
+            for context_index, context in enumerate(context_keys):
+                if context_type == 'context':
+                    context_data = group_data[group_data['context_val_name'] == context]
+                else:
+                    context_data = group_data[group_data['symbol_name'] == context]
+                mean_accuracy = context_data.groupby(trial_index_name)['accuracy'].mean()
+                CIs = context_data.groupby(trial_index_name)['accuracy'].sem()*t_score
                 if rolling_mean is not None:
                     mean_accuracy = mean_accuracy.rolling(rolling_mean, min_periods=1).mean()
-                ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.2, color=['#B2DF8A', '#FB9A99'][context_index], edgecolor='none')
-                ax[i].plot(mean_accuracy, color=['#B2DF8A', '#FB9A99'][context_index], label=['Reward' if context == 'Reward' else 'Punish'])
+                if context_type == 'context':
+                    ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.2, color=color[context_index], edgecolor='none')
+                ax[i].plot(mean_accuracy, color=color[context_index], label=context, alpha=alpha)
 
             ax[i].set_ylim(40, 100)
             ax[i].set_title(f'{group.capitalize()}')
@@ -60,7 +86,9 @@ class SOMAPlotting:
             ax[i].legend(loc='lower right', frameon=False)
 
         #Save the plot
-        plt.savefig('SOMA_AL/plots/Figure_N_Accuracy_Across_Learning.png')
+        save_name = 'SOMA_AL/plots/Figure_N_Accuracy_Across_Learning.png'
+        save_name = save_name.replace('.png', f'_{context_type}.png')
+        plt.savefig(save_name)
 
         #Close figure
         plt.close()

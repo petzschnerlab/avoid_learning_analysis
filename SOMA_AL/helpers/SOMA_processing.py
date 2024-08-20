@@ -99,7 +99,9 @@ class SOMAProcessing:
 
         #Create trial indices
         self.learning_data['trial_number'] = self.learning_data.groupby(['participant_id', 'context_val_name']).cumcount() + 1
-        
+
+        #Create trial indices per participant and symbol_L_name/symbol_R_name
+        self.learning_data['trial_number_symbol'] = self.learning_data.groupby(['participant_id', 'symbol_L_name']).cumcount() + 1
 
     def filter_transfer_data(self):
 

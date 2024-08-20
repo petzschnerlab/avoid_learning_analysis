@@ -156,6 +156,11 @@ class SOMAReport:
             section_figure1_caption += f' For visualization, the accuracy is smoothed using a rolling mean of {self.rolling_mean} trials.'
         section_figure1_caption += ' Shaded regions represent 95\% confidence intervals.'
 
+        section_figure1_2_caption = 'Behavioral performance across learning trials for each symbol pair for each group.'
+        if self.rolling_mean is not None:
+            section_figure1_2_caption += f' For visualization, the accuracy is smoothed using a rolling mean of {self.rolling_mean} trials.'
+        section_figure1_2_caption += ' Shaded regions represent 95\% confidence intervals.'
+
         section_figure2_caption = f"""Reaction time distributions for each phase and group. Half circles represent the mean reaction time for each group.
         Reaction times less than {self.RT_low_threshold}ms and greater than {self.RT_high_threshold}ms were excluded from the analysis.
         """
@@ -178,8 +183,10 @@ class SOMAReport:
 
         section_text = [f'## Behavioural Findings',
                         f'### Learning Accuracy',
-                        f'#### ![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning.png)\n',
+                        f'#### ![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning_context.png)\n',
                         f'{section_figure1_caption}',
+                        f'#### ![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning_symbol.png)\n',
+                        f'{section_figure1_2_caption}',
                         f'### Reaction Time Distributions',
                         f'#### ![rt_distributions](SOMA_AL/plots/Figure_N_RT_Distributions.png)\n',
                         f'{section_figure2_caption}',
