@@ -12,7 +12,7 @@ class SOMATests:
     def run_tests(self):
         self.test_trial_counts()
         if self.tests == 'extensive':
-            self.test_plot_learning_accuracy(self.test_rolling_mean)
+            self.test_plot_learning_accuracy(self.test_rolling_mean, self.test_context_type)
         self.test_determine_contingencies()
 
     def test_trial_counts(self):
@@ -28,7 +28,7 @@ class SOMATests:
             if participant_trial_counts[0] != 48 or participant_trial_counts[1] != 48:
                 raise ValueError(f'Participant {participant} has incorrect number of trials: {participant_trial_counts}') 
             
-    def test_plot_learning_accuracy(self, rolling_mean=None):
+    def test_plot_learning_accuracy(self, rolling_mean=None, context_type='context'):
 
         #Create folder for plots if non existent
         if not os.path.exists('SOMA_AL/plots/tests'):
@@ -47,13 +47,24 @@ class SOMATests:
         for i, group in enumerate(self.group_labels):
             folder_name = f'SOMA_AL/plots/tests/{group}/'
             group_data = self.learning_data[self.learning_data[self.group_code] == group]
+            
+            if context_type == 'context':
+                group_data['symbol_name'] = group_data['symbol_name'].replace({'Reward1': 'Reward',
+                                                                               'Reward2': 'Reward', 
+                                                                               'Punish1': 'Punish',
+                                                                               'Punish2': 'Punish'})
+                group_data['symbol_name'] = pd.Categorical(group_data['symbol_name'], categories=['Reward', 'Punish'])
+            else:
+                group_data['symbol_name'] = pd.Categorical(group_data['symbol_name'], categories=['Reward1', 'Reward2', 'Punish1', 'Punish2'])
+                
+            color = ['#B2DF8A', '#FB9A99'] if context_type == 'context' else ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C']
             for participant in group_data['participant_id'].unique():
                 participant_data = group_data[group_data['participant_id'] == participant]
-                for context_index, context in enumerate(['Reward', 'Loss Avoid']):
-                    context_data = participant_data[participant_data['context_val_name'] == context]['accuracy']
+                for context_index, context in enumerate(participant_data['symbol_name'].unique()):
+                    context_data = participant_data[participant_data['symbol_name'] == context]['accuracy']
                     if rolling_mean is not None:
                         context_data = context_data.rolling(rolling_mean, min_periods=1).mean()
-                    plt.plot(np.arange(1,context_data.shape[0]+1) ,context_data, color=['#B2DF8A', '#FB9A99'][context_index], label=['Reward' if context == 'Reward' else 'Punish'])
+                    plt.plot(np.arange(1,context_data.shape[0]+1) ,context_data, color=color[context_index], label=context)
 
                 plt.ylim(-5, 105)
                 plt.title(f'{participant.capitalize()}')

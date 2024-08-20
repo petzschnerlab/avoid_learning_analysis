@@ -97,8 +97,23 @@ class SOMAProcessing:
         #Filter data
         self.learning_data = self.data[self.data['trial_type'] == 'learning-trials'].reset_index(drop=True)
 
+        #Create symbol coding
+        symbol_renames = {
+            '75R1': 'Reward1', 
+            '25R1': 'Reward1',
+            '75R2': 'Reward2',
+            '25R2': 'Reward2',
+            '75P1': 'Punish1',
+            '25P1': 'Punish1',
+            '75P2': 'Punish2',
+            '25P2': 'Punish2',
+        }
+        self.learning_data['symbol_name'] = self.learning_data['symbol_L_name']
+        for symbol in symbol_renames:
+            self.learning_data['symbol_name'] = self.learning_data['symbol_name'].replace(symbol, symbol_renames[symbol])
+
         #Create trial indices
-        self.learning_data['trial_number'] = self.learning_data.groupby(['participant_id', 'context_val_name']).cumcount() + 1
+        self.learning_data['trial_number'] = self.learning_data.groupby(['participant_id', 'symbol_name']).cumcount() + 1
 
         #Create trial indices per participant and symbol_L_name/symbol_R_name
         self.learning_data['trial_number_symbol'] = self.learning_data.groupby(['participant_id', 'symbol_L_name']).cumcount() + 1

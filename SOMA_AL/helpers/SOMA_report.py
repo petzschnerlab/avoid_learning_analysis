@@ -177,6 +177,7 @@ class SOMAReport:
         Boxplots show the mean and 95\% confidence intervals of the choice rate for each group."""
 
         section_figure1_caption = self.add_figure_caption(section_figure1_caption)
+        section_figure1_2_caption = self.add_figure_caption(section_figure1_2_caption)
         section_figure2_caption = self.add_figure_caption(section_figure2_caption)
         section_figure3_caption = self.add_figure_caption(section_figure3_caption)
         section_figure4_caption = self.add_figure_caption(section_figure4_caption)
