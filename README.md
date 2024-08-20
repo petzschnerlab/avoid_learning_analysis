@@ -67,6 +67,8 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
 - Bavard et al. - 2018
 - Gold - 2012
 - Geana et al. - 2021 
+- https://youtu.be/a483TKDJ7ss?si=LrVM__enUvdC0KSY
+- https://www.youtube.com/watch?v=etQVRd6N8dM&t=697s
 
 # Project notes
 
