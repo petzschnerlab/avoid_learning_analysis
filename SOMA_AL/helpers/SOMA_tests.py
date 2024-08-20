@@ -50,7 +50,7 @@ class SOMATests:
                 for context_index, context in enumerate(['Reward', 'Loss Avoid']):
                     context_data = participant_data[participant_data['context_val_name'] == context]['accuracy']
                     if rolling_mean is not None:
-                        context_data = context_data.rolling(rolling_mean).mean()
+                        context_data = context_data.rolling(rolling_mean, min_periods=1).mean()
                     plt.plot(np.arange(1,context_data.shape[0]+1) ,context_data, color=['#B2DF8A', '#FB9A99'][context_index], label=['Reward' if context == 'Reward' else 'Punish'])
 
                 plt.ylim(-5, 105)

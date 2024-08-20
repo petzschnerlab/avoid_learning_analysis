@@ -49,7 +49,7 @@ class SOMAPlotting:
                 mean_accuracy = context_data.groupby('trial_number')['accuracy'].mean()
                 CIs = context_data.groupby('trial_number')['accuracy'].sem()*t_score
                 if rolling_mean is not None:
-                    mean_accuracy = mean_accuracy.rolling(rolling_mean).mean()
+                    mean_accuracy = mean_accuracy.rolling(rolling_mean, min_periods=1).mean()
                 ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.2, color=['#B2DF8A', '#FB9A99'][context_index], edgecolor='none')
                 ax[i].plot(mean_accuracy, color=['#B2DF8A', '#FB9A99'][context_index], label=['Reward' if context == 'Reward' else 'Punish'])
 
