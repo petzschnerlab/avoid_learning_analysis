@@ -14,6 +14,7 @@ class SOMATests:
         if self.tests == 'extensive':
             self.test_plot_learning_accuracy(self.test_rolling_mean, self.test_context_type)
         self.test_determine_contingencies()
+        self.check_condition_order()
 
     def test_trial_counts(self):
 
@@ -143,6 +144,19 @@ class SOMATests:
         for symbol in feedback_freqs:
             if abs(feedback_freqs[symbol][0] - feedback_freqs[symbol][1]) > 5:
                 raise ValueError(f'Feedback frequencies for symbol {symbol} are incorrect: {feedback_freqs[symbol]}')
+            
+    def check_condition_order(self):
+
+        #Check whether the conditions are in the same order for each participant using symbol_L_name
+        participant_order = []
+        for participant in self.learning_data['participant_id'].unique():
+            participant_data = self.learning_data[self.learning_data['participant_id'] == participant]
+            participant_order.append(participant_data['symbol_name'].values)
+            
+        #Assertions to ensure conditions are not in the same order for each participant
+        for i in range(len(participant_order)-1):
+            if np.array_equal(participant_order[i], participant_order[i+1]):
+                raise ValueError(f'Conditions are in the same order for participant {i+1} and participant {i+2}')
 
 
             
