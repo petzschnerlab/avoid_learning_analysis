@@ -11,7 +11,7 @@ class SOMATests:
     def run_tests(self):
         self.test_trial_counts()
         if self.tests == 'extensive':
-            self.test_plot_learning_accuracy()
+            self.test_plot_learning_accuracy(self.test_rolling_mean)
 
     def test_trial_counts(self):
 

@@ -41,7 +41,8 @@ class SOMAPipeline(SOMAMaster):
                            'RT_low_threshold',
                            'RT_high_threshold',
                            'rolling_mean',
-                           'tests']
+                           'tests',
+                           'test_rolling_mean']
         for key in kwargs:
             if key not in accepted_params:
                 warnings.warn(f'Unknown parameter {key} is being ignored', stacklevel=2)
@@ -63,6 +64,7 @@ class SOMAPipeline(SOMAMaster):
         self.RT_high_threshold = kwargs.get('RT_high_threshold', 5000)
         self.rolling_mean = kwargs.get('rolling_mean', 5)
         self.tests = kwargs.get('tests', 'basic') #'basic' or 'extensive'
+        self.test_rolling_mean = kwargs.get('test_rolling_mean', None)
         
         #Set parameters
         self.split_by_group = split_by_group
@@ -105,8 +107,12 @@ if __name__ == '__main__':
     RT_low_threshold = 200
     RT_high_threshold = 5000
 
-    #Other parameters
+    #Plotting parameters
+    rolling_mean = 5
+
+    #Test parameters
     tests = 'extensive'
+    test_rolling_mean = 5
 
     #Run the pipeline for each split_by_group
     for split_by_group in split_by_groups:
@@ -115,11 +121,14 @@ if __name__ == '__main__':
         kwargs = {'file_path': file_path,
             'file_name': file_name,
             'split_by_group': split_by_group,
+            'rolling_mean': rolling_mean,
             'accuracy_exclusion_threshold': accuracy_exclusion_threshold,
             'RT_low_threshold': RT_low_threshold,
             'RT_high_threshold': RT_high_threshold,
-            'tests': tests}
+            'tests': tests,
+            'test_rolling_mean': test_rolling_mean}
 
+        #Run the pipeline
         SOMA_pipeline = SOMAPipeline(author='Chad C. Williams')
         SOMA_pipeline.run(**kwargs)
 
