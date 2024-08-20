@@ -69,6 +69,25 @@ class SOMATests:
 
     def test_determine_contingencies(self):
 
+        #Determine the symbols from symbol_L_name and symbol_R_name for the first and second half of data based on trial_number
+        split_symbols = []
+        for half in range(2):
+
+                #Get data for each half splitting by trial_number
+                data_index = self.learning_data['trial_number']<int(self.learning_data['trial_number'].max()/2) if half == 0 else self.learning_data['trial_number']>=int(self.learning_data['trial_number'].max()/2)
+                half_data = self.learning_data[data_index]
+    
+                #Get symbols for each half
+                symbols_L = half_data['symbol_L_name'].unique()
+                symbols_R = half_data['symbol_R_name'].unique()
+                #combine arrays
+                symbols = np.unique(np.concatenate([symbols_L, symbols_R]))
+                split_symbols.append(symbols)
+
+        #Assertions to ensure symbols are the same in each half
+        if not np.array_equal(split_symbols[0], split_symbols[1]):
+            raise ValueError(f'Symbols are not the same in each half of the data: {split_symbols[0]}, {split_symbols[1]}')
+
         #Split groups by symbol_L_value and symbol_R_value and determine counts and contingencies for each symbol
         feedback_counts = {}
         feedback_freqs = {}
