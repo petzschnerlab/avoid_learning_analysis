@@ -1,4 +1,5 @@
 import os 
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -12,6 +13,7 @@ class SOMATests:
         self.test_trial_counts()
         if self.tests == 'extensive':
             self.test_plot_learning_accuracy(self.test_rolling_mean)
+        self.test_determine_contingencies()
 
     def test_trial_counts(self):
 
@@ -65,5 +67,54 @@ class SOMATests:
                 #Close figure
                 plt.close()
 
+    def test_determine_contingencies(self):
+
+        #Split groups by symbol_L_value and symbol_R_value and determine counts and contingencies for each symbol
+        feedback_counts = {}
+        feedback_freqs = {}
+        for symbol in self.learning_data['symbol_L_name'].unique():
+
+            #Get data for each symbol
+            symbol_data_L = self.learning_data[self.learning_data['symbol_L_name'] == symbol]
+            symbol_data_R = self.learning_data[self.learning_data['symbol_R_name'] == symbol]
+
+            #Determine unique feedbacks
+            feedback = pd.concat([symbol_data_L['feedback_L'], symbol_data_R['feedback_R']]).unique()
+            feedback_counts[symbol] = list(feedback)
+
+            #Determine percentage of feedbacks that are not zero for the first and second half of the data
+            feedback_freq = []
+            for half in range(2):
+                
+                #Get data for each half splitting by trial_number
+                symbol_data_L_index = symbol_data_L['trial_number']<int(symbol_data_L['trial_number'].max()/2) if half == 0 else symbol_data_L['trial_number']>=int(symbol_data_L['trial_number'].max()/2)
+                symbol_data_R_index = symbol_data_R['trial_number']<int(symbol_data_R['trial_number'].max()/2) if half == 0 else symbol_data_R['trial_number']>=int(symbol_data_R['trial_number'].max()/2)
+                symbol_data_L_half = symbol_data_L[symbol_data_L_index]
+                symbol_data_R_half = symbol_data_R[symbol_data_R_index]
+
+                #Get feedback counts that are zero
+                feedback_data_L_half = symbol_data_L_half[symbol_data_L_half['feedback_L'] == 0]
+                feedback_data_R_half = symbol_data_R_half[symbol_data_R_half['feedback_R'] == 0]
+
+                #Determine percentage of feedbacks that are not zero
+                feedback_count = (feedback_data_L_half.shape[0] + feedback_data_R_half.shape[0])/(symbol_data_L_half.shape[0] + symbol_data_R_half.shape[0])*100
+                feedback_count = 100 - feedback_count if 'R' in symbol else feedback_count
+                feedback_freq.append(int(np.round(feedback_count)))
+
+            #Store feedback frequencies
+            feedback_freqs[symbol] = feedback_freq
+
+        #Assertions to ensure feedback counts only contain 2 values
+        for symbol in feedback_counts:
+            if len(feedback_counts[symbol]) != 2:
+                raise ValueError(f'Feedback counts for symbol {symbol} are incorrect: {feedback_counts[symbol]}')
+            
+        #Assertions to ensure feedback frequencies are similar in each symbol
+        for symbol in feedback_freqs:
+            if abs(feedback_freqs[symbol][0] - feedback_freqs[symbol][1]) > 5:
+                raise ValueError(f'Feedback frequencies for symbol {symbol} are incorrect: {feedback_freqs[symbol]}')
+
+
+            
 
             
