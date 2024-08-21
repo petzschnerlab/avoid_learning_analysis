@@ -13,8 +13,10 @@ class SOMAPlotting:
 
     def print_plots(self):
         self.plot_clinical_scores()
-        self.plot_learning_accuracy(rolling_mean=self.rolling_mean)
-        self.plot_learning_accuracy(rolling_mean=self.rolling_mean, context_type='symbol')
+        self.plot_learning_curves(rolling_mean=self.rolling_mean)
+        self.plot_learning_curves(rolling_mean=self.rolling_mean, metric='rt')
+        self.plot_learning_curves(rolling_mean=self.rolling_mean, context_type='symbol')
+        self.plot_learning_curves(rolling_mean=self.rolling_mean, context_type='symbol', metric='rt')
         self.plot_rt_distributions()
         self.plot_transfer_accuracy()
         self.plot_neutral_transfer_accuracy()
@@ -34,7 +36,7 @@ class SOMAPlotting:
 
         return sample_sizes, t_scores
 
-    def plot_learning_accuracy(self, rolling_mean=None, context_type='context'):
+    def plot_learning_curves(self, rolling_mean=None, context_type='context', metric='accuracy'):
 
         #Add three sublpots, one for each group (group_code), which shows the average accuracy over trials (trial_number) for each of the two contexts (context_val_name)
         num_subplots = 3 if self.split_by_group == 'pain' else 2
@@ -63,22 +65,23 @@ class SOMAPlotting:
             color = ['#B2DF8A', '#FB9A99'] if context_type == 'context' else ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C']
             for context_index, context in enumerate(contexts):
                 context_data = group_data[group_data['symbol_name'] == context]
-                mean_accuracy = context_data.groupby(trial_index_name)['accuracy'].mean()
-                CIs = context_data.groupby(trial_index_name)['accuracy'].sem()*t_score
+                mean_accuracy = context_data.groupby(trial_index_name)[metric].mean()
+                CIs = context_data.groupby(trial_index_name)[metric].sem()*t_score
                 if rolling_mean is not None:
                     mean_accuracy = mean_accuracy.rolling(rolling_mean, min_periods=1).mean()
                 if context_type == 'context':
                     ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.2, color=color[context_index], edgecolor='none')
                 ax[i].plot(mean_accuracy, color=color[context_index], label=context)
 
-            ax[i].set_ylim(40, 100)
+            if metric == 'accuracy':
+                ax[i].set_ylim(40, 100)
             ax[i].set_title(f'{group.capitalize()}')
             ax[i].set_xlabel('Trial Number')
-            ax[i].set_ylabel('Accuracy')
+            ax[i].set_ylabel(metric.capitalize() if metric != 'rt' else 'Reaction Time (ms)')
             ax[i].legend(loc='lower right', frameon=False)
 
         #Save the plot
-        save_name = 'SOMA_AL/plots/Figure_N_Accuracy_Across_Learning.png'
+        save_name = f'SOMA_AL/plots/Figure_N_{metric.capitalize()}_Across_Learning.png'
         save_name = save_name.replace('.png', f'_{context_type}.png')
         plt.savefig(save_name)
 
