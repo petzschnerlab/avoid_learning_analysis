@@ -19,7 +19,9 @@ class SOMAPlotting:
         self.plot_learning_curves(rolling_mean=self.rolling_mean, context_type='symbol', metric='rt')
         self.plot_rt_distributions()
         self.plot_transfer_accuracy()
+        self.plot_transfer_accuracy(metric='rt')
         self.plot_neutral_transfer_accuracy()
+        self.plot_neutral_transfer_accuracy(metric='rt')
 
     def compute_n_and_t(self, data, splitting_column):
 
@@ -157,10 +159,10 @@ class SOMAPlotting:
                 ax.add_patch(plt.Rectangle((factor_index+1-0.4, (mean_data.loc[factor] - CIs.loc[factor])['score']), 0.8, 2*CIs.loc[factor], fill=None, edgecolor='darkgrey'))
                 ax.hlines(mean_data.loc[factor], factor_index+1-0.4, factor_index+1+0.4, color='darkgrey')            
 
-    def plot_transfer_accuracy(self):
+    def plot_transfer_accuracy(self, metric='choice_rate'):
 
         #Copy choice rate data
-        choice_rate = self.choice_rate
+        choice_rate = self.choice_rate if metric == 'choice_rate' else self.choice_rt
         
         #Create a bar plot of the choice rate for each symbol
         num_subplots = 3 if self.split_by_group == 'pain' else 2
@@ -174,7 +176,8 @@ class SOMAPlotting:
             _, t_scores = self.compute_n_and_t(group_choice_rate, 'symbol')
 
             #Get descriptive statistics for the group
-            group_choice_rate = group_choice_rate.set_index('symbol')['choice_rate'].astype(float)
+            metric_label = 'choice_rate' if metric == 'choice_rate' else 'choice_rt'
+            group_choice_rate = group_choice_rate.set_index('symbol')[metric_label].astype(float)
 
             #Create plot
             self.raincloud_plot(data=group_choice_rate, ax=ax[group_index], t_scores=t_scores)
@@ -182,20 +185,21 @@ class SOMAPlotting:
             #Create horizontal line for the mean the same width
             ax[group_index].set_xticks([1, 2, 3, 4, 5], ['High\nReward', 'Low\nReward', 'Low\nPunish', 'High\nPunish', 'Novel'])
             ax[group_index].set_xlabel('')
-            ax[group_index].set_ylabel('Choice Rate (%)')
-            ax[group_index].set_ylim(-4, 104)
+            ax[group_index].set_ylabel('Choice Rate (%)' if metric == 'choice_rate' else 'Reaction Time (ms)')
+            if metric == 'choice_rate':
+                ax[group_index].set_ylim(-4, 104)
             ax[group_index].set_title(group.capitalize())
 
         #Save the plot
-        plt.savefig('SOMA_AL/plots/Figure_N_Transfer_Choice_Rate.png')
+        plt.savefig(f'SOMA_AL/plots/Figure_N_Transfer_{metric}.png')
 
         #Close figure
         plt.close()
 
-    def plot_neutral_transfer_accuracy(self):
+    def plot_neutral_transfer_accuracy(self, metric='choice_rate'):
 
         #Copy choice rate data
-        choice_rate = self.neutral_choice_rate
+        choice_rate = self.neutral_choice_rate if metric == 'choice_rate' else self.neutral_choice_rt
         choice_rate = choice_rate.reset_index()
         
         #Create a bar plot of the choice rate for each symbol
@@ -207,7 +211,8 @@ class SOMAPlotting:
         _, t_scores = self.compute_n_and_t(choice_rate, 'group')
 
         #Get descriptive statistics for the group
-        choice_rate = choice_rate.set_index('group')['choice_rate'].astype(float)
+        metric_label = 'choice_rate' if metric == 'choice_rate' else 'choice_rt'
+        choice_rate = choice_rate.set_index('group')[metric_label].astype(float)
 
         #Create plot
         self.raincloud_plot(data=choice_rate, ax=ax, t_scores=t_scores)
@@ -217,16 +222,17 @@ class SOMAPlotting:
         x_labels = ['No\nPain', 'Acute\nPain', 'Chronic\nPain'] if self.split_by_group == 'pain' else ['Healthy', 'Depressed']
         ax.set_xticks(x_indexes, x_labels)
         ax.set_xlabel('')
-        ax.set_ylabel('Choice Rate (%)')
-        ax.set_ylim(-4, 104)
-        ax.axhline(y=50, color='darkgrey', linestyle='--')
+        ax.set_ylabel('Choice Rate (%)' if metric == 'choice_rate' else 'Reaction Time (ms)')
+        if metric == 'choice_rate':
+            ax.set_ylim(-4, 104)
+            ax.axhline(y=50, color='darkgrey', linestyle='--')
 
-        #Add vertical annotations on the top and bottom of the plot near the y-axis that says 'Reward' (on the top) and 'Punish' (on the bottom)
-        ax.annotate('Reward', xy=(0.55, 95), xytext=(0.55, 95), rotation=90, textcoords='data', ha='center', va='center', color='darkgrey')
-        ax.annotate('Punish', xy=(0.55, 5), xytext=(0.55, 5), rotation=90, textcoords='data', ha='center', va='center', color='darkgrey')
+            #Add vertical annotations on the top and bottom of the plot near the y-axis that says 'Reward' (on the top) and 'Punish' (on the bottom)
+            ax.annotate('Reward', xy=(0.55, 95), xytext=(0.55, 95), rotation=90, textcoords='data', ha='center', va='center', color='darkgrey')
+            ax.annotate('Punish', xy=(0.55, 5), xytext=(0.55, 5), rotation=90, textcoords='data', ha='center', va='center', color='darkgrey')
 
         #Save the plot
-        plt.savefig('SOMA_AL/plots/Figure_N_Neutral_Transfer_Choice_Rate.png')
+        plt.savefig(f'SOMA_AL/plots/Figure_N_Neutral_Transfer_{metric}.png')
 
         #Close figure
         plt.close()

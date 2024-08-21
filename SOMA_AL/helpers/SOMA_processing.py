@@ -182,6 +182,8 @@ class SOMAProcessing:
 
         #Compute choice rates for each participant and symbol within each group
         choice_rate = pd.DataFrame(columns=['choice_rate'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=['group', 'participant', 'symbol']))
+        choice_rt = pd.DataFrame(columns=['choice_rt'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=['group', 'participant', 'symbol']))
+
         for group in self.group_labels:
             group_data = data[data[self.group_code] == group]
             for participant in group_data['participant_id'].unique():
@@ -194,14 +196,21 @@ class SOMAProcessing:
 
                     #Insert symbol_choice_rate into a new dataframe with index levels [group, participant, symbol]
                     choice_rate.loc[(group, participant, symbol), 'choice_rate'] = symbol_choice_rate
+                    choice_rt.loc[(group, participant, symbol), 'choice_rt'] = participant_data[participant_data['symbol_chosen'] == symbol]['rt'].mean()
 
         if not neutral:
             self.choice_rate = choice_rate
+            self.choice_rt = choice_rt
         else:
             choice_rate = choice_rate.reset_index()
             choice_rate = choice_rate[choice_rate['symbol'] == 3] #Choose rewarding 
             choice_rate = choice_rate.set_index(['group', 'participant', 'symbol'])
             self.neutral_choice_rate = choice_rate
+
+            choice_rt = choice_rt.reset_index()
+            choice_rt = choice_rt[choice_rt['symbol'] == 3] #Choose rewarding
+            choice_rt = choice_rt.set_index(['group', 'participant', 'symbol'])
+            self.neutral_choice_rt = choice_rt
 
     def compute_demographics(self):
 
