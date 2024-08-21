@@ -1,5 +1,6 @@
 # Research Plan:
-Avoidance Learning in Chronic Pain Patients (Behavioural)
+Avoidance Learning in Chronic Pain Patients (Behavioural).
+
 This document is meant to serve as a method of outlining the research plan for the project Avoidance Learning in Acute and Chronic Pain Patients (Behavioural). It will outline the research goals of the project and the steps taken to achieve those goals.
 
 This project will focus on behavioural findings, which includes descriptive and inferential statistics on accuracy and reaction times as well as the computational modeling of these data using a context-dependent reinforcement learning model and baseline reinforcement learning models.
@@ -32,7 +33,7 @@ All references refer to Vandendriessche et al., 2023 (Van et al hereafter)
 Focus is on accuracy rates, not reaction times as the previous literature found no reaction time effects and due to the use of prolific, reaction times recorded in this study may vary widely depending on the tech (e.g., computer, internet strength) used per participant.
 
 ### Steps:
-- Learning Phase:
+- **Learning Phase**:
     1. Thorough investigation of the data
     3.  Replicate Figure 2
     4.  Conduct all statistical analyses
@@ -42,7 +43,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
         - Determine effects of context (reward, punish), group (controls, acute pain, chronic pain), and their interaction.
             - Van et al: Only signifiance in the interaction, post-hocs determining this was driven by impaired learning in patients
 
-- Transfer Phase: GLMM of choice rates (3 levels, those containing A when D not present, those containing D when A not present, and the rest)
+- **Transfer Phase**: GLMM of choice rates (3 levels, those containing A when D not present, those containing D when A not present, and the rest)
     1. Determine if choice rate was above chance (intercept)
         - Van et al: Found significant effect
     2. Determine effects of context (reward, punish), group (controls, acute pain, chronic pain), and their interaction.
@@ -50,12 +51,13 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
 
 ## Computational Modelling
 ### Steps:
-1. Develop the Q-learning benchmark RL model
-2. Develop the relative RL model
-3. Run model simulations to validate models (fig 3A)
-4. Fit models to empirical findings (fig 3B)
-5. Replicate Figure 3
-6. Extract learning rates and run ANOVA of transfer phase choices
+1. Develop the Q-learning benchmark RL model (Palminteri et al., 2015)
+2. Develop the relative RL model (Palminteri et al., 2015)
+3. Develop the relative +- RL model (Lefebvre et al., 2017)
+4. Run model simulations to validate models (fig 3A)
+5. Fit models to empirical findings (fig 3B)
+6. Replicate Figure 3
+7. Extract learning rates and run ANOVA of transfer phase choices
     - 2x2 ANOVA: group (patient/ control) x Valence (positive/negative learning rate) + interaction
         - Van et al: Effect of group and interaction but not valence
 7. Extract temperature and run ANOVA of transfer phase choices?
