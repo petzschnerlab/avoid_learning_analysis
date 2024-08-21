@@ -53,13 +53,15 @@ class SOMAPlotting:
                                                                                         'Punish1': 'Punish',
                                                                                         'Punish2': 'Punish'})
                 group_data['symbol_name'] = pd.Categorical(group_data['symbol_name'], categories=['Reward', 'Punish'])
+                contexts = ['Reward', 'Punish']
             else:
                 group_data['symbol_name'] = pd.Categorical(group_data['symbol_name'], categories=['Reward1', 'Reward2', 'Punish1', 'Punish2'])
-                
+                contexts = ['Reward1', 'Reward2', 'Punish1', 'Punish2']
+
             #Determine information of interest
             trial_index_name = 'trial_number' if context_type == 'context' else 'trial_number_symbol'
             color = ['#B2DF8A', '#FB9A99'] if context_type == 'context' else ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C']
-            for context_index, context in enumerate(group_data['symbol_name'].unique()):
+            for context_index, context in enumerate(contexts):
                 context_data = group_data[group_data['symbol_name'] == context]
                 mean_accuracy = context_data.groupby(trial_index_name)['accuracy'].mean()
                 CIs = context_data.groupby(trial_index_name)['accuracy'].sem()*t_score
