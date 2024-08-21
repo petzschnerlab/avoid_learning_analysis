@@ -69,6 +69,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
 - Geana et al. - 2021 
 - https://youtu.be/a483TKDJ7ss?si=LrVM__enUvdC0KSY
 - https://www.youtube.com/watch?v=etQVRd6N8dM&t=697s
+- [Lefebvre et al. - 2017](https://www.unicog.org/publications/LefebvreLebretonMeynielBourgeois-GirondePalminteri_2017_NHB_Behavioral-and-neural-characterization-of-optimistic-reinforcement-learning.pdf)
 
 # Project notes
 
