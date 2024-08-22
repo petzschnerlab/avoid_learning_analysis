@@ -57,6 +57,8 @@ class SOMAPlotting:
                                                                                         'Punish1': 'Punish',
                                                                                         'Punish2': 'Punish'})
                 #Average duplicate trial_numbers for each participant within each symbol_name
+                group_data = group_data[['participant_id', 'trial_number', 'symbol_name', metric]]
+                group_data = group_data.groupby(['participant_id', 'trial_number', 'symbol_name']).mean().reset_index()
                 contexts = ['Reward', 'Punish']
             else:
                 contexts = ['Reward1', 'Reward2', 'Punish1', 'Punish2']

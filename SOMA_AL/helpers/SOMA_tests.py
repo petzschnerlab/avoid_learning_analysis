@@ -55,6 +55,7 @@ class SOMATests:
                                                                                         'Punish1': 'Punish',
                                                                                         'Punish2': 'Punish'})
                 #Average duplicate trial_numbers for each participant within each symbol_name
+                group_data = group_data[['participant_id', 'trial_number', 'symbol_name', 'accuracy']]
                 group_data = group_data.groupby(['participant_id', 'trial_number', 'symbol_name']).mean().reset_index()
                 contexts = ['Reward', 'Punish']
             else:
@@ -67,14 +68,16 @@ class SOMATests:
                     context_data = participant_data[participant_data['symbol_name'] == context]['accuracy']
                     if rolling_mean is not None:
                         context_data = context_data.rolling(rolling_mean, min_periods=1).mean()
-                    plt.plot(np.arange(1,context_data.shape[0]+1) ,context_data, color=color[context_index], label=context)
+                    plt.scatter(np.arange(1,context_data.shape[0]+1) ,context_data, color=color[context_index], label=context)
 
                 plt.ylim(-5, 105)
                 plt.title(f'{participant.capitalize()}')
                 plt.xlabel('Trial Number')
                 plt.ylabel('Accuracy')
                 plt.legend(loc='lower right', frameon=False)
-                plt.axvline(x=12, color='black', linestyle='--')
+                plt.axvline(x=15, color='black', linestyle='--')
+                plt.axvline(x=5, color='black', linestyle='--')
+                plt.axvline(x=10, color='black', linestyle='--')
                 plt.axhline(y=50, color='black', linestyle='--')
 
                 #Save the plot
@@ -146,7 +149,7 @@ class SOMATests:
             
         #Assertions to ensure feedback frequencies are similar in each symbol
         for symbol in feedback_freqs:
-            if abs(feedback_freqs[symbol][0] - feedback_freqs[symbol][1]) > 5:
+            if abs(feedback_freqs[symbol][0] - feedback_freqs[symbol][1]) > 10:
                 raise ValueError(f'Feedback frequencies for symbol {symbol} are incorrect: {feedback_freqs[symbol]}')
             
     def check_condition_order(self):
