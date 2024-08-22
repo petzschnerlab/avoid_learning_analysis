@@ -67,3 +67,15 @@ class SOMAParameters:
         else:
             self.group_labels = ['healthy', 'depressed']
             self.group_labels_formatted = ['Healthy', 'Depressed']
+
+    def announce(self, case='start'):
+        if case == 'start' and self.verbose:
+            if self.author != 'SOMA_Team':
+                print(f'Welcome {self.author.replace("_"," ").title()}!')
+            print(f'\nRunning the SOMA pipeline with the following parameters:\n')
+            [print(f'{key}: {value}') for key, value in self.kwargs.items()]
+            print(f'\nProcessing {self.split_by_group} group data...')
+        elif case == 'end' and self.verbose:
+            print(f'{self.split_by_group} group processing complete!')
+        else:
+            pass   

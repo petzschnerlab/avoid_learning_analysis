@@ -14,32 +14,20 @@ class SOMAPipeline(SOMAMaster):
     Class to run the SOMA project pipeline
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self):
         super().__init__()     
-
-    def announce(self, time):
-        if time == 'start' and self.verbose:
-            if self.author != 'SOMA_Team':
-                print(f'Welcome {self.author.replace("_"," ").title()}!')
-            print(f'\nRunning the SOMA pipeline with the following parameters:\n')
-            [print(f'{key}: {value}') for key, value in self.kwargs.items()]
-            print(f'\nProcessing {self.split_by_group} group data...')
-        elif time == 'end' and self.verbose:
-            print(f'{self.split_by_group} group processing complete!')
-        else:
-            pass   
 
     def run(self, **kwargs):
 
         #Run the pipeline
         self.set_parameters(**kwargs)
-        self.announce(time='start')
+        self.announce(case='start')
         self.load_data(file_path = self.file_path, file_name = self.file_name)
         if self.check_data():
             self.process_data()
             self.run_tests()
             self.build_report()
-            self.announce(time='end')
+            self.announce(case='end')
                 
 
 if __name__ == '__main__':
