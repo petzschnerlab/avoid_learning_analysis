@@ -40,8 +40,8 @@ class SOMAParameters:
                 raise ValueError(f'Missing required parameter {param}, which does not contain a default. Please provide a value for this parameter.')
 
         #Set internal parameters
-        self.figure_count = 0
-        self.table_count = 0
+        self.figure_count = 1
+        self.table_count = 1
 
         #Unpack parameters
         self.kwargs = kwargs

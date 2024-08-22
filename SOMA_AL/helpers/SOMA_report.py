@@ -200,10 +200,10 @@ class SOMAReport:
         Boxplots show the mean and 95\% confidence intervals of the choice rate for each group."""
 
         section_figure1_caption = self.add_figure_caption(section_figure1_caption)
-        section_figure1_2_caption = self.add_figure_caption(section_figure1_2_caption)
+        #section_figure1_2_caption = self.add_figure_caption(section_figure1_2_caption)
         section_figure2_caption = self.add_figure_caption(section_figure2_caption)
-        section_figure2_1_caption = self.add_figure_caption(section_figure2_1_caption)
-        section_figure2_2_caption = self.add_figure_caption(section_figure2_2_caption)
+        #section_figure2_1_caption = self.add_figure_caption(section_figure2_1_caption)
+        #section_figure2_2_caption = self.add_figure_caption(section_figure2_2_caption)
         section_figure3_caption = self.add_figure_caption(section_figure3_caption)
         section_figure4_caption = self.add_figure_caption(section_figure4_caption)
         section_figure5_caption = self.add_figure_caption(section_figure5_caption)
@@ -213,13 +213,13 @@ class SOMAReport:
                         f'### Learning Accuracy',
                         f'#### ![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning_context.png)\n',
                         f'{section_figure1_caption}',
-                        f'#### ![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning_symbol.png)\n',
-                        f'{section_figure1_2_caption}',
+                        #f'#### ![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning_symbol.png)\n',
+                        #f'{section_figure1_2_caption}',
                         f'### Learning Reaction Time',
                         f'#### ![learning_rt](SOMA_AL/plots/Figure_N_Rt_Across_Learning_context.png)\n',
                         f'{section_figure2_caption}',
-                        f'#### ![learning_rt](SOMA_AL/plots/Figure_N_Rt_Across_Learning_symbol.png)\n',
-                        f'{section_figure2_1_caption}',
+                        #f'#### ![learning_rt](SOMA_AL/plots/Figure_N_Rt_Across_Learning_symbol.png)\n',
+                        #f'{section_figure2_1_caption}',
                         #f'#### ![rt_distributions](SOMA_AL/plots/Figure_N_RT_Distributions.png)\n',
                         #f'{section_figure2_2_caption}',
                         f'### Transfer Accuracy',

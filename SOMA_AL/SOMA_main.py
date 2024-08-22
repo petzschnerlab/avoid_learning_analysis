@@ -35,16 +35,10 @@ class SOMAPipeline(SOMAMaster):
 if __name__ == '__main__':
 
     #Meta parameters
-    author = 'Chad C. Williams'
-    
-    #Data parameters
-    file_path = r'D:\BM_Carney_Petzschner_Lab\SOMAStudyTracking\SOMAV1\database_exports\avoid_learn_prolific'
-    #file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv', r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
-    #file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv']
-    file_name = [r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
+    author = 'Chad C. Williams' 
 
-    #Set analyses dependent on whether there is only depression groups
-    split_by_groups = ['pain'] if any("v1a" in s for s in file_name) else ['pain', 'depression'] #'pain' or 'depression'
+    #File parameters
+    file_path = r'D:\BM_Carney_Petzschner_Lab\SOMAStudyTracking\SOMAV1\database_exports\avoid_learn_prolific'
 
     #Grouping parameters
     depression_cutoff = 10
@@ -58,7 +52,7 @@ if __name__ == '__main__':
     rolling_mean = 5 #None or int
 
     #Test parameters
-    tests = 'extensive' #'basic' or 'extensive'
+    tests = 'basic' #'basic' or 'extensive'
     test_rolling_mean = 5
     test_context_type = 'context' #'context' or 'symbol'
 
@@ -66,7 +60,12 @@ if __name__ == '__main__':
     verbose = True
 
     #Run the pipeline for each split_by_group
-    for split_by_group in ['depression']:#split_by_groups:
+    for split_by_group in ['pain', 'depression']:
+
+        if split_by_group == 'pain':
+            file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv', r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
+        elif split_by_group == 'depression':
+            file_name = [r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
         
         #Create a dict of args
         kwargs = {'author': author,
@@ -86,8 +85,6 @@ if __name__ == '__main__':
         #Run the pipeline
         SOMA_pipeline = SOMAPipeline()
         SOMA_pipeline.run(**kwargs)
-
-
 
     #Debug stop
     print()
