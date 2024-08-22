@@ -15,34 +15,32 @@ class SOMAPipeline(SOMAMaster):
     """
 
     def __init__(self, **kwargs):
-        super().__init__()
+        super().__init__()     
 
-        #Warning of unknown params
-        accepted_params = ['author']
-        for key in kwargs:
-            if key not in accepted_params:
-                warnings.warn(f'Unknown parameter {key} is being ignored', stacklevel=2)
-
-        #Set input parameters
-        self.author = kwargs.get('author', 'SOMA_Team')
-
-        #Set backend parameters
-        self.figure_count = 1
-        self.table_count = 1
+    def announce(self, time):
+        if time == 'start' and self.verbose:
+            if self.author != 'SOMA_Team':
+                print(f'Welcome {self.author.replace("_"," ").title()}!')
+            print(f'\nRunning the SOMA pipeline with the following parameters:\n')
+            [print(f'{key}: {value}') for key, value in self.kwargs.items()]
+            print(f'\nProcessing {self.split_by_group} group data...')
+        elif time == 'end' and self.verbose:
+            print(f'{self.split_by_group} group processing complete!')
+        else:
+            pass   
 
     def run(self, **kwargs):
 
+        #Run the pipeline
         self.set_parameters(**kwargs)
+        self.announce(time='start')
         self.load_data(file_path = self.file_path, file_name = self.file_name)
-        
         if self.check_data():
             self.process_data()
             self.run_tests()
             self.build_report()
-
-            #Report end
-            if self.verbose:
-                print(f'{self.split_by_group} group processing complete!')
+            self.announce(time='end')
+                
 
 if __name__ == '__main__':
 
@@ -65,7 +63,7 @@ if __name__ == '__main__':
 
     #Test parameters
     tests = 'extensive' #'basic' or 'extensive'
-    test_rolling_mean = 5
+    test_rolling_mean = None
     test_context_type = 'symbol' #'context' or 'symbol'
 
     #Other parameters
