@@ -47,7 +47,7 @@ class SOMAPlotting:
             group_data = self.learning_data[self.learning_data[self.group_code] == group]
 
             #Get descriptive statistics for the group
-            sample_size = group_data['participant_id'].nunique() #TODO: FIX THIS
+            sample_size = group_data['participant_id'].nunique() #TODO: FIX THIS, USE FUNCTION
             t_score = stats.t.ppf(0.975, sample_size-1)
 
             #Rename symbol labels
@@ -56,6 +56,7 @@ class SOMAPlotting:
                                                                                         'Reward2': 'Reward', 
                                                                                         'Punish1': 'Punish',
                                                                                         'Punish2': 'Punish'})
+                #Average duplicate trial_numbers for each participant within each symbol_name
                 contexts = ['Reward', 'Punish']
             else:
                 contexts = ['Reward1', 'Reward2', 'Punish1', 'Punish2']
@@ -68,7 +69,7 @@ class SOMAPlotting:
                 mean_accuracy = context_data.groupby(trial_index_name)[metric].mean()
                 CIs = context_data.groupby(trial_index_name)[metric].sem()*t_score
                 if rolling_mean is not None:
-                    mean_accuracy = mean_accuracy.rolling(rolling_mean, min_periods=1).mean()
+                    mean_accuracy = mean_accuracy.rolling(rolling_mean, min_periods=1, center=True).mean()
                 if context_type == 'context':
                     ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.2, color=color[context_index], edgecolor='none')
                 ax[i].plot(mean_accuracy, color=color[context_index], label=context)

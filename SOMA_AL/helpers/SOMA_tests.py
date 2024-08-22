@@ -50,18 +50,20 @@ class SOMATests:
             group_data = self.learning_data[self.learning_data[self.group_code] == group]
             
             if context_type == 'context':
-                group_data['symbol_name'] = group_data['symbol_name'].replace({'Reward1': 'Reward',
-                                                                               'Reward2': 'Reward', 
-                                                                               'Punish1': 'Punish',
-                                                                               'Punish2': 'Punish'})
-                group_data['symbol_name'] = pd.Categorical(group_data['symbol_name'], categories=['Reward', 'Punish'])
+                group_data.loc[:,'symbol_name'] = group_data['symbol_name'].replace({'Reward1': 'Reward',
+                                                                                        'Reward2': 'Reward', 
+                                                                                        'Punish1': 'Punish',
+                                                                                        'Punish2': 'Punish'})
+                #Average duplicate trial_numbers for each participant within each symbol_name
+                group_data = group_data.groupby(['participant_id', 'trial_number', 'symbol_name']).mean().reset_index()
+                contexts = ['Reward', 'Punish']
             else:
-                group_data['symbol_name'] = pd.Categorical(group_data['symbol_name'], categories=['Reward1', 'Reward2', 'Punish1', 'Punish2'])
-                
+                contexts = ['Reward1', 'Reward2']#, 'Punish1', 'Punish2']
+
             color = ['#B2DF8A', '#FB9A99'] if context_type == 'context' else ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C']
             for participant in group_data['participant_id'].unique():
                 participant_data = group_data[group_data['participant_id'] == participant]
-                for context_index, context in enumerate(participant_data['symbol_name'].unique()):
+                for context_index, context in enumerate(contexts):
                     context_data = participant_data[participant_data['symbol_name'] == context]['accuracy']
                     if rolling_mean is not None:
                         context_data = context_data.rolling(rolling_mean, min_periods=1).mean()
@@ -72,6 +74,8 @@ class SOMATests:
                 plt.xlabel('Trial Number')
                 plt.ylabel('Accuracy')
                 plt.legend(loc='lower right', frameon=False)
+                plt.axvline(x=12, color='black', linestyle='--')
+                plt.axhline(y=50, color='black', linestyle='--')
 
                 #Save the plot
                 plt.savefig(f'{folder_name}{participant}.png')
