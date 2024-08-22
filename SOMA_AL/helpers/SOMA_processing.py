@@ -63,6 +63,10 @@ class SOMAProcessing:
             return False
 
         return True
+    
+    def recode_depression(self):
+        self.data['depression'] = (self.data['PHQ8'] >= self.depression_cutoff).astype(int)
+        self.data['depression'] = self.data['depression'].replace({0: 'healthy', 1: 'depressed'})
 
     def process_data(self):
         

@@ -19,6 +19,7 @@ class SOMAParameters:
                            'file_name', 
                            'print_filename', 
                            'split_by_group',
+                           'depression_cutoff',
                            'accuracy_exclusion_threshold',
                            'RT_low_threshold',
                            'RT_high_threshold',
@@ -49,6 +50,7 @@ class SOMAParameters:
         self.file_name = kwargs.get('file_name', None)
         self.print_filename = kwargs.get('print_filename', r'SOMA_AL/reports/SOMA_report.pdf')
         self.split_by_group = kwargs.get('split_by_group', 'pain')
+        self.depression_cutoff = kwargs.get('depression_cutoff', 10)
         self.accuracy_exclusion_threshold = kwargs.get('accuracy_exclusion_threshold', 55)
         self.RT_low_threshold = kwargs.get('RT_low_threshold', 200)
         self.RT_high_threshold = kwargs.get('RT_high_threshold', 5000)
