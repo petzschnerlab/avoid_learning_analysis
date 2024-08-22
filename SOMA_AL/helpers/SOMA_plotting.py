@@ -13,10 +13,10 @@ class SOMAPlotting:
 
     def print_plots(self):
         self.plot_clinical_scores()
-        self.plot_learning_curves(rolling_mean=self.rolling_mean)
-        self.plot_learning_curves(rolling_mean=self.rolling_mean, metric='rt')
-        self.plot_learning_curves(rolling_mean=self.rolling_mean, context_type='symbol')
-        self.plot_learning_curves(rolling_mean=self.rolling_mean, context_type='symbol', metric='rt')
+        self.plot_learning_curves(rolling_mean=self.rolling_mean, grouping='clinical')
+        self.plot_learning_curves(rolling_mean=self.rolling_mean, grouping='clinical', metric='rt')
+        self.plot_learning_curves(rolling_mean=self.rolling_mean, grouping='context')
+        self.plot_learning_curves(rolling_mean=self.rolling_mean, grouping='context', metric='rt')
         self.plot_rt_distributions()
         self.plot_transfer_accuracy()
         self.plot_transfer_accuracy(metric='rt')
@@ -38,43 +38,45 @@ class SOMAPlotting:
 
         return sample_sizes, t_scores
 
-    def plot_learning_curves(self, rolling_mean=None, context_type='context', metric='accuracy'):
+    def plot_learning_curves(self, rolling_mean=None,  metric='accuracy', grouping = 'clinical'):
+
+        #
+        if grouping == 'clinical':
+            grouping_labels = self.group_labels
+            grouping_code = self.group_code
+            contexts = ['Reward', 'Punish']
+            contexts_code = 'symbol_name'
+        else:
+            grouping_labels = ['Reward', 'Punish']
+            grouping_code = 'symbol_name'
+            contexts = ['no pain', 'chronic pain'] if self.split_by_group == 'pain' else ['healthy', 'depressed']
+            contexts_code = self.group_code
 
         #Add three sublpots, one for each group (group_code), which shows the average accuracy over trials (trial_number) for each of the two contexts (context_val_name)
-        num_subplots = 3 if self.split_by_group == 'pain' else 2
+        num_subplots = len(grouping_labels)
         fig, ax = plt.subplots(1, num_subplots, figsize=(5*num_subplots, 5))
-        for i, group in enumerate(self.group_labels):
-            group_data = self.learning_data[self.learning_data[self.group_code] == group]
+        for i, group in enumerate(grouping_labels):
+            group_data = self.learning_data[self.learning_data[grouping_code] == group]
 
             #Get descriptive statistics for the group
             sample_size = group_data['participant_id'].nunique() #TODO: FIX THIS, USE FUNCTION
             t_score = stats.t.ppf(0.975, sample_size-1)
 
-            #Rename symbol labels
-            if context_type == 'context':
-                group_data.loc[:,'symbol_name'] = group_data['symbol_name'].replace({'Reward1': 'Reward',
-                                                                                        'Reward2': 'Reward', 
-                                                                                        'Punish1': 'Punish',
-                                                                                        'Punish2': 'Punish'})
-                #Average duplicate trial_numbers for each participant within each symbol_name
-                group_data = group_data[['participant_id', 'trial_number', 'symbol_name', metric]]
-                group_data = group_data.groupby(['participant_id', 'trial_number', 'symbol_name']).mean().reset_index()
-                contexts = ['Reward', 'Punish']
-            else:
-                contexts = ['Reward1', 'Reward2', 'Punish1', 'Punish2']
+            #Average duplicate trial_numbers for each participant within each symbol_name but then also keep the symbol_name column
+            group_data = group_data[['participant_id', 'trial_number', contexts_code, metric]]
+            group_data = group_data.groupby(['participant_id', 'trial_number', contexts_code]).mean().reset_index()
 
             #Determine information of interest
-            trial_index_name = 'trial_number' if context_type == 'context' else 'trial_number_symbol'
-            color = ['#B2DF8A', '#FB9A99'] if context_type == 'context' else ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C']
+            trial_index_name = 'trial_number'
+            color = ['#B2DF8A', '#FB9A99'] if len(contexts) == 2 else ['#B2DF8A', '#FFD92F', '#FB9A99']
             for context_index, context in enumerate(contexts):
-                context_data = group_data[group_data['symbol_name'] == context]
+                context_data = group_data[group_data[contexts_code] == context]
                 mean_accuracy = context_data.groupby(trial_index_name)[metric].mean()
                 CIs = context_data.groupby(trial_index_name)[metric].sem()*t_score
                 if rolling_mean is not None:
                     mean_accuracy = mean_accuracy.rolling(rolling_mean, min_periods=1, center=True).mean()
-                if context_type == 'context':
-                    ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.2, color=color[context_index], edgecolor='none')
-                ax[i].plot(mean_accuracy, color=color[context_index], label=context)
+                ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.2, color=color[context_index], edgecolor='none')
+                ax[i].plot(mean_accuracy, color=color[context_index], label=context.title())
 
             if metric == 'accuracy':
                 ax[i].set_ylim(40, 100)
@@ -85,7 +87,7 @@ class SOMAPlotting:
 
         #Save the plot
         save_name = f'SOMA_AL/plots/Figure_N_{metric.capitalize()}_Across_Learning.png'
-        save_name = save_name.replace('.png', f'_{context_type}.png')
+        save_name = save_name.replace('.png', f'_{grouping}.png')
         plt.savefig(save_name)
 
         #Close figure

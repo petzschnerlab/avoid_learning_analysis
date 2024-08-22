@@ -161,7 +161,7 @@ class SOMAReport:
             section_figure1_caption += f' For visualization, the accuracy is smoothed using a rolling mean of {self.rolling_mean} trials.'
         section_figure1_caption += ' Shaded regions represent 95\% confidence intervals.'
 
-        section_figure1_2_caption = 'Behavioral performance across learning trials for each symbol pair for each group.'
+        section_figure1_2_caption = 'Behavioral performance across learning trials for each group for each context.'
         if self.rolling_mean is not None:
             section_figure1_2_caption += f' For visualization, the accuracy is smoothed using a rolling mean of {self.rolling_mean} trials.'
         section_figure1_2_caption += ' Shaded regions represent 95\% confidence intervals.'
@@ -171,14 +171,10 @@ class SOMAReport:
             section_figure2_caption += f' For visualization, the reaction time is smoothed using a rolling mean of {self.rolling_mean} trials.'
         section_figure2_caption += ' Shaded regions represent 95\% confidence intervals.'
 
-        section_figure2_1_caption = 'Reaction times across learning trials for each symbol pair for each group.'
+        section_figure2_2_caption = 'Reaction times across learning trials for each group for each context.'
         if self.rolling_mean is not None:
-            section_figure2_1_caption += f' For visualization, the reaction time is smoothed using a rolling mean of {self.rolling_mean} trials.'
-        section_figure2_1_caption += ' Shaded regions represent 95\% confidence intervals.'
-
-        section_figure2_2_caption = f"""Reaction time distributions for each phase and group. Half circles represent the mean reaction time for each group.
-        Reaction times less than {self.RT_low_threshold}ms and greater than {self.RT_high_threshold}ms were excluded from the analysis.
-        """
+            section_figure2_2_caption += f' For visualization, the reaction time is smoothed using a rolling mean of {self.rolling_mean} trials.'
+        section_figure2_2_caption += ' Shaded regions represent 95\% confidence intervals.'
 
         section_figure3_caption = """Choice rate for each symbol during transfer trials for each group.
         Choice rate is computed as the number of times a symbol was chosen given the number of times it was presented.
@@ -200,10 +196,9 @@ class SOMAReport:
         Boxplots show the mean and 95\% confidence intervals of the choice rate for each group."""
 
         section_figure1_caption = self.add_figure_caption(section_figure1_caption)
-        #section_figure1_2_caption = self.add_figure_caption(section_figure1_2_caption)
+        section_figure1_2_caption = self.add_figure_caption(section_figure1_2_caption)
         section_figure2_caption = self.add_figure_caption(section_figure2_caption)
-        #section_figure2_1_caption = self.add_figure_caption(section_figure2_1_caption)
-        #section_figure2_2_caption = self.add_figure_caption(section_figure2_2_caption)
+        section_figure2_2_caption = self.add_figure_caption(section_figure2_2_caption)
         section_figure3_caption = self.add_figure_caption(section_figure3_caption)
         section_figure4_caption = self.add_figure_caption(section_figure4_caption)
         section_figure5_caption = self.add_figure_caption(section_figure5_caption)
@@ -211,17 +206,15 @@ class SOMAReport:
 
         section_text = [f'## Behavioural Findings',
                         f'### Learning Accuracy',
-                        f'#### ![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning_context.png)\n',
+                        f'#### ![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning_clinical.png)\n',
                         f'{section_figure1_caption}',
-                        #f'#### ![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning_symbol.png)\n',
-                        #f'{section_figure1_2_caption}',
+                        f'#### ![learning_accuracy](SOMA_AL/plots/Figure_N_Accuracy_Across_Learning_context.png)\n',
+                        f'{section_figure1_2_caption}',
                         f'### Learning Reaction Time',
-                        f'#### ![learning_rt](SOMA_AL/plots/Figure_N_Rt_Across_Learning_context.png)\n',
+                        f'#### ![learning_rt](SOMA_AL/plots/Figure_N_Rt_Across_Learning_clinical.png)\n',
                         f'{section_figure2_caption}',
-                        #f'#### ![learning_rt](SOMA_AL/plots/Figure_N_Rt_Across_Learning_symbol.png)\n',
-                        #f'{section_figure2_1_caption}',
-                        #f'#### ![rt_distributions](SOMA_AL/plots/Figure_N_RT_Distributions.png)\n',
-                        #f'{section_figure2_2_caption}',
+                        f'#### ![learning_rt](SOMA_AL/plots/Figure_N_Rt_Across_Learning_context.png)\n',
+                        f'{section_figure2_2_caption}',
                         f'### Transfer Accuracy',
                         f'#### ![transfer_choice](SOMA_AL/plots/Figure_N_Transfer_choice_rate.png)\n',
                         f'{section_figure3_caption}',

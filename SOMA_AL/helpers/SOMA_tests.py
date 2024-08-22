@@ -50,13 +50,13 @@ class SOMATests:
             group_data = self.learning_data[self.learning_data[self.group_code] == group]
             
             if context_type == 'context':
-                group_data.loc[:,'symbol_name'] = group_data['symbol_name'].replace({'Reward1': 'Reward',
+                group_data.loc[:,'symbol_names'] = group_data['symbol_names'].replace({'Reward1': 'Reward',
                                                                                         'Reward2': 'Reward', 
                                                                                         'Punish1': 'Punish',
                                                                                         'Punish2': 'Punish'})
                 #Average duplicate trial_numbers for each participant within each symbol_name
-                group_data = group_data[['participant_id', 'trial_number', 'symbol_name', 'accuracy']]
-                group_data = group_data.groupby(['participant_id', 'trial_number', 'symbol_name']).mean().reset_index()
+                group_data = group_data[['participant_id', 'trial_number', 'symbol_names', 'accuracy']]
+                group_data = group_data.groupby(['participant_id', 'trial_number', 'symbol_names']).mean().reset_index()
                 contexts = ['Reward', 'Punish']
             else:
                 contexts = ['Reward1', 'Reward2']#, 'Punish1', 'Punish2']
@@ -65,7 +65,7 @@ class SOMATests:
             for participant in group_data['participant_id'].unique():
                 participant_data = group_data[group_data['participant_id'] == participant]
                 for context_index, context in enumerate(contexts):
-                    context_data = participant_data[participant_data['symbol_name'] == context]['accuracy']
+                    context_data = participant_data[participant_data['symbol_names'] == context]['accuracy']
                     if rolling_mean is not None:
                         context_data = context_data.rolling(rolling_mean, min_periods=1).mean()
                     plt.scatter(np.arange(1,context_data.shape[0]+1) ,context_data, color=color[context_index], label=context)
@@ -158,7 +158,7 @@ class SOMATests:
         participant_order = []
         for participant in self.learning_data['participant_id'].unique():
             participant_data = self.learning_data[self.learning_data['participant_id'] == participant]
-            participant_order.append(participant_data['symbol_name'].values)
+            participant_order.append(participant_data['symbol_names'].values)
             
         #Assertions to ensure conditions are not in the same order for each participant
         for i in range(len(participant_order)-1):

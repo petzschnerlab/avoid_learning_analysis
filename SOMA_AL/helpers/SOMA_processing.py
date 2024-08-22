@@ -112,15 +112,21 @@ class SOMAProcessing:
             '75P2': 'Punish2',
             '25P2': 'Punish2',
         }
-        self.learning_data['symbol_name'] = self.learning_data['symbol_L_name']
+        self.learning_data['symbol_names'] = self.learning_data['symbol_L_name']
         for symbol in symbol_renames:
-            self.learning_data['symbol_name'] = self.learning_data['symbol_name'].replace(symbol, symbol_renames[symbol])
+            self.learning_data['symbol_names'] = self.learning_data['symbol_names'].replace(symbol, symbol_renames[symbol])
+        
+        self.learning_data['symbol_name'] = self.learning_data['symbol_names']
+        self.learning_data['symbol_name'] = self.learning_data['symbol_name'].replace({'Reward1': 'Reward',
+                                                                                        'Reward2': 'Reward', 
+                                                                                        'Punish1': 'Punish',
+                                                                                        'Punish2': 'Punish'})
 
         #Create trial indices - computes both cases (75R1, 75R2) of reward and both cases of punish (75P1, 75P2) seperately to later be averaged
-        self.learning_data['trial_number'] = self.learning_data.groupby(['participant_id', 'symbol_name']).cumcount() + 1
+        self.learning_data['trial_number'] = self.learning_data.groupby(['participant_id', 'symbol_names']).cumcount() + 1
 
         #Create trial indices per participant and symbol_name #TODO: Check this
-        self.learning_data['trial_number_symbol'] = self.learning_data.groupby(['participant_id', 'symbol_name']).cumcount() + 1
+        self.learning_data['trial_number_symbol'] = self.learning_data.groupby(['participant_id', 'symbol_names']).cumcount() + 1
 
     def filter_transfer_data(self):
 
