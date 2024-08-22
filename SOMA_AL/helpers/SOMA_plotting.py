@@ -52,14 +52,12 @@ class SOMAPlotting:
 
             #Rename symbol labels
             if context_type == 'context':
-                group_data['symbol_name'] = group_data['symbol_name'].replace({'Reward1': 'Reward',
+                group_data.loc[:,'symbol_name'] = group_data['symbol_name'].replace({'Reward1': 'Reward',
                                                                                         'Reward2': 'Reward', 
                                                                                         'Punish1': 'Punish',
                                                                                         'Punish2': 'Punish'})
-                group_data['symbol_name'] = pd.Categorical(group_data['symbol_name'], categories=['Reward', 'Punish'])
                 contexts = ['Reward', 'Punish']
             else:
-                group_data['symbol_name'] = pd.Categorical(group_data['symbol_name'], categories=['Reward1', 'Reward2', 'Punish1', 'Punish2'])
                 contexts = ['Reward1', 'Reward2', 'Punish1', 'Punish2']
 
             #Determine information of interest

@@ -43,7 +43,8 @@ class SOMAPipeline(SOMAMaster):
                            'rolling_mean',
                            'tests',
                            'test_rolling_mean',
-                           'test_context_type']
+                           'test_context_type',
+                           'verbose']
         for key in kwargs:
             if key not in accepted_params:
                 warnings.warn(f'Unknown parameter {key} is being ignored', stacklevel=2)
@@ -55,7 +56,8 @@ class SOMAPipeline(SOMAMaster):
             if param not in kwargs:
                 raise ValueError(f'Missing required parameter {param}, which does not contain a default. Please provide a value for this parameter.')
 
-        #Turn parameters into a kwargs dictionary #file_path: str, file_name: list, split_by_group: str = 'pain'
+        #Unpack parameters
+        self.kwargs = kwargs
         self.file_path = kwargs.get('file_path', None)
         self.file_name = kwargs.get('file_name', None)
         self.print_filename = kwargs.get('print_filename', r'SOMA_AL/reports/SOMA_report.pdf')
@@ -67,6 +69,7 @@ class SOMAPipeline(SOMAMaster):
         self.tests = kwargs.get('tests', 'basic') #'basic' or 'extensive'
         self.test_rolling_mean = kwargs.get('test_rolling_mean', None)
         self.test_context_type = kwargs.get('test_context_type', 'context')
+        self.verbose = kwargs.get('verbose', False)
         
         #Set parameters
         self.split_by_group = split_by_group
@@ -78,6 +81,12 @@ class SOMAPipeline(SOMAMaster):
         else:
             self.group_labels = ['healthy', 'depressed']
             self.group_labels_formatted = ['Healthy', 'Depressed']
+
+        #Report start
+        if self.verbose:
+            print(f'\nRunning the SOMA pipeline with the following parameters:\n')
+            [print(f'{key}: {value}') for key, value in kwargs.items()]
+            print(f'\nProcessing {split_by_group} group data...')
 
         #Load data
         self.load_data(file_path = file_path, file_name = file_name)
@@ -93,13 +102,17 @@ class SOMAPipeline(SOMAMaster):
             #Report data
             self.build_report()
 
+            #Report end
+            if self.verbose:
+                print(f'{split_by_group} group processing complete!')
+
 if __name__ == '__main__':
 
     #Data parameters
     file_path = r'D:\BM_Carney_Petzschner_Lab\SOMAStudyTracking\SOMAV1\database_exports\avoid_learn_prolific'
-    #file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv', r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
+    file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv', r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
     #file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv']
-    file_name = [r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
+    #file_name = [r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
 
     #Set analyses dependent on whether there is only depression groups
     split_by_groups = ['pain'] if any("v1a" in s for s in file_name) else ['pain', 'depression'] #'pain' or 'depression'
@@ -117,6 +130,9 @@ if __name__ == '__main__':
     test_rolling_mean = 5
     test_context_type = 'symbol' #'context' or 'symbol'
 
+    #Other parameters
+    verbose = True
+
     #Run the pipeline for each split_by_group
     for split_by_group in split_by_groups:
         
@@ -130,11 +146,12 @@ if __name__ == '__main__':
             'RT_high_threshold': RT_high_threshold,
             'tests': tests,
             'test_rolling_mean': test_rolling_mean,
-            'test_context_type': test_context_type}
-
+            'test_context_type': test_context_type,
+            'verbose': verbose}
+        
         #Run the pipeline
         SOMA_pipeline = SOMAPipeline(author='Chad C. Williams')
         SOMA_pipeline.run(**kwargs)
 
-    #Debug stop
-    print()
+        #Report end
+        print(f'{split_by_group} processing complete!')
