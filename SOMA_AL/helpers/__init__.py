@@ -1,7 +1,7 @@
 from helpers.SOMA_processing import SOMAProcessing
 from helpers.SOMA_plotting import SOMAPlotting
 from helpers.SOMA_report import SOMAReport
-from SOMA_AL.helpers.SOMA_parameters import SOMAParameters
+from helpers.SOMA_parameters import SOMAParameters
 from helpers.SOMA_tests import SOMATests
 
 class SOMAMaster(SOMAProcessing, 
