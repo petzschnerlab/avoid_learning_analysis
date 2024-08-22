@@ -14,7 +14,8 @@ class SOMAParameters:
         """
 
         #Warning of unknown params
-        accepted_params = ['file_path', 
+        accepted_params = ['author',
+                           'file_path', 
                            'file_name', 
                            'print_filename', 
                            'split_by_group',
@@ -37,8 +38,13 @@ class SOMAParameters:
             if param not in kwargs:
                 raise ValueError(f'Missing required parameter {param}, which does not contain a default. Please provide a value for this parameter.')
 
+        #Set internal parameters
+        self.figure_count = 0
+        self.table_count = 0
+
         #Unpack parameters
         self.kwargs = kwargs
+        self.author = kwargs.get('author', 'SOMA_Team')
         self.file_path = kwargs.get('file_path', None)
         self.file_name = kwargs.get('file_name', None)
         self.print_filename = kwargs.get('print_filename', r'SOMA_AL/reports/SOMA_report.pdf')
@@ -52,8 +58,7 @@ class SOMAParameters:
         self.test_context_type = kwargs.get('test_context_type', 'context')
         self.verbose = kwargs.get('verbose', False)
         
-        #Set parameters
-        self.split_by_group = self.split_by_group
+        #Format parameters
         self.print_filename = self.print_filename.replace('.pdf', f'_{self.split_by_group}.pdf')
         self.group_code = 'group_code' if self.split_by_group == 'pain' else 'depression'
         if self.split_by_group == 'pain':
@@ -62,9 +67,3 @@ class SOMAParameters:
         else:
             self.group_labels = ['healthy', 'depressed']
             self.group_labels_formatted = ['Healthy', 'Depressed']
-
-        #Report start
-        if self.verbose:
-            print(f'\nRunning the SOMA pipeline with the following parameters:\n')
-            [print(f'{key}: {value}') for key, value in kwargs.items()]
-            print(f'\nProcessing {self.split_by_group} group data...')
