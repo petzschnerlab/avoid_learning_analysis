@@ -241,7 +241,7 @@ class SOMAReport:
         section_text.append('### Transfer Reaction Time')   
         section_text.extend(self.insert_image('transfer-rt'))
         section_text.extend(self.insert_image('transfer-rt-neutral'))
-        self.add_data_pdf(section_text, center=True) #TODO: It crashes here
+        self.add_data_pdf(section_text, center=True)
 
         #Save to pdf
         self.save_report()
