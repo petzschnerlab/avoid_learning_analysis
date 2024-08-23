@@ -12,16 +12,15 @@ class SOMAPlotting:
     """
 
     def print_plots(self):
-        self.plot_clinical_scores()
-        self.plot_learning_curves(rolling_mean=self.rolling_mean, grouping='clinical')
-        self.plot_learning_curves(rolling_mean=self.rolling_mean, grouping='clinical', metric='rt')
-        self.plot_learning_curves(rolling_mean=self.rolling_mean, grouping='context')
-        self.plot_learning_curves(rolling_mean=self.rolling_mean, grouping='context', metric='rt')
-        self.plot_rt_distributions()
-        self.plot_transfer_accuracy()
-        self.plot_transfer_accuracy(metric='rt')
-        self.plot_neutral_transfer_accuracy()
-        self.plot_neutral_transfer_accuracy(metric='rt')
+        self.plot_clinical_scores('demo-clinical-scores')
+        self.plot_learning_curves('learning-accuracy-by-group',rolling_mean=self.rolling_mean, grouping='clinical')
+        self.plot_learning_curves('learning-rt-by-group', rolling_mean=self.rolling_mean, grouping='clinical', metric='rt')
+        self.plot_learning_curves('learning-accuracy-by-context', rolling_mean=self.rolling_mean, grouping='context')
+        self.plot_learning_curves('learning-rt-by-context', rolling_mean=self.rolling_mean, grouping='context', metric='rt')
+        self.plot_transfer_accuracy('transfer-choice-rate')
+        self.plot_transfer_accuracy('transfer-rt', metric='rt')
+        self.plot_neutral_transfer_accuracy('transfer-choice-rate-neutral')
+        self.plot_neutral_transfer_accuracy('transfer-rt-neutral', metric='rt')
 
     def compute_n_and_t(self, data, splitting_column):
 
@@ -38,9 +37,9 @@ class SOMAPlotting:
 
         return sample_sizes, t_scores
 
-    def plot_learning_curves(self, rolling_mean=None,  metric='accuracy', grouping = 'clinical'):
+    def plot_learning_curves(self, save_name, rolling_mean=None,  metric='accuracy', grouping = 'clinical'):
 
-        #
+        #Set grouping parameters
         if grouping == 'clinical':
             grouping_labels = self.group_labels
             grouping_code = self.group_code
@@ -86,38 +85,7 @@ class SOMAPlotting:
             ax[i].legend(loc='lower right', frameon=False)
 
         #Save the plot
-        save_name = f'SOMA_AL/plots/Figure_N_{metric.capitalize()}_Across_Learning.png'
-        save_name = save_name.replace('.png', f'_{grouping}.png')
-        plt.savefig(save_name)
-
-        #Close figure
-        plt.close()
-
-    def plot_rt_distributions(self):
-
-        #create histograms of reaction times for each self.learning_data and self.transfer_data for each group
-        fig, ax = plt.subplots(1, len(self.group_labels), figsize=(5*len(self.group_labels), 5))
-        for i, group in enumerate(self.group_labels):
-            group_data_learning = self.learning_data[self.learning_data[self.group_code] == group]
-            group_data_learning = group_data_learning[~group_data_learning['excluded_rt']]
-            group_data_transfer = self.transfer_data[self.transfer_data[self.group_code] == group]
-            group_data_transfer = group_data_transfer[~group_data_transfer['excluded_rt']]
-            
-            #normalize data in histogram
-            ax[i].hist(group_data_learning['rt'], bins=20, color='C0', alpha=0.5, label='Learning', density=True)
-            ax[i].hist(group_data_transfer['rt'], bins=20, color='C1', alpha=0.5, label='Transfer', density=True)
-            ax[i].set_title(f'{group.capitalize()}')
-            ax[i].set_xlabel('Reaction Time (ms)')
-            ax[i].set_ylabel('Density')
-            ax[i].legend(loc='upper right', frameon=False)
-            ax[i].ticklabel_format(axis='y', style='sci', scilimits=(4,4))
-
-            #Add a point at the mean of the reaction times for each group
-            ax[i].scatter(group_data_learning['rt'].mean(), 0, color='C0', s=100, zorder=10)
-            ax[i].scatter(group_data_transfer['rt'].mean(), 0, color='C1', s=100, zorder=10)
-
-        #Save the plot
-        plt.savefig('SOMA_AL/plots/Figure_N_RT_distributions.png')
+        plt.savefig(f'SOMA_AL/plots/{save_name}.png')
 
         #Close figure
         plt.close()
@@ -162,7 +130,7 @@ class SOMAPlotting:
                 ax.add_patch(plt.Rectangle((factor_index+1-0.4, (mean_data.loc[factor] - CIs.loc[factor])['score']), 0.8, 2*CIs.loc[factor], fill=None, edgecolor='darkgrey'))
                 ax.hlines(mean_data.loc[factor], factor_index+1-0.4, factor_index+1+0.4, color='darkgrey')            
 
-    def plot_transfer_accuracy(self, metric='choice_rate'):
+    def plot_transfer_accuracy(self, save_name, metric='choice_rate'):
 
         #Copy choice rate data
         choice_rate = self.choice_rate if metric == 'choice_rate' else self.choice_rt
@@ -194,12 +162,12 @@ class SOMAPlotting:
             ax[group_index].set_title(group.capitalize())
 
         #Save the plot
-        plt.savefig(f'SOMA_AL/plots/Figure_N_Transfer_{metric}.png')
+        plt.savefig(f'SOMA_AL/plots/{save_name}.png')
 
         #Close figure
         plt.close()
 
-    def plot_neutral_transfer_accuracy(self, metric='choice_rate'):
+    def plot_neutral_transfer_accuracy(self, save_name, metric='choice_rate'):
 
         #Copy choice rate data
         choice_rate = self.neutral_choice_rate if metric == 'choice_rate' else self.neutral_choice_rt
@@ -235,12 +203,12 @@ class SOMAPlotting:
             ax.annotate('Punish', xy=(0.55, 5), xytext=(0.55, 5), rotation=90, textcoords='data', ha='center', va='center', color='darkgrey')
 
         #Save the plot
-        plt.savefig(f'SOMA_AL/plots/Figure_N_Neutral_Transfer_{metric}.png')
+        plt.savefig(f'SOMA_AL/plots/{save_name}.png')
 
         #Close figure
         plt.close()
 
-    def plot_clinical_scores(self):
+    def plot_clinical_scores(self, save_name):
 
         #Organize clinical data
         metrics = ['intensity', 'unpleasant', 'interference']
@@ -274,7 +242,7 @@ class SOMAPlotting:
             ax[metric_index].set_title(metric.capitalize())
 
         #Save the plot
-        plt.savefig('SOMA_AL/plots/Figure_N_Clinical_Scores.png')
+        plt.savefig(f'SOMA_AL/plots/{save_name}.png')
 
         #Close figure
         plt.close()
