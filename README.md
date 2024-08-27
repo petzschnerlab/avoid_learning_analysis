@@ -84,6 +84,28 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
     -**Findings:** 
         - Significant group effect, controls had higher accuracy than all groups. No interaction btw time and group
 
+- **Gold et al., 2012:**
+    - ANOVA 1: Accuracy ~ group x f_valence x probability x learning block
+        - Correction: Hyun-Feldt correction was applied if assumption of sphericity was violated
+        - Group: controls, Schizophrenia-LNS (low negative symptom), Schizophrenia-HNS (high neg sympt)
+        - Feedback Valence: Context -> reward punishment
+        - Probability: 90% change of winning vs 80%
+        - Learning Block: 4 learning blocks, time of learning
+    - ANOVA 2: Accuracy (B4) ~ valence x probability x group
+        - Accuracy: Block 4 only
+    -**Findings:**
+        - ANOVA 1
+            - Significant probability (90% > 80%)
+            - Significant learning block (inc acc over time)
+            - Significant probability x group interaction
+                - HNS does not show greater performance for probability but other groups do
+            - Significant valence x learning block interaction
+        - ANOVA 2
+            - Significant probability 
+            - Significant group x valence interaction
+                - HC greater learning on 90% than HNS group
+                - Better learning from gain than punish in HC vs HNS group
+
 - **Vandendriessche et al. 2023:** 
     - Software: R glmer
     - GLMM: Accuracy ~ group*context + (1|participant), link: binomial
@@ -118,6 +140,17 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
             - Higher acc in 75R-75P and 75R-25R versus 75R-25P **double check this**
         - 75R-25P condition main effect of group (controls higher accuracy than SZOFF) **not sure how this was conducted**
         - Learned (old) pairings showed main effect of group where controls > all patients.
+
+- **Gold et al., 2012:**
+    - ANOVA: Accuracy ~ group
+        - Accuracy: percent correct
+        - Group: control, LNS, HNS
+    - Post-Hocs: 
+    - **Findings:** 
+        - Difference of accuracy btw groups
+            - HC > HNS
+            - HC had preference for 75R over 25P but HNS group showed no preference for 75R over 25P?
+        - All groups prefered 25P over 25R
 
 - **Vandendriessche et al. 2023:**
     - Software: R glmer
