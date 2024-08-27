@@ -72,6 +72,17 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
         - Overall performance above chance (via t-test vs 50%)
         - Significant feedback information (not feedback valence/context or interaction)
             - Post-Hocs: Complete feedback > partial feedback in both contexts 
+    
+- **Geana, et al, and Frank, 2021:**
+    - Software: SPSS
+    - ANOVA: Accuracy ~ Timee x group x condition
+        - Assumptions: They used Hyunh-Feldt correction for violating assumption of sphericity
+        - Accuracy: moving time window of 20 trials **look into this**
+        - Time: Trial number? **look into this**
+        - Group: Bipolar disorder, schizophrenia with meds, schizophrenia without meds, controls
+        - Condition: Context, reward or punish
+    -**Findings:** 
+        - Significant group effect, controls had higher accuracy than all groups. No interaction btw time and group
 
 - **Vandendriessche et al. 2023:** 
     - Software: R glmer
@@ -98,6 +109,15 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
     - **Findings:**
         - Significant outcome valence and option_correctness, no effect of feedback information
 
+- **Geana, et al, and Frank, 2021:**
+    - Software: SPSS
+    - ANOVA: Accuracy ~ group x condition
+        - Multiple ANOVAs using 75R-25P vs 75R-75P and 75R-25P vs 75R-25R
+    - **Findings:** 
+        - Significant condition in both ANOVAs
+            - Higher acc in 75R-75P and 75R-25R versus 75R-25P **double check this**
+        - 75R-25P condition main effect of group (controls higher accuracy than SZOFF) **not sure how this was conducted**
+        - Learned (old) pairings showed main effect of group where controls > all patients.
 
 - **Vandendriessche et al. 2023:**
     - Software: R glmer
