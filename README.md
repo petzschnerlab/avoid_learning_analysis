@@ -59,8 +59,23 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
         - Depression scales: LOt-R, usual optimism, current optimism 
 
 ### Learning Phase
+- **Palminteri et al., 2015:**
+    - Software: Matlab Statistical Toolbox
+    - ANOVA: Accuracy ~ f_information*f_valence
+        - Accuracy: Percentage of correct choices (cont scale)
+        - Feedback Information: Partial vs complete information
+        - Feedback Valence: Reward vs Punishment contexts
+    - Post-Hocs: 
+        - Two-sided, one sample t-test of context
+            -Context: reward/partial, reward/complete, punishment/partial and punishment/complete
+    - **Findings:** 
+        - Overall performance above chance (via t-test vs 50%)
+        - Significant feedback information (not feedback valence/context or interaction)
+            - Post-Hocs: Complete feedback > partial feedback in both contexts 
+
 - **Vandendriessche et al. 2023:** 
-    - GLMM: (R - glmer) Accuracy ~ group*context + (1|participant), link: binomial
+    - Software: R glmer
+    - GLMM: Accuracy ~ group*context + (1|participant), link: binomial
         - Accuracy: 0, 1 (**this is odd, must be an average?**)
         - Group: control, patients
         - Context: rich, poor
@@ -74,8 +89,19 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
 
 
 ### Transfer Phase
+- **Palminteri et al., 2015:**
+    - Software: Matlab Statistical Toolbox
+    - ANOVA: Accuracy ~ f_information x f_valence x option_correctness
+        - Feedback Information: Partial vs complete information
+        - Feedback Valence: Reward vs Punishment contexts
+        - Option correctness: **what is this? It is never explained**
+    - **Findings:**
+        - Significant outcome valence and option_correctness, no effect of feedback information
+
+
 - **Vandendriessche et al. 2023:**
-    - GLMM: (R - glmer) Accuracy ~ group*condition + (1|participant), link: binomial
+    - Software: R glmer
+    - GLMM: Accuracy ~ group*condition + (1|participant), link: binomial
         - Accuracy: 0, 1 (**this is odd, must be an average?**)
         - Group: control, patients
         - Condition: best, other (intermediate), worst
