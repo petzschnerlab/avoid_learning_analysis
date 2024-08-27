@@ -28,6 +28,7 @@ class SOMAPipeline(SOMAMaster):
         if self.check_data():
             self.process_data()
             self.run_tests()
+            self.run_statistics()
             self.build_report()
             self.announce(case='end')
                 
