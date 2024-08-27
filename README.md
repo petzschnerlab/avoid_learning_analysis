@@ -29,15 +29,16 @@ The current initiative is to conduct data analysis on previously collected data.
 
 # Data analysis
 All references refer to Vandendriessche et al., 2023 (Van et al hereafter)
+
 ## Behavioural Analyses
 Focus is on accuracy rates, not reaction times as the previous literature found no reaction time effects and due to the use of prolific, reaction times recorded in this study may vary widely depending on the tech (e.g., computer, internet strength) used per participant.
 
 ### Steps:
 - **Learning Phase**:
     1. Thorough investigation of the data
-    3.  Replicate Figure 2
-    4.  Conduct all statistical analyses
-    5.  Learning Phase:GLMM of correct choice rates
+    2.  Replicate Figure 2
+    3.  Conduct all statistical analyses
+    4.  Learning Phase:GLMM of correct choice rates
         - Determine if accuracy was above chance (intercept)
             - Van et al: Found significant effect
         - Determine effects of context (reward, punish), group (controls, acute pain, chronic pain), and their interaction.
@@ -48,6 +49,49 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
         - Van et al: Found significant effect
     2. Determine effects of context (reward, punish), group (controls, acute pain, chronic pain), and their interaction.
         - Van et al: Significant group and interaction, but not context
+
+## Statistical Analyses Described 
+### Demographics
+- **Vandendriessche et al. 2023:** 
+    - T-Tests:
+        - Age matched
+        - Education matched
+        - Depression scales: LOt-R, usual optimism, current optimism 
+
+### Learning Phase
+- **Vandendriessche et al. 2023:** 
+    - GLMM: (R - glmer) Accuracy ~ group*context + (1|participant), link: binomial
+        - Accuracy: 0, 1 (**this is odd, must be an average?**)
+        - Group: control, patients
+        - Context: rich, poor
+    - Post-Hocs: 
+        - Comparing marginal means to zero
+        - Tukey correction
+    - **Findings:** 
+        - Overall performance above chance (intercept)
+        - Significant interaction of group*context
+            - Post-Hocs: Effect of context in patients, but not controls (slopes presented)
+
+
+### Transfer Phase
+- **Vandendriessche et al. 2023:**
+    - GLMM: (R - glmer) Accuracy ~ group*condition + (1|participant), link: binomial
+        - Accuracy: 0, 1 (**this is odd, must be an average?**)
+        - Group: control, patients
+        - Condition: best, other (intermediate), worst
+            - Best: incudes 75R (but not 75P)
+                - 75R vs 25R/25P
+            - Other: Does not include 75R or 75P 
+                - 25R vs 25P (**maybe also 75R vs 75P?**)
+            - Worst: includes 75P (but not 75R)
+                - 75P vs 25R/25P
+    - Post-Hocs: 
+        - Comparing marginal means to zero
+        - Tukey correction
+    - **Findings:**
+        - Overall performance above chance (intercept)
+        - Significant group and interaction effects
+            - Post-Hocs: Patients were better at seeking 75R than avoiding 75P (controls these were equal)
 
 ## Computational Modelling
 ### Steps:
