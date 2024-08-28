@@ -81,7 +81,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
         - Time: Trial number? **look into this**
         - Group: Bipolar disorder, schizophrenia with meds, schizophrenia without meds, controls
         - Condition: Context, reward or punish
-    -**Findings:** 
+    - **Findings:** 
         - Significant group effect, controls had higher accuracy than all groups. No interaction btw time and group
 
 - **Gold et al., 2012:**
@@ -93,7 +93,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
         - Learning Block: 4 learning blocks, time of learning
     - ANOVA 2: Accuracy (B4) ~ valence x probability x group
         - Accuracy: Block 4 only
-    -**Findings:**
+    - **Findings:**
         - ANOVA 1
             - Significant probability (90% > 80%)
             - Significant learning block (inc acc over time)
