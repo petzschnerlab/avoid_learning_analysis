@@ -1,5 +1,6 @@
 #Import modules
 import warnings
+import os
 
 class SOMAParameters:
 
@@ -15,6 +16,7 @@ class SOMAParameters:
 
         #Warning of unknown params
         accepted_params = ['author',
+                           'rscripts_path',
                            'file_path', 
                            'file_name', 
                            'print_filename', 
@@ -27,6 +29,7 @@ class SOMAParameters:
                            'tests',
                            'test_rolling_mean',
                            'test_context_type',
+                           'hide_stats',
                            'verbose']
         for key in kwargs:
             if key not in accepted_params:
@@ -42,10 +45,12 @@ class SOMAParameters:
         #Set internal parameters
         self.figure_count = 1
         self.table_count = 1
+        self.repo_directory = os.path.dirname(os.path.realpath(__file__)).split('SOMA_AL')[0]
 
         #Unpack parameters
         self.kwargs = kwargs
         self.author = kwargs.get('author', 'SOMA_Team')
+        self.rscripts_path = kwargs.get('rscripts_path', None)
         self.file_path = kwargs.get('file_path', None)
         self.file_name = kwargs.get('file_name', None)
         self.print_filename = kwargs.get('print_filename', r'SOMA_AL/reports/SOMA_report.pdf')
@@ -58,6 +63,8 @@ class SOMAParameters:
         self.tests = kwargs.get('tests', 'basic') #'basic' or 'extensive'
         self.test_rolling_mean = kwargs.get('test_rolling_mean', None)
         self.test_context_type = kwargs.get('test_context_type', 'context')
+        self.rscripts_path = kwargs.get('rscripts_path', None)
+        self.hide_stats = kwargs.get('hide_stats', False)
         self.verbose = kwargs.get('verbose', False)
         
         #Format parameters

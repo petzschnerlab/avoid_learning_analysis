@@ -40,6 +40,7 @@ if __name__ == '__main__':
 
     #File parameters
     file_path = r'D:\BM_Carney_Petzschner_Lab\SOMAStudyTracking\SOMAV1\database_exports\avoid_learn_prolific'
+    rscripts_path = 'C:/Program Files/R/R-4.4.1/bin/x64/Rscript'
 
     #Grouping parameters
     depression_cutoff = 10
@@ -58,6 +59,7 @@ if __name__ == '__main__':
     test_context_type = 'context' #'context' or 'symbol'
 
     #Other parameters
+    hide_stats = True
     verbose = True
 
     #Run the pipeline for each split_by_group
@@ -70,18 +72,20 @@ if __name__ == '__main__':
         
         #Create a dict of args
         kwargs = {'author': author,
-            'file_path': file_path,
-            'file_name': file_name,
-            'split_by_group': split_by_group,
-            'depression_cutoff': depression_cutoff,
-            'rolling_mean': rolling_mean,
-            'accuracy_exclusion_threshold': accuracy_exclusion_threshold,
-            'RT_low_threshold': RT_low_threshold,
-            'RT_high_threshold': RT_high_threshold,
-            'tests': tests,
-            'test_rolling_mean': test_rolling_mean,
-            'test_context_type': test_context_type,
-            'verbose': verbose}
+                  'rscripts_path': rscripts_path,
+                  'file_path': file_path,
+                  'file_name': file_name,
+                  'split_by_group': split_by_group,
+                  'depression_cutoff': depression_cutoff,
+                  'rolling_mean': rolling_mean,
+                  'accuracy_exclusion_threshold': accuracy_exclusion_threshold,
+                  'RT_low_threshold': RT_low_threshold,
+                  'RT_high_threshold': RT_high_threshold,
+                  'tests': tests,
+                  'test_rolling_mean': test_rolling_mean,
+                  'test_context_type': test_context_type,
+                  'hide_stats': hide_stats,
+                  'verbose': verbose}
         
         #Run the pipeline
         SOMA_pipeline = SOMAPipeline()

@@ -1,11 +1,23 @@
 
 import numpy as np
 import pandas as pd
-import itertools
+import subprocess
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 
 class SOMAStatistics:
+
+    def get_pvalue(self, summary):
+        if self.hide_stats:
+            return 'Hidden'
+
+        p_value = summary['p_value'][0].round(4)
+        if p_value < 0.0001:
+            p_value = '<0.0001'
+        else:
+            p_value = str(p_value)
+
+        return p_value
 
     def run_statistics(self):
 
@@ -15,12 +27,36 @@ class SOMAStatistics:
         self.stats_unpleasant = self.linear_model(f'unpleasant~{self.group_code}', self.pain_scores)
         self.stats_interference = self.linear_model(f'interference~{self.group_code}', self.pain_scores)
         if self.depression_scores is not None:
-            self.stats_depression = self.linear_model(f'depression~{self.group_code}', self.depression_scores)
+            self.stats_depression = self.linear_model(f'PHQ8~{self.group_code}', self.depression_scores)
 
-        #Linear Mixed Effects Models
-        #self.learning_lmem = self.linear_model(self.learning_data)
+        #Add p-values to summary
+        demographics_results = pd.DataFrame({'p-value': [' ', f'{self.get_pvalue(self.stats_age)}', ' ']}, index=self.demographics_summary.index)
+        self.demographics_summary = pd.concat([self.demographics_summary, demographics_results], axis=1)
 
-    def linear_model(self, formula, data):
+        pain_results = pd.DataFrame({'p-value': [f'{self.get_pvalue(self.stats_intensity)}', 
+                                                 f'{self.get_pvalue(self.stats_unpleasant)}', 
+                                                 f'{self.get_pvalue(self.stats_interference)}']}, 
+                                                 index=self.pain_summary.index)
+        self.pain_summary = pd.concat([self.pain_summary, pain_results], axis=1)
+
+        if self.depression_scores is not None:
+            depression_results = pd.DataFrame({'p-value': [f'{self.get_pvalue(self.stats_depression)}']}, index=self.depression_summary.index)
+            self.depression_summary = pd.concat([self.depression_summary, depression_results], axis=1)
+
+        #Linear Mixed Effects Models group*context + (1|participant)
+        self.learning_lmem = self.linear_model(f'accuracy~1+{self.group_code}*symbol_name+(1|participant_id)', 
+                                               self.avg_learning_data,
+                                               path=self.repo_directory,
+                                               filename="SOMA_AL/stats/stats_learning_data.csv")
+        
+        '''
+        self.transfer_lmem = self.linear_model(f'choice_rate~1+{self.group_code}*symbol_name+(1|participant_id)',
+                                                  self.avg_transfer_data,
+                                                  path=self.repo_directory,
+                                                  filename="SOMA_AL/stats/stats_transfer_data.csv")
+        '''
+
+    def linear_model(self, formula, data, path=None, filename=None):
         """
         Linear mixed effects model
 
@@ -28,6 +64,7 @@ class SOMAStatistics:
         formula: string,
             formula structure: "y ~ x1 + x2 + x3 + (1|Group)"
         """
+
         #Format formula
         formula = formula.replace(' ', '')
 
@@ -41,18 +78,22 @@ class SOMAStatistics:
 
         #Fit model
         if random_effect:
-            mdf = smf.mixedlm(formula=fixed_formula, data=data, groups=random_effect).fit()
+            _ = subprocess.call([self.rscripts_path,
+                                 'SOMA_AL/helpers/mixed_effects_models.R', 
+                                 path, 
+                                 filename, 
+                                 formula])
+            model_summary = pd.read_csv(filename.replace('.csv', '_results.csv'))
+            model_summary = model_summary[['Unnamed: 0', 'NumDF', 'F value', 'Pr(>F)']]
+            model_summary.columns = ['factor', 'df', 'f_value', 'p_value']
         else:
-            mdf = smf.ols(formula=fixed_formula, data=data).fit()
+            model_results = smf.ols(formula=fixed_formula, data=data).fit()
+            model_summary = sm.stats.anova_lm(model_results, type=3)
+            model_summary = model_summary.reset_index()[['index', 'df', 'F', 'PR(>F)']][:-1]
+            model_summary.columns = ['factor', 'df', 'f_value', 'p_value']
 
-        #Turn into pandas dataframe
-        mdf_summary = mdf.summary() #TODO: HERE
-        #mdf_summary = mdf_summary.tables[0].as_html()
-        #mdf_summary = pd.read_html(mdf_summary, header=0, index_col=0)[0]
-
-        return mdf_summary
+        return model_summary
     
-
 if __name__ == '__main__':
 
     #TTest Example

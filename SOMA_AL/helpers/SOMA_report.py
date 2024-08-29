@@ -191,7 +191,7 @@ class SOMAReport:
         self.add_data_pdf(section_text)
     
     def insert_demographics_table(self):
-        column_blanks = ['','',''] if self.split_by_group == 'pain' else ['','']
+        column_blanks = ['','','',''] if self.split_by_group == 'pain' else ['','','']
         demo_title = pd.DataFrame([column_blanks], columns=self.demographics_summary.columns, index=['Demographics'])
         pain_title = pd.DataFrame([column_blanks], columns=self.demographics_summary.columns, index=['Pain Scores'])
         depression_title = pd.DataFrame([column_blanks], columns=self.demographics_summary.columns, index=['Depression Scores'])

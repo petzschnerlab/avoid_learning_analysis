@@ -74,21 +74,17 @@ class SOMAProcessing:
         self.filter_learning_data()
         self.filter_transfer_data()
 
-        #Compute accuracy for learning data
-        self.compute_accuracy()
-
         #Exclude participants with low accuracy and trials with low reaction times
         self.exclude_low_accuracy(self.accuracy_exclusion_threshold)
         self.exclude_low_rt(self.RT_low_threshold, self.RT_high_threshold)
+
+        #Average the data
+        self.average_data()
 
         #Compute demographics and scores
         self.compute_demographics()
         self.compute_pain_scores()
         self.compute_depression_scores()
-
-        #Compute choice rate for transfer data
-        self.compute_choice_rate()
-        self.compute_choice_rate(neutral=True)
 
     def save_processed_data(self):
         #Save the processed data to a new file
@@ -128,6 +124,9 @@ class SOMAProcessing:
         #Create trial indices per participant and symbol_name #TODO: Check this
         self.learning_data['trial_number_symbol'] = self.learning_data.groupby(['participant_id', 'symbol_names']).cumcount() + 1
 
+        #Compute accuracy
+        self.compute_accuracy()
+
     def filter_transfer_data(self):
 
         #Filter data
@@ -139,6 +138,27 @@ class SOMAProcessing:
         self.transfer_data.loc[self.transfer_data['choice_made'] == 1, 'symbol_chosen'] = self.transfer_data['symbol_R_value']
         self.transfer_data['symbol_ignored'] = self.transfer_data['symbol_R_value']
         self.transfer_data.loc[self.transfer_data['choice_made'] == 1, 'symbol_ignored'] = self.transfer_data['symbol_L_value']
+
+        #Compute choice rates
+        self.compute_choice_rate()
+        self.compute_choice_rate(neutral=True)
+    
+    def average_data(self):
+
+        #Create participant average for learning data
+        self.avg_learning_data = self.learning_data.groupby(['participant_id', self.group_code, 'symbol_name'])['accuracy'].mean().reset_index()
+        self.avg_learning_data['context'] = -1
+        self.avg_learning_data.loc[self.avg_learning_data['symbol_name'] == 'Reward', 'context'] = 1
+        if self.split_by_group == 'pain':
+            self.avg_learning_data['group'] = 0
+            self.avg_learning_data.loc[self.avg_learning_data[self.group_code] == 'no pain', 'group'] = -1
+            self.avg_learning_data.loc[self.avg_learning_data[self.group_code] == 'chronic pain', 'group'] = 1
+        else:
+            self.avg_learning_data['group'] = -1
+            self.avg_learning_data.loc[self.avg_learning_data[self.group_code] == 'depressed', 'group'] = 1
+
+        #Save to csv
+        self.avg_learning_data.to_csv('SOMA_AL/stats/stats_learning_data.csv', index=False)
 
     def compute_accuracy(self):
         
