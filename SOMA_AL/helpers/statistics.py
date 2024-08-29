@@ -44,10 +44,11 @@ class Statistics:
             self.depression_summary = pd.concat([self.depression_summary, depression_results], axis=1)
 
         #Linear Mixed Effects Models group*context + (1|participant)
-        self.learning_lmem = self.linear_model(f'accuracy~1+{self.group_code}*symbol_name+(1|participant_id)', 
-                                               self.avg_learning_data,
+        self.learning_lmem_trials = self.linear_model(f'accuracy~1+{self.group_code}*symbol_name+(1|participant_id)', 
+                                               self.learning_data,
                                                path=self.repo_directory,
-                                               filename="SOMA_AL/stats/stats_learning_data.csv")
+                                               filename="SOMA_AL/stats/stats_learning_data_trials.csv",
+                                               family='binomial')
         
         '''
         self.transfer_lmem = self.linear_model(f'choice_rate~1+{self.group_code}*symbol_name+(1|participant_id)',
@@ -56,7 +57,7 @@ class Statistics:
                                                   filename="SOMA_AL/stats/stats_transfer_data.csv")
         '''
 
-    def linear_model(self, formula, data, path=None, filename=None):
+    def linear_model(self, formula, data, path=None, filename=None, family='gaussian'):
         """
         Linear mixed effects model
 
@@ -82,15 +83,19 @@ class Statistics:
                                  'SOMA_AL/helpers/mixed_effects_models.R', 
                                  path, 
                                  filename, 
-                                 formula])
+                                 formula,
+                                 family])
             model_summary = pd.read_csv(filename.replace('.csv', '_results.csv'))
-            model_summary = model_summary[['Unnamed: 0', 'NumDF', 'F value', 'Pr(>F)']]
-            model_summary.columns = ['factor', 'df', 'f_value', 'p_value']
+            if family == 'gaussian':
+                model_summary = model_summary[['Unnamed: 0', 'NumDF', 'F value', 'Pr(>F)']]
+            else: 
+                model_summary = model_summary[['Unnamed: 0', 'Df', 'Chisq', 'Pr(>Chisq)']]
+            model_summary.columns = ['factor', 'df', 'test_value', 'p_value']
         else:
             model_results = smf.ols(formula=fixed_formula, data=data).fit()
             model_summary = sm.stats.anova_lm(model_results, type=3)
             model_summary = model_summary.reset_index()[['index', 'df', 'F', 'PR(>F)']][:-1]
-            model_summary.columns = ['factor', 'df', 'f_value', 'p_value']
+            model_summary.columns = ['factor', 'df', 'test_value', 'p_value']
 
         return model_summary
     

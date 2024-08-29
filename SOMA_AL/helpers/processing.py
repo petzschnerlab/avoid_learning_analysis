@@ -159,6 +159,7 @@ class Processing:
 
         #Save to csv
         self.avg_learning_data.to_csv('SOMA_AL/stats/stats_learning_data.csv', index=False)
+        self.learning_data.to_csv('SOMA_AL/stats/stats_learning_data_trials.csv', index=False)
 
     def compute_accuracy(self):
         
@@ -189,18 +190,15 @@ class Processing:
     def exclude_low_rt(self, low_threshold=200, high_threshold=5000):
 
         self.learning_data['excluded_rt'] = (self.learning_data['rt'] < low_threshold) | (self.learning_data['rt'] > high_threshold)
-        self.learning_data.loc[self.learning_data['excluded_rt'] == True, 'rt'] = np.nan
-        self.learning_data.loc[self.learning_data['excluded_rt'] == True, 'accuracy'] = np.nan
+        learning_excluded, learning_trials = self.learning_data['excluded_rt'].sum(), self.learning_data.shape[0]
+        self.learning_data = self.learning_data[self.learning_data['excluded_rt'] == False]
 
         self.transfer_data['excluded_rt'] = (self.transfer_data['rt'] < low_threshold) | (self.transfer_data['rt'] > high_threshold)
-        self.transfer_data.loc[self.transfer_data['excluded_rt'] == True, 'rt'] = np.nan
-        self.transfer_data.loc[self.transfer_data['excluded_rt'] == True, 'symbol_chosen'] = np.nan
-        self.transfer_data.loc[self.transfer_data['excluded_rt'] == True, 'symbol_ignored'] = np.nan
+        transfer_excluded, transfer_trials = self.transfer_data['excluded_rt'].sum(), self.transfer_data.shape[0]
+        self.transfer_data = self.transfer_data[self.transfer_data['excluded_rt'] == False]
 
         #Track number of participants excluded
-        excluded_count = (self.learning_data['excluded_rt'].sum() + self.transfer_data['excluded_rt'].sum())
-        total_trials = (self.learning_data.shape[0] + self.transfer_data.shape[0])
-        self.trials_excluded_rt = excluded_count/total_trials * 100
+        self.trials_excluded_rt = (learning_excluded + transfer_excluded)/(learning_trials + transfer_trials) * 100
 
     def compute_choice_rate(self, neutral = False):
 

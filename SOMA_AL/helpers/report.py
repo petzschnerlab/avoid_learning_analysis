@@ -17,12 +17,12 @@ class Report:
         section = Section(' \n '.join(content), toc=toc)
         self.pdf.add_section(section, user_css=user_css)
 
-    def table_to_pdf(self, table:pd.DataFrame, save_name="SOMA_AL/plots/Table.png"):
+    def table_to_png(self, table:pd.DataFrame, save_name="SOMA_AL/plots/Table.png"):
         
         #Format titles as titles
         for i in range(len(table)):
             table.index.values[i] = table.index.values[i].title()  
-        table.columns = table.columns.str.title()   
+        table.columns = table.columns.str.title()
         table.columns.name = None   
 
         #Format the table
@@ -40,7 +40,7 @@ class Report:
                                                                            ('border-right', '1px solid white')]},])
         
         #Save the table as a png
-        dfi.export(table, save_name)
+        dfi.export(table, save_name, table_conversion="selenium", max_rows=-1)#, table_conversion='matplotlib')
     
     def add_figure_caption(self, text):
         section_text = f'**Figure {self.figure_count}.** {text}'
@@ -150,7 +150,7 @@ class Report:
         return subsection
     
     def insert_table(self, table_name):
-        self.table_to_pdf(self.demographics, save_name=f'SOMA_AL/plots/{table_name}.png')
+        self.table_to_png(self.demographics, save_name=f'SOMA_AL/plots/{table_name}.png')
 
         subsection = [f'{self.get_caption(table_name)}',
                       f'#### ![{table_name}](SOMA_AL/plots/{table_name}.png)\n']

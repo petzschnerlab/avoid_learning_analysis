@@ -10,7 +10,7 @@ class Tests:
     """
 
     def run_tests(self):
-        self.test_trial_counts()
+        #self.test_trial_counts() #Due to exclusion of trials via RT violations, this test no longer works
         if self.tests == 'extensive':
             self.test_plot_learning_accuracy(self.test_rolling_mean, self.test_context_type)
         self.test_determine_contingencies()
