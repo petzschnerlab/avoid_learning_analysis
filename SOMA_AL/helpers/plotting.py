@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 from scipy import stats
 
-class SOMAPlotting:
+class Plotting:
 
     """
     Class to hold plotting functions for the SOMA project

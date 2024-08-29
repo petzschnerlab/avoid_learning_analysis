@@ -2,7 +2,7 @@
 import warnings
 import os
 
-class SOMAParameters:
+class Parameters:
 
     """
     Class to set parameters for the SOMA pipeline

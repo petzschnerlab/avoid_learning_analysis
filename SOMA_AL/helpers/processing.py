@@ -6,7 +6,7 @@ import numpy as np
 pd.set_option("future.no_silent_downcasting", True)
 
 #SOMAALPipeline class
-class SOMAProcessing:
+class Processing:
 
     """
     Class to hold processing functions for the SOMA project

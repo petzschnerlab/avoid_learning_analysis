@@ -5,7 +5,7 @@ import pandas as pd
 import dataframe_image as dfi
 from markdown_pdf import MarkdownPdf, Section
 
-class SOMAReport:
+class Report:
 
     """
     Class to hold reporting functions for the SOMA project

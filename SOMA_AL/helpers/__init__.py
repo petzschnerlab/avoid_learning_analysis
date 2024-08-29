@@ -1,16 +1,16 @@
-from helpers.SOMA_processing import SOMAProcessing
-from helpers.SOMA_plotting import SOMAPlotting
-from helpers.SOMA_report import SOMAReport
-from helpers.SOMA_parameters import SOMAParameters
-from helpers.SOMA_tests import SOMATests
-from helpers.SOMA_statistics import SOMAStatistics
+from helpers.processing import Processing
+from helpers.plotting import Plotting
+from helpers.report import Report
+from helpers.parameters import Parameters
+from helpers.tests import Tests
+from helpers.statistics import Statistics
 
-class SOMAMaster(SOMAProcessing, 
-                 SOMAPlotting, 
-                 SOMAReport, 
-                 SOMAParameters,
-                 SOMAStatistics, 
-                 SOMATests):
+class Master(Processing, 
+                 Plotting, 
+                 Report, 
+                 Parameters,
+                 Statistics, 
+                 Tests):
     
     """
     Class to hold all functions for the SOMA project

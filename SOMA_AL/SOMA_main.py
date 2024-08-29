@@ -5,10 +5,10 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 #Import modules
-from helpers import SOMAMaster
+from helpers import Master
 
 #Pipeline class
-class SOMAPipeline(SOMAMaster):
+class SOMAPipeline(Master):
 
     """
     Class to run the SOMA project pipeline

@@ -5,7 +5,7 @@ import subprocess
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 
-class SOMAStatistics:
+class Statistics:
 
     def get_pvalue(self, summary):
         if self.hide_stats:
