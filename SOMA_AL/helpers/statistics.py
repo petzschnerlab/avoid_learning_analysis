@@ -1,4 +1,5 @@
 
+import os
 import warnings
 import pandas as pd
 import subprocess
@@ -100,14 +101,19 @@ class Statistics:
             #You must also have the path to the Rscript executable set in the rscripts_path variable, which can be a bit annoying.
             #The reason this is done in R is because the statsmodels package in Python does not provide factor level p-values for (generalized) linear mixed effects models.
             #This is worth looking into further, as there might be a parameter I have overlooked, or else there could be a different package that fits our needs.
-            if not self.load_stats:
+            outcome = formula.split('~')[0]
+            file_exists = os.path.isfile(filename.replace('.csv', f'_{outcome}_results.csv'))
+            if not self.load_stats or not file_exists:
+                if not file_exists:
+                    warnings.warn(f'''You requested to load rather than run the statistics using the load_stats=True parameter.
+                                  However, the file {filename.replace(".csv", f"_{outcome}_results.csv")} does not exist. 
+                                  So, we will run the linear mixed effects model now.''', stacklevel=2)
                 _ = subprocess.call([self.rscripts_path,
                                     'SOMA_AL/helpers/mixed_effects_models.R', 
                                     path, 
                                     filename, 
                                     formula,
                                     family])
-            outcome = formula.split('~')[0]
             model_summary = pd.read_csv(filename.replace('.csv', f'_{outcome}_results.csv'))
             if family == 'gaussian':
                 model_summary = model_summary[['Unnamed: 0', 'NumDF', 'F value', 'Pr(>F)']]

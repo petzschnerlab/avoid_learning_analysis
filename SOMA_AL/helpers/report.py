@@ -192,7 +192,7 @@ class Report:
                 significance = 'significant,' if (factor_data['p_value'].values < 0.05) else 'not significant,'
                 if i > 0:
                     subsection += ', '
-                subsection += f"**{factor.replace('*','x')}:** {significance} F({factor_data['df'].values[0]}, ___) = {factor_data['test_value'].values.round(2)[0]}, p = {p}"
+                subsection += f"\n**{factor.replace('*','x')}:** {significance} F({factor_data['df'].values[0]}, ___) = {factor_data['test_value'].values.round(2)[0]}, p = {p}"
                 if i == len(summary['factor'].unique())-1:
                     subsection += '.'
 
