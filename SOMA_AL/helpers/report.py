@@ -197,7 +197,7 @@ class Report:
                 test_value = 'hidden'
                 p = 'hidden'
 
-            subsection += f"\n\n**{factor.replace('*',':')}:** {significance} F({df_1}, {df_2}) = {test_value}, p = {p}"
+            subsection += f"\n\n**{factor.replace('*',':')}:** {significance}, F({df_1}, {df_2}) = {test_value}, p = {p}"
             if i == len(summary['factor'].unique())-1:
                 subsection += '.'
 
