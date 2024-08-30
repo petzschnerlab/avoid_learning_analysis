@@ -177,24 +177,29 @@ class Report:
         phase = target.split('-')[0]
         summary = data['model_summary']
 
-        subsection = f'**{target.replace("-", " ").title()}**\n'
+        subsection = f'**{target.replace("-", " ").title()} Statistics**\n\n'
+        subsection += f"""{outcome.capitalize()} in the {phase} phase was modelled using a linear mixed effects model with the following formula: {formula.replace('*', ':')}, 
+        where {', '.join([f.replace('*',':') for f in fixed])} are the fixed effects {f'and {random} is the random effect.' if random else '.'}"""
 
-        subsection += f"""{outcome.capitalize()} in the {phase} phase was modelled using a linear mixed effects model with the following formula: {formula}, 
-        where {', '.join(fixed)} are the fixed effects {f'and {random} is the random effect.' if random else '.'}"""
+        #Iterate through summary and format each row into a sentence
+        for i, factor in enumerate(summary['factor'].unique()):
+            factor_data = summary[summary['factor']==factor]
+            significance = 'significant,' if (factor_data['p_value'].values < 0.05) else 'not significant,'
+            df_1 = factor_data['df'].values[0]
+            df_2 = '__' #TODO: populate this
+            test_value = factor_data['test_value'].values.round(2)[0]
+            p = factor_data['p_value'].values.round(3)[0] if (factor_data['p_value'] >= 0.001).values else '<0.001'
 
-        if self.hide_stats:
-            subsection += 'Statistics for this section are hidden. To view, set hide_stats=False.'
-        else:
-            #Iterate through summary and format each row into a sentence
-            for i, factor in enumerate(summary['factor'].unique()):
-                factor_data = summary[summary['factor']==factor]
-                p = factor_data['p_value'].values.round(3)[0] if (factor_data['p_value'] >= 0.001).values else '<0.001'
-                significance = 'significant,' if (factor_data['p_value'].values < 0.05) else 'not significant,'
-                if i > 0:
-                    subsection += ', '
-                subsection += f"\n**{factor.replace('*','x')}:** {significance} F({factor_data['df'].values[0]}, ___) = {factor_data['test_value'].values.round(2)[0]}, p = {p}"
-                if i == len(summary['factor'].unique())-1:
-                    subsection += '.'
+            if self.hide_stats:
+                significance = 'hidden'
+                df_1 = '__'
+                df_2 = '__'
+                test_value = 'hidden'
+                p = 'hidden'
+
+            subsection += f"\n\n**{factor.replace('*',':')}:** {significance} F({df_1}, {df_2}) = {test_value}, p = {p}"
+            if i == len(summary['factor'].unique())-1:
+                subsection += '.'
 
         return [subsection]
     
@@ -210,7 +215,8 @@ class Report:
                         #Add a description of all of the kwargs
                         f'\n### Inputted Parameters']
         for key, value in self.kwargs.items():
-            section_text = section_text + [f'**{key.replace("_", " ").title()}:** {value}\n']
+            section_text += [f'**{key.replace("_", " ").title()}:** {value}\n']
+        section_text.append(f'\n\n{"*Note: statistics are hidden, to reveal them, set hide_stats=False.*" if self.hide_stats else ""}')
         self.add_data_pdf(section_text)
 
     def insert_analysis_details(self):
@@ -227,8 +233,7 @@ class Report:
                         f'**Number of Original Participants:** {self.participants_original}\n',
                         f'**Number of Participants Excluded (Accuracy Threshold: {self.accuracy_threshold}%):** {self.participants_excluded_accuracy}\n',
                         f'**Number of Participants Remaining:** {self.learning_data["participant_id"].nunique()}\n',
-                        f'**Percentage of Trials Excluded (RT Threshold: < {self.RT_low_threshold}ms or > {self.RT_high_threshold}ms):** {self.trials_excluded_rt.round(2)}%\n',
-                        ]
+                        f'**Percentage of Trials Excluded (RT Threshold: < {self.RT_low_threshold}ms or > {self.RT_high_threshold}ms):** {self.trials_excluded_rt.round(2)}%\n']
         self.add_data_pdf(section_text)
     
     def insert_demographics_table(self):
@@ -269,19 +274,28 @@ class Report:
         
         #Results
         section_text = []
-        section_text.append(f'## Behavioural Findings')
+        section_text.append(f'## Results')
         section_text.append(f'### Learning Accuracy')
         section_text.extend(self.insert_image('learning-accuracy-by-group'))
         section_text.extend(self.insert_image('learning-accuracy-by-context'))
         section_text.extend(self.get_statistics('learning-accuracy'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
         section_text.append('### Learning Reaction Time')
         section_text.extend(self.insert_image('learning-rt-by-group'))
         section_text.extend(self.insert_image('learning-rt-by-context'))
         section_text.extend(self.get_statistics('learning-rt'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
         section_text.append('### Choice Rate')
         section_text.extend(self.insert_image('transfer-choice-rate'))
         section_text.extend(self.insert_image('transfer-choice-rate-neutral'))
         section_text.extend(self.get_statistics('transfer-choice-rate'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
         section_text.append('### Transfer Reaction Time')   
         section_text.extend(self.insert_image('transfer-rt'))
         section_text.extend(self.insert_image('transfer-rt-neutral'))
