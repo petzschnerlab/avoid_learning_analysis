@@ -81,11 +81,13 @@ class Parameters:
 
     def announce(self, case='start'):
         if case == 'start' and self.verbose:
+            print('\n*******************************************')
             if self.author != 'SOMA_Team':
                 print(f'Welcome {self.author.replace("_"," ").title()}!')
             print(f'\nRunning the SOMA pipeline with the following parameters:\n')
             [print(f'{key}: {value}') for key, value in self.kwargs.items()]
             print(f'\nProcessing {self.split_by_group} group data...')
+            print('*******************************************\n')
         elif case == 'end' and self.verbose:
             print(f'{self.split_by_group} group processing complete!')
         else:
