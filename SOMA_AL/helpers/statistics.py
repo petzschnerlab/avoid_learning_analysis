@@ -30,6 +30,25 @@ class Statistics:
         if self.depression_scores is not None:
             self.stats_depression = self.linear_model(f'PHQ8~{self.group_code}', self.depression_scores)
 
+        #Prepate summaries for statistical reporting
+        factor_labels = ['Age', 'Pain Intensity', 'Pain Unpleasantness', 'Pain Interference', 'Depression']
+        self.demo_clinical = pd.concat([self.stats_age['model_summary'],
+                                        self.stats_intensity['model_summary'],
+                                        self.stats_unpleasant['model_summary'],
+                                        self.stats_interference['model_summary']], axis=0)
+        if self.depression_scores is not None:
+            self.demo_clinical = pd.concat([self.demo_clinical, self.stats_depression['model_summary']], axis=0)
+        self.demo_clinical = self.demo_clinical.reset_index(drop=True)
+        
+        for i in range(self.demo_clinical.shape[0]):
+            self.demo_clinical.loc[i, 'factor'] = factor_labels[i]
+
+        self.demo_metadata = self.stats_age['metadata'].copy()
+        self.demo_metadata['formula'] = self.demo_metadata['formula'].replace('age', 'metric')
+        self.demo_metadata['outcome'] = 'metric'
+
+        self.demo_clinical = {'metadata': self.demo_metadata, 'model_summary': self.demo_clinical}
+    
         #Linear Mixed Effects Models group*context + (1|participant)
         self.learning_accuracy = self.linear_model(f'accuracy~1+{self.group_code}*symbol_name+(1|participant_id)', 
                                                self.learning_data,
@@ -131,6 +150,7 @@ class Statistics:
                             {fixed_formula}\n''', stacklevel=2)
             model_results = smf.ols(formula=fixed_formula, data=data).fit()
             model_summary = sm.stats.anova_lm(model_results, type=3)
+            df_residual = model_results.df_resid
             model_summary = model_summary.reset_index()[['index', 'df', 'F', 'PR(>F)']][:-1]
             model_summary.columns = ['factor', 'df', 'test_value', 'p_value']
 
@@ -142,6 +162,8 @@ class Statistics:
         fixed_effects = fixed_effects + split_effects
         fixed_effects = list(dict.fromkeys(fixed_effects))
         fixed_effects.sort(key=lambda x: x.count('*'))
+
+        test = 'F' if family == 'gaussian' else 'Chisq'
         
         metadata = {'path': path, 
                     'filename': filename, 
@@ -149,6 +171,9 @@ class Statistics:
                     'formula': formula,
                     'outcome': formula.split('~')[0],
                     'fixed_effects': fixed_effects,
-                    'random_effects': random_effect}
+                    'random_effects': random_effect,
+                    'sample_size': data['participant_id'].nunique(),
+                    'df_residual': df_residual if not random_effect else None,
+                    'test': test}
 
         return {'metadata': metadata, 'model_summary': model_summary}

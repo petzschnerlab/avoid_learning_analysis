@@ -162,31 +162,40 @@ class Report:
         fixed_effects = data['metadata']['fixed_effects']
         random_effects = data['metadata']['random_effects']
         outcome = data['metadata']['outcome']
+        sample_size = data['metadata']['sample_size']
+        test = data['metadata']['test']
+        df_residual = data['metadata']['df_residual']
 
-        return formula, outcome, fixed_effects, random_effects
+        return formula, outcome, fixed_effects, random_effects, sample_size, df_residual, test
     
     def get_statistics(self, target):
 
         self.data_legend = {'learning-accuracy': self.learning_accuracy,
                             'learning-rt': self.learning_rt,
                             'transfer-choice-rate': self.transfer_accuracy,
-                            'transfer-rt': self.transfer_rt}
+                            'transfer-rt': self.transfer_rt,
+                            'demographics-and-clinical-scores': self.demo_clinical}
 
         data = self.data_legend[target]
-        formula, outcome, fixed, random = self.get_metadata(data)
+        formula, outcome, fixed, random, sample_size, df_residual, test = self.get_metadata(data)
+        test = 'χ<sup>2</sup>' if test == 'Chisq' else test
         phase = target.split('-')[0]
         summary = data['model_summary']
 
         subsection = f'**{target.replace("-", " ").title()} Statistics**\n\n'
-        subsection += f"""{outcome.capitalize()} in the {phase} phase was modelled using a linear mixed effects model with the following formula: {formula.replace('*', ':')}, 
-        where {', '.join([f.replace('*',':') for f in fixed])} are the fixed effects {f'and {random} is the random effect.' if random else '.'}"""
+        if data['metadata']['outcome'] == 'metric':
+            outcomes = ', '.join(data['model_summary']['factor'].unique())
+            subsection += f"""{outcomes.capitalize()} were modelled using linear regression with the following formula: *{formula.replace('*', ':').replace('*',':').replace('group_code','group')}*."""
+        else:
+            subsection += f"""{outcome.capitalize()} in the {phase} phase was modelled using a linear mixed effects model with the following formula: *{formula.replace('*', ':').replace('group_code','group').replace('symbol_name','context')}*, 
+            where *{', '.join([f.replace('*',':').replace('group_code','group').replace('symbol_name','context') for f in fixed])}* are the fixed effects {f'and *{random}* is the random effect.' if random else '.'}"""
 
         #Iterate through summary and format each row into a sentence
         for i, factor in enumerate(summary['factor'].unique()):
             factor_data = summary[summary['factor']==factor]
-            significance = 'significant,' if (factor_data['p_value'].values < 0.05) else 'not significant,'
-            df_1 = factor_data['df'].values[0]
-            df_2 = '__' #TODO: populate this
+            significance = 'significant' if (factor_data['p_value'].values < 0.05) else 'not significant'
+            df_1 = round(float(factor_data['df'].values[0])) #TODO: Check these - they are not the same as k-1 but probably bc of the method used
+            df_2 = round(float(df_residual)) if test == 'F' else f'N={sample_size}'
             test_value = factor_data['test_value'].values.round(2)[0]
             p = factor_data['p_value'].values.round(3)[0] if (factor_data['p_value'] >= 0.001).values else '<0.001'
 
@@ -197,9 +206,8 @@ class Report:
                 test_value = 'hidden'
                 p = 'hidden'
 
-            subsection += f"\n\n**{factor.replace('*',':')}:** {significance}, F({df_1}, {df_2}) = {test_value}, p = {p}"
-            if i == len(summary['factor'].unique())-1:
-                subsection += '.'
+            factor_named = factor.replace('*',':').replace('group_code','group').replace('symbol_name','context')
+            subsection += f"\n\n**{factor_named}:** {significance}, *{test}*(*{df_1}, {df_2}*) = {test_value}, *p* = {p}"
 
         return [subsection]
     
@@ -270,6 +278,7 @@ class Report:
         self.insert_demographics_table()
         section_text = self.insert_table('demo-scores')
         section_text.extend(self.insert_image('demo-clinical-scores'))
+        section_text.extend(self.get_statistics('demographics-and-clinical-scores'))
         self.add_data_pdf(section_text, center=True)
         
         #Results
