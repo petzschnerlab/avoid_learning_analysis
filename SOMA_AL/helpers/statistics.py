@@ -1,5 +1,5 @@
 
-import numpy as np
+import warnings
 import pandas as pd
 import subprocess
 import statsmodels.api as sm
@@ -94,7 +94,7 @@ class Statistics:
         fixed_formula = formula.split('+(')[0]
 
         #Fit the model
-        if random_effect:
+        if len(random_effect) > 0 and self.rscripts_path is not None:
             #This section runs an R script to fit the generalized linear mixed effects models. 
             #This is tricky because you need to have R and a few packages (lme4, lmerTest, car, afex, and emmeans) installed.
             #You must also have the path to the Rscript executable set in the rscripts_path variable, which can be a bit annoying.
@@ -115,6 +115,14 @@ class Statistics:
                 model_summary = model_summary[['Unnamed: 0', 'Df', 'Chisq', 'Pr(>Chisq)']]
             model_summary.columns = ['factor', 'df', 'test_value', 'p_value']
         else:
+            if random_effect:
+                #Add warning
+                warnings.warn(f'''This analysis {formula} contains a random effect {random_effect}, however, the rscripts_path is not set. 
+                            Running linear mixed effects models requires R with the lme4, lmerTest, car, afex, and emmeans packages installed.
+                            You must then provide the path to the Rscript executable in the rscripts_path variable.
+                            Here is an example of where the rscripts executable may live: C:/Program Files/R/R-4.4.1/bin/x64/Rscript.
+                            Until these steps are fulfilled, this analysis will proceed as a multiple regression *without* the random effect:
+                            {fixed_formula}\n''', stacklevel=2)
             model_results = smf.ols(formula=fixed_formula, data=data).fit()
             model_summary = sm.stats.anova_lm(model_results, type=3)
             model_summary = model_summary.reset_index()[['index', 'df', 'F', 'PR(>F)']][:-1]

@@ -177,11 +177,10 @@ class Report:
         phase = target.split('-')[0]
         summary = data['model_summary']
 
-        subsection = f"""{outcome.capitalize()} in the {phase} phase was modelled using a linear mixed effects model with the following formula: {formula}, where {', '.join(fixed)} are the fixed effects"""
-        if random:
-            subsection += f' and {random} is the random effect. '
-        else:
-            subsection += '. '
+        subsection = f'**{target.replace("-", " ").title()}**\n'
+
+        subsection += f"""{outcome.capitalize()} in the {phase} phase was modelled using a linear mixed effects model with the following formula: {formula}, 
+        where {', '.join(fixed)} are the fixed effects {f'and {random} is the random effect.' if random else '.'}"""
 
         if self.hide_stats:
             subsection += 'Statistics for this section are hidden. To view, set hide_stats=False.'
