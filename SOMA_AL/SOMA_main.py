@@ -59,7 +59,7 @@ if __name__ == '__main__':
     test_context_type = 'context' #'context' or 'symbol'
 
     #Other parameters
-    hide_stats = True
+    hide_stats = False
     verbose = True
 
     #Run the pipeline for each split_by_group

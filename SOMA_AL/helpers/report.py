@@ -157,6 +157,48 @@ class Report:
        
         return subsection
     
+    def get_metadata(self, data):
+        formula = data['metadata']['formula']
+        fixed_effects = data['metadata']['fixed_effects']
+        random_effects = data['metadata']['random_effects']
+        outcome = data['metadata']['outcome']
+
+        return formula, outcome, fixed_effects, random_effects
+    
+    def get_statistics(self, target):
+
+        self.data_legend = {'learning-accuracy': self.learning_accuracy,
+                            'learning-rt': self.learning_rt,
+                            'transfer-choice-rate': self.transfer_accuracy,
+                            'transfer-rt': self.transfer_rt}
+
+        data = self.data_legend[target]
+        formula, outcome, fixed, random = self.get_metadata(data)
+        phase = target.split('-')[0]
+        summary = data['model_summary']
+
+        subsection = f"""{outcome.capitalize()} in the {phase} phase was modelled using a linear mixed effects model with the following formula: {formula}, where {', '.join(fixed)} are the fixed effects"""
+        if random:
+            subsection += f' and {random} is the random effect. '
+        else:
+            subsection += '. '
+
+        if self.hide_stats:
+            subsection += 'Statistics for this section are hidden. To view, set hide_stats=False.'
+        else:
+            #Iterate through summary and format each row into a sentence
+            for i, factor in enumerate(summary['factor'].unique()):
+                factor_data = summary[summary['factor']==factor]
+                p = factor_data['p_value'].values.round(3)[0] if (factor_data['p_value'] >= 0.001).values else '<0.001'
+                significance = 'significant,' if (factor_data['p_value'].values < 0.05) else 'not significant,'
+                if i > 0:
+                    subsection += ', '
+                subsection += f"**{factor.replace('*','x')}:** {significance} F({factor_data['df'].values[0]}, ___) = {factor_data['test_value'].values.round(2)[0]}, p = {p}"
+                if i == len(summary['factor'].unique())-1:
+                    subsection += '.'
+
+        return [subsection]
+    
     def insert_title_page(self):
         section_text = [f'# SOMA Report',
                         f'![SOMA_logo](SOMA_AL/media/SOMA_preview.png)']
@@ -232,15 +274,19 @@ class Report:
         section_text.append(f'### Learning Accuracy')
         section_text.extend(self.insert_image('learning-accuracy-by-group'))
         section_text.extend(self.insert_image('learning-accuracy-by-context'))
+        section_text.extend(self.get_statistics('learning-accuracy'))
         section_text.append('### Learning Reaction Time')
         section_text.extend(self.insert_image('learning-rt-by-group'))
         section_text.extend(self.insert_image('learning-rt-by-context'))
+        #section_text.extend(self.get_statistics('learning-rt'))
         section_text.append('### Choice Rate')
         section_text.extend(self.insert_image('transfer-choice-rate'))
         section_text.extend(self.insert_image('transfer-choice-rate-neutral'))
+        #section_text.extend(self.get_statistics('transfer-choice-rate'))
         section_text.append('### Transfer Reaction Time')   
         section_text.extend(self.insert_image('transfer-rt'))
         section_text.extend(self.insert_image('transfer-rt-neutral'))
+        #section_text.extend(self.get_statistics('transfer-rt'))
         self.add_data_pdf(section_text, center=True)
 
         #Save to pdf

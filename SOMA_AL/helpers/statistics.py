@@ -11,7 +11,7 @@ class Statistics:
         if self.hide_stats:
             return 'Hidden'
 
-        p_value = summary['p_value'][0].round(4)
+        p_value = summary['model_summary']['p_value'][0].round(4)
         if p_value < 0.0001:
             p_value = '<0.0001'
         else:
@@ -29,7 +29,33 @@ class Statistics:
         if self.depression_scores is not None:
             self.stats_depression = self.linear_model(f'PHQ8~{self.group_code}', self.depression_scores)
 
-        #Add p-values to summary
+        #Linear Mixed Effects Models group*context + (1|participant)
+        self.learning_accuracy = self.linear_model(f'accuracy~1+{self.group_code}*symbol_name+(1|participant_id)', 
+                                               self.learning_data,
+                                               path=self.repo_directory,
+                                               filename="SOMA_AL/stats/stats_learning_data_trials.csv",
+                                               family='binomial')
+        
+        '''
+        self.learning_rt = self.linear_model(f'rt~1+{self.group_code}*symbol_name+(1|participant_id)', 
+                                               self.learning_data,
+                                               path=self.repo_directory,
+                                               filename="SOMA_AL/stats/stats_learning_data_trials.csv",
+                                               family='gamma')
+        '''
+        
+        '''
+        self.transfer_lmem = self.linear_model(f'choice_rate~1+{self.group_code}*symbol_name+(1|participant_id)',
+                                                  self.avg_transfer_data,
+                                                  path=self.repo_directory,
+                                                  filename="SOMA_AL/stats/stats_transfer_data.csv")
+        '''
+
+        self.insert_statistics()
+
+    def insert_statistics(self):
+
+        #Add p-values to summaries
         demographics_results = pd.DataFrame({'p-value': [' ', f'{self.get_pvalue(self.stats_age)}', ' ']}, index=self.demographics_summary.index)
         self.demographics_summary = pd.concat([self.demographics_summary, demographics_results], axis=1)
 
@@ -42,20 +68,6 @@ class Statistics:
         if self.depression_scores is not None:
             depression_results = pd.DataFrame({'p-value': [f'{self.get_pvalue(self.stats_depression)}']}, index=self.depression_summary.index)
             self.depression_summary = pd.concat([self.depression_summary, depression_results], axis=1)
-
-        #Linear Mixed Effects Models group*context + (1|participant)
-        self.learning_lmem_trials = self.linear_model(f'accuracy~1+{self.group_code}*symbol_name+(1|participant_id)', 
-                                               self.learning_data,
-                                               path=self.repo_directory,
-                                               filename="SOMA_AL/stats/stats_learning_data_trials.csv",
-                                               family='binomial')
-        
-        '''
-        self.transfer_lmem = self.linear_model(f'choice_rate~1+{self.group_code}*symbol_name+(1|participant_id)',
-                                                  self.avg_transfer_data,
-                                                  path=self.repo_directory,
-                                                  filename="SOMA_AL/stats/stats_transfer_data.csv")
-        '''
 
     def linear_model(self, formula, data, path=None, filename=None, family='gaussian'):
         """
@@ -77,8 +89,13 @@ class Statistics:
         #Remove random effect variable from formula
         fixed_formula = formula.split('+(')[0]
 
-        #Fit model
+        #Fit the model
         if random_effect:
+            #This section runs an R script to fit the generalized linear mixed effects models. 
+            #This is tricky because you need to have R and a few packages (lme4, lmerTest, car, afex, and emmeans) installed.
+            #You must also have the path to the Rscript executable set in the rscripts_path variable, which can be a bit annoying.
+            #The reason this is done in R is because the statsmodels package in Python does not provide factor level p-values for (generalized) linear mixed effects models.
+            #This is worth looking into further, as there might be a parameter I have overlooked, or else there could be a different package that fits our needs.
             _ = subprocess.call([self.rscripts_path,
                                  'SOMA_AL/helpers/mixed_effects_models.R', 
                                  path, 
@@ -97,7 +114,22 @@ class Statistics:
             model_summary = model_summary.reset_index()[['index', 'df', 'F', 'PR(>F)']][:-1]
             model_summary.columns = ['factor', 'df', 'test_value', 'p_value']
 
-        return model_summary
+        #Collect metadata
+        fixed_effects = fixed_formula.split('~')[1].split('(')[0].split('+')
+        fixed_effects = [fixed_effect for fixed_effect in fixed_effects if fixed_effect != '1']
+        fixed_effects = fixed_effects + [fixed_effect.split('*')+[fixed_effect] for fixed_effect in fixed_effects if '*' in fixed_effect][0]
+        fixed_effects = list(dict.fromkeys(fixed_effects))
+        fixed_effects.sort(key=lambda x: x.count('*'))
+        
+        metadata = {'path': path, 
+                    'filename': filename, 
+                    'family': family, 
+                    'formula': formula,
+                    'outcome': formula.split('~')[0],
+                    'fixed_effects': fixed_effects,
+                    'random_effects': random_effect}
+
+        return {'metadata': metadata, 'model_summary': model_summary}
     
 if __name__ == '__main__':
 
