@@ -33,5 +33,6 @@ if (family == 'None' | family == 'gaussian'){
 }
 
 #Save results as csv
-save_name = gsub('.csv', '_results.csv', filename)
+outcome = strsplit(formula, '~')[[1]][1]
+save_name = gsub('.csv', paste('_',outcome,'_results.csv',sep=''), filename)
 write.csv(results, save_name)

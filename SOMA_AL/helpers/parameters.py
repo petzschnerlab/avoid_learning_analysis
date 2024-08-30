@@ -30,6 +30,7 @@ class Parameters:
                            'test_rolling_mean',
                            'test_context_type',
                            'hide_stats',
+                           'load_stats',
                            'verbose']
         for key in kwargs:
             if key not in accepted_params:
@@ -65,6 +66,7 @@ class Parameters:
         self.test_context_type = kwargs.get('test_context_type', 'context')
         self.rscripts_path = kwargs.get('rscripts_path', None)
         self.hide_stats = kwargs.get('hide_stats', False)
+        self.load_stats = kwargs.get('load_stats', False)
         self.verbose = kwargs.get('verbose', False)
         
         #Format parameters

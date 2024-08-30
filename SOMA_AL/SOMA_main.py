@@ -60,6 +60,7 @@ if __name__ == '__main__':
 
     #Other parameters
     hide_stats = False
+    load_stats = True
     verbose = True
 
     #Run the pipeline for each split_by_group
@@ -85,6 +86,7 @@ if __name__ == '__main__':
                   'test_rolling_mean': test_rolling_mean,
                   'test_context_type': test_context_type,
                   'hide_stats': hide_stats,
+                  'load_stats': load_stats,
                   'verbose': verbose}
         
         #Run the pipeline

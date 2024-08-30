@@ -33,24 +33,27 @@ class Statistics:
         self.learning_accuracy = self.linear_model(f'accuracy~1+{self.group_code}*symbol_name+(1|participant_id)', 
                                                self.learning_data,
                                                path=self.repo_directory,
-                                               filename="SOMA_AL/stats/stats_learning_data_trials.csv",
+                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
                                                family='binomial')
         
-        '''
         self.learning_rt = self.linear_model(f'rt~1+{self.group_code}*symbol_name+(1|participant_id)', 
                                                self.learning_data,
                                                path=self.repo_directory,
-                                               filename="SOMA_AL/stats/stats_learning_data_trials.csv",
-                                               family='gamma')
-        '''
+                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
+                                               family='Gamma')
         
-        '''
-        self.transfer_lmem = self.linear_model(f'choice_rate~1+{self.group_code}*symbol_name+(1|participant_id)',
-                                                  self.avg_transfer_data,
-                                                  path=self.repo_directory,
-                                                  filename="SOMA_AL/stats/stats_transfer_data.csv")
-        '''
+        self.transfer_accuracy = self.linear_model(f'accuracy~1+{self.group_code}*context+(1|participant_id)', 
+                                               self.transfer_data_reduced,
+                                               path=self.repo_directory,
+                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv",
+                                               family='binomial')
 
+        self.transfer_rt = self.linear_model(f'rt~1+{self.group_code}*context+(1|participant_id)', 
+                                               self.transfer_data_reduced,
+                                               path=self.repo_directory,
+                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv",
+                                               family='Gamma')
+        
         self.insert_statistics()
 
     def insert_statistics(self):
@@ -78,6 +81,7 @@ class Statistics:
             formula structure: "y ~ x1 + x2 + x3 + (1|Group)"
         """
 
+
         #Format formula
         formula = formula.replace(' ', '')
 
@@ -96,13 +100,15 @@ class Statistics:
             #You must also have the path to the Rscript executable set in the rscripts_path variable, which can be a bit annoying.
             #The reason this is done in R is because the statsmodels package in Python does not provide factor level p-values for (generalized) linear mixed effects models.
             #This is worth looking into further, as there might be a parameter I have overlooked, or else there could be a different package that fits our needs.
-            _ = subprocess.call([self.rscripts_path,
-                                 'SOMA_AL/helpers/mixed_effects_models.R', 
-                                 path, 
-                                 filename, 
-                                 formula,
-                                 family])
-            model_summary = pd.read_csv(filename.replace('.csv', '_results.csv'))
+            if not self.load_stats:
+                _ = subprocess.call([self.rscripts_path,
+                                    'SOMA_AL/helpers/mixed_effects_models.R', 
+                                    path, 
+                                    filename, 
+                                    formula,
+                                    family])
+            outcome = formula.split('~')[0]
+            model_summary = pd.read_csv(filename.replace('.csv', f'_{outcome}_results.csv'))
             if family == 'gaussian':
                 model_summary = model_summary[['Unnamed: 0', 'NumDF', 'F value', 'Pr(>F)']]
             else: 
@@ -117,7 +123,9 @@ class Statistics:
         #Collect metadata
         fixed_effects = fixed_formula.split('~')[1].split('(')[0].split('+')
         fixed_effects = [fixed_effect for fixed_effect in fixed_effects if fixed_effect != '1']
-        fixed_effects = fixed_effects + [fixed_effect.split('*')+[fixed_effect] for fixed_effect in fixed_effects if '*' in fixed_effect][0]
+        split_effects = [fixed_effect.split('*')+[fixed_effect] for fixed_effect in fixed_effects if '*' in fixed_effect]
+        split_effects = split_effects[0] if len(split_effects) > 0 else split_effects
+        fixed_effects = fixed_effects + split_effects
         fixed_effects = list(dict.fromkeys(fixed_effects))
         fixed_effects.sort(key=lambda x: x.count('*'))
         
@@ -130,21 +138,3 @@ class Statistics:
                     'random_effects': random_effect}
 
         return {'metadata': metadata, 'model_summary': model_summary}
-    
-if __name__ == '__main__':
-
-    #TTest Example
-    x_ = (373,398,245,272,238,241,134,410,158,125,198,252,577,272,208,260)
-    y_ = (411,471,320,364,311,390,163,424,228,144,246,371,680,384,279,303)
-
-    soma_stats = SOMAStatistics()
-    soma_stats.t_test(x_, y_)
-
-    #LMEM Example
-    data = sm.datasets.get_rdataset("dietox", "geepack").data
-    formula = 'Weight ~ Time + (1|Pig)'
-    
-    soma_stats = SOMAStatistics()
-    soma_stats.linear_model(data, formula)
-
-

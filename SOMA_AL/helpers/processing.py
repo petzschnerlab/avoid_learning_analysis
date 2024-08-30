@@ -74,17 +74,22 @@ class Processing:
         self.filter_learning_data()
         self.filter_transfer_data()
 
+        #Compute metrics
+        self.compute_accuracy()
+        self.compute_choice_rate()
+        self.compute_choice_rate(neutral=True)
+
         #Exclude participants with low accuracy and trials with low reaction times
         self.exclude_low_accuracy(self.accuracy_exclusion_threshold)
         self.exclude_low_rt(self.RT_low_threshold, self.RT_high_threshold)
-
-        #Average the data
-        self.average_data()
 
         #Compute demographics and scores
         self.compute_demographics()
         self.compute_pain_scores()
         self.compute_depression_scores()
+
+        #Average the data
+        self.average_data()
 
     def save_processed_data(self):
         #Save the processed data to a new file
@@ -124,9 +129,6 @@ class Processing:
         #Create trial indices per participant and symbol_name #TODO: Check this
         self.learning_data['trial_number_symbol'] = self.learning_data.groupby(['participant_id', 'symbol_names']).cumcount() + 1
 
-        #Compute accuracy
-        self.compute_accuracy()
-
     def filter_transfer_data(self):
 
         #Filter data
@@ -139,9 +141,14 @@ class Processing:
         self.transfer_data['symbol_ignored'] = self.transfer_data['symbol_R_value']
         self.transfer_data.loc[self.transfer_data['choice_made'] == 1, 'symbol_ignored'] = self.transfer_data['symbol_L_value']
 
-        #Compute choice rates
-        self.compute_choice_rate()
-        self.compute_choice_rate(neutral=True)
+        #TODO: It keeps the novel stimuli
+        high_reward = ((self.transfer_data['symbol_L_value'] == 4) & (self.transfer_data['symbol_R_value'] != 1)) | ((self.transfer_data['symbol_L_value'] != 1) & (self.transfer_data['symbol_R_value'] == 4))
+        high_punish = ((self.transfer_data['symbol_L_value'] == 1) & (self.transfer_data['symbol_R_value'] != 4)) | ((self.transfer_data['symbol_L_value'] != 4) & (self.transfer_data['symbol_R_value'] == 1))
+        moderate = ((self.transfer_data['symbol_L_value'] == 2) | (self.transfer_data['symbol_L_value'] == 3) | (self.transfer_data['symbol_L_value'] == 0)) & ((self.transfer_data['symbol_R_value'] == 2) | (self.transfer_data['symbol_R_value'] == 3) | (self.transfer_data['symbol_R_value'] == 0))
+        self.transfer_data['context'] = np.nan
+        self.transfer_data.loc[high_reward, 'context'] = 'high_reward'
+        self.transfer_data.loc[high_punish, 'context'] = 'high_punish'
+        self.transfer_data.loc[moderate, 'context'] = 'moderate'
     
     def average_data(self):
 
@@ -157,16 +164,37 @@ class Processing:
             self.avg_learning_data['group'] = -1
             self.avg_learning_data.loc[self.avg_learning_data[self.group_code] == 'depressed', 'group'] = 1
 
+        #Create participant average for transfer data
+        self.transfer_data_reduced = self.transfer_data[~self.transfer_data['context'].isna()]
+
+        self.avg_transfer_data = self.transfer_data.groupby(['participant_id', self.group_code, 'context'])['accuracy'].mean().reset_index()
+        if self.split_by_group == 'pain':
+            self.avg_transfer_data['group'] = 0
+            self.avg_transfer_data.loc[self.avg_transfer_data[self.group_code] == 'no pain', 'group'] = -1
+            self.avg_transfer_data.loc[self.avg_transfer_data[self.group_code] == 'chronic pain', 'group'] = 1
+        else:
+            self.avg_transfer_data['group'] = -1
+            self.avg_transfer_data.loc[self.avg_transfer_data[self.group_code] == 'depressed', 'group'] = 1
+
         #Save to csv
-        self.avg_learning_data.to_csv('SOMA_AL/stats/stats_learning_data.csv', index=False)
-        self.learning_data.to_csv('SOMA_AL/stats/stats_learning_data_trials.csv', index=False)
+        self.avg_learning_data.to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_learning_data.csv', index=False)
+        self.learning_data.to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv', index=False)
+
+        #Create participant average for transfer data
+        self.avg_transfer_data.to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_transfer_data.csv', index=False)
+        self.transfer_data.to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials.csv', index=False)
+        self.transfer_data_reduced.to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv', index=False)
 
     def compute_accuracy(self):
         
-        #Add computations to determine accuracy
+        #Compute learning accuracy
         self.learning_data['larger_value'] = (self.learning_data['symbol_R_value'] > self.learning_data['symbol_L_value']).astype(int) #1 = Right has larger value, 0 = Left has larger value
         self.learning_data['accuracy'] = (self.learning_data['larger_value'] == self.learning_data['choice_made']).astype(int)*100 #100 = Correct, 0 = Incorrect
 
+        #Compute transfer accuracy
+        self.transfer_data['larger_value'] = (self.transfer_data['symbol_R_value'] > self.transfer_data['symbol_L_value']).astype(int) #1 = Right has larger value, 0 = Left has larger value
+        self.transfer_data['accuracy'] = (self.transfer_data['larger_value'] == self.transfer_data['choice_made']).astype(int)*100 #100 = Correct, 0 = Incorrect
+        
     def exclude_low_accuracy(self, threshold=60):
         #Compute accuracy for each participant
         accuracy = pd.DataFrame(columns=['accuracy'], index=pd.MultiIndex(levels=[[]], codes=[[]], names=['participant']))

@@ -278,15 +278,15 @@ class Report:
         section_text.append('### Learning Reaction Time')
         section_text.extend(self.insert_image('learning-rt-by-group'))
         section_text.extend(self.insert_image('learning-rt-by-context'))
-        #section_text.extend(self.get_statistics('learning-rt'))
+        section_text.extend(self.get_statistics('learning-rt'))
         section_text.append('### Choice Rate')
         section_text.extend(self.insert_image('transfer-choice-rate'))
         section_text.extend(self.insert_image('transfer-choice-rate-neutral'))
-        #section_text.extend(self.get_statistics('transfer-choice-rate'))
+        section_text.extend(self.get_statistics('transfer-choice-rate'))
         section_text.append('### Transfer Reaction Time')   
         section_text.extend(self.insert_image('transfer-rt'))
         section_text.extend(self.insert_image('transfer-rt-neutral'))
-        #section_text.extend(self.get_statistics('transfer-rt'))
+        section_text.extend(self.get_statistics('transfer-rt'))
         self.add_data_pdf(section_text, center=True)
 
         #Save to pdf
