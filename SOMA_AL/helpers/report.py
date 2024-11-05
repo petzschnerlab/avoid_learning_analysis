@@ -80,6 +80,8 @@ class Report:
             case 'demo-scores':
                 target_type = 'table'
                 caption = 'Demographic information for each group.'
+                if self.split_by_group == 'pain':
+                    caption += ' Group differences reflect which groups are significantly different from the no pain group in planned follow-up tests.'
 
             case 'demo-clinical-scores':
                 depression_caption = ' and depression' if self.split_by_group == 'depression' else ''
@@ -182,6 +184,14 @@ class Report:
         phase = target.split('-')[0]
         summary = data['model_summary']
 
+        if self.split_by_group == 'pain':
+            self.data_planned_legend = {'learning-accuracy': self.learning_accuracy_planned,
+                                        'learning-rt': self.learning_rt_planned,
+                                        'transfer-choice-rate': self.transfer_accuracy_planned,
+                                        'transfer-rt': self.transfer_rt_planned,
+                                        'demographics-and-clinical-scores': self.demo_clinical_planned}
+            planned_summary = self.data_planned_legend[target]['model_summary']
+
         subsection = f'**{target.replace("-", " ").title()} Statistics**\n\n'
         if data['metadata']['outcome'] == 'metric':
             outcomes = ', '.join(data['model_summary']['factor'].unique())
@@ -208,6 +218,29 @@ class Report:
 
             factor_named = factor.replace('*',':').replace('group_code','group').replace('symbol_name','context')
             subsection += f"\n\n**{factor_named}:** {significance}, *{test}*(*{df_1}, {df_2}*) = {test_value}, *p* = {p}"
+
+            #Add planned comparisons for pain analyses (with groups > 2)
+            if self.split_by_group == 'pain':
+                if 'factor' in planned_summary.columns:
+                    factor_summary = planned_summary[planned_summary['factor']==factor]
+                else:
+                    factor_summary = planned_summary
+
+                if ('factor' in planned_summary.columns or self.group_code == factor) and factor_data['p_value'].values[0]<0.05:
+                    for comparison in factor_summary['comparison'].unique():
+                        comparison_summary = factor_summary[factor_summary['comparison']==comparison]
+                        significance = 'significant' if (comparison_summary['p_value'].values < 0.05) else 'not significant'
+                        df = round(float(comparison_summary['df'].values[0]))
+                        test_value = comparison_summary['t_value'].values[0].round(2)
+                        p = comparison_summary['p_value'].values[0].round(4) if (comparison_summary['p_value'] >= 0.0001).values else '<0.0001'
+
+                        if self.hide_stats:
+                            significance = 'hidden'
+                            df = '__'
+                            test_value = 'hidden'
+                            p = 'hidden'
+
+                        subsection += f"\n\n&nbsp;&nbsp;&nbsp;&nbsp;**{comparison}**: {significance}, *t*(*{df}*) = {test_value}, *p* = {p}"
 
         return [subsection]
     
@@ -245,7 +278,7 @@ class Report:
         self.add_data_pdf(section_text)
     
     def insert_demographics_table(self):
-        column_blanks = ['','','',''] if self.split_by_group == 'pain' else ['','','']
+        column_blanks = ['','','','',''] if self.split_by_group == 'pain' else ['','','']
         demo_title = pd.DataFrame([column_blanks], columns=self.demographics_summary.columns, index=['Demographics'])
         pain_title = pd.DataFrame([column_blanks], columns=self.demographics_summary.columns, index=['Pain Scores'])
         depression_title = pd.DataFrame([column_blanks], columns=self.demographics_summary.columns, index=['Depression Scores'])

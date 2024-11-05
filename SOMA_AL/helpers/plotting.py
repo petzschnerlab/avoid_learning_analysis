@@ -13,7 +13,7 @@ class Plotting:
 
     def print_plots(self):
         self.plot_clinical_scores('demo-clinical-scores')
-        self.plot_learning_curves('learning-accuracy-by-group',rolling_mean=self.rolling_mean, grouping='clinical')
+        self.plot_learning_curves('learning-accuracy-by-group', rolling_mean=self.rolling_mean, grouping='clinical')
         self.plot_learning_curves('learning-rt-by-group', rolling_mean=self.rolling_mean, grouping='clinical', metric='rt')
         self.plot_learning_curves('learning-accuracy-by-context', rolling_mean=self.rolling_mean, grouping='context')
         self.plot_learning_curves('learning-rt-by-context', rolling_mean=self.rolling_mean, grouping='context', metric='rt')
