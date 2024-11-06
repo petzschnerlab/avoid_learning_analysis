@@ -96,6 +96,30 @@ class Report:
                     caption += f' For visualization, the accuracy is smoothed using a rolling mean of {self.rolling_mean} trials.'
                 caption += ' Shaded regions represent 95\% confidence intervals.'
 
+            case 'learning-accuracy':
+                caption = """Averaged behavioral performance during learning for the reward and punishment contexts for each group.
+                Boxplots show the mean and 95\% confidence intervals of the accuracy for each context across participants within each group.
+                Half-violin plots show the distribution of accuracy for each context across participants within each group.
+                Scatter points show the averaged accuracy for each participant within each symbol type."""
+
+            case 'learning-accuracy-diff':
+                caption = """Averaged difference (Reward - Punish) of behavioral performance during learning for each group.
+                Boxplots show the mean and 95\% confidence intervals of the accuracy for each context across participants within each group.
+                Half-violin plots show the distribution of accuracy for each context across participants within each group.
+                Scatter points show the averaged accuracy for each participant within each symbol type."""
+
+            case 'learning-rt':
+                caption = """Averaged behavioral performance during learning for the reward and punishment contexts for each group.
+                Boxplots show the mean and 95\% confidence intervals of the reaction times for each context across participants within each group.
+                Half-violin plots show the distribution of reaction times for each context across participants within each group.
+                Scatter points show the averaged reaction times for each participant within each symbol type."""
+
+            case 'learning-rt-diff':
+                caption = """Averaged difference (Reward - Punish) of behavioral performance during learning for each group.
+                Boxplots show the mean and 95\% confidence intervals of the reaction times for each context across participants within each group.
+                Half-violin plots show the distribution of reaction times for each context across participants within each group.
+                Scatter points show the averaged reaction times for each participant within each symbol type."""
+
             case 'learning-accuracy-by-context':
                 caption = 'Behavioral performance across learning trials for each group for each context.'
                 if self.rolling_mean is not None:
@@ -172,10 +196,10 @@ class Report:
     
     def get_statistics(self, target):
 
-        self.data_legend = {'learning-accuracy': self.learning_accuracy,
-                            'learning-rt': self.learning_rt,
-                            'transfer-choice-rate': self.transfer_accuracy,
-                            'transfer-rt': self.transfer_rt,
+        self.data_legend = {'learning-accuracy': self.learning_accuracy_glmm,
+                            'learning-rt': self.learning_rt_glmm,
+                            'transfer-choice-rate': self.transfer_accuracy_glmm,
+                            'transfer-rt': self.transfer_rt_glmm,
                             'demographics-and-clinical-scores': self.demo_clinical}
 
         data = self.data_legend[target]
@@ -226,7 +250,7 @@ class Report:
                 else:
                     factor_summary = planned_summary
 
-                if ('factor' in planned_summary.columns or self.group_code == factor) and factor_data['p_value'].values[0]<0.05:
+                if 'factor' in planned_summary.columns or self.group_code == factor:
                     for comparison in factor_summary['comparison'].unique():
                         comparison_summary = factor_summary[factor_summary['comparison']==comparison]
                         significance = 'significant' if (comparison_summary['p_value'].values < 0.05) else 'not significant'
@@ -319,6 +343,8 @@ class Report:
         section_text.append(f'## Results')
         section_text.append(f'### Learning Accuracy')
         section_text.extend(self.insert_image('learning-accuracy-by-group'))
+        section_text.extend(self.insert_image('learning-accuracy'))
+        section_text.extend(self.insert_image('learning-accuracy-diff'))
         section_text.extend(self.insert_image('learning-accuracy-by-context'))
         section_text.extend(self.get_statistics('learning-accuracy'))
         self.add_data_pdf(section_text, center=True)
@@ -326,6 +352,8 @@ class Report:
         section_text = []
         section_text.append('### Learning Reaction Time')
         section_text.extend(self.insert_image('learning-rt-by-group'))
+        section_text.extend(self.insert_image('learning-rt'))
+        section_text.extend(self.insert_image('learning-rt-diff'))
         section_text.extend(self.insert_image('learning-rt-by-context'))
         section_text.extend(self.get_statistics('learning-rt'))
         self.add_data_pdf(section_text, center=True)

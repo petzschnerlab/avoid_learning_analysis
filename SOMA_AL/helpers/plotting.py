@@ -17,8 +17,16 @@ class Plotting:
         self.plot_learning_curves('learning-rt-by-group', rolling_mean=self.rolling_mean, grouping='clinical', metric='rt')
         self.plot_learning_curves('learning-accuracy-by-context', rolling_mean=self.rolling_mean, grouping='context')
         self.plot_learning_curves('learning-rt-by-context', rolling_mean=self.rolling_mean, grouping='context', metric='rt')
-        self.plot_transfer_accuracy('transfer-choice-rate')
-        self.plot_transfer_accuracy('transfer-rt', metric='rt')
+        self.plot_rainclouds('learning-accuracy')
+        self.plot_rainclouds('learning-accuracy-context')
+        self.plot_rainclouds('learning-accuracy-diff')
+        self.plot_rainclouds('learning-accuracy-context-diff')
+        self.plot_rainclouds('learning-rt')
+        self.plot_rainclouds('learning-rt-context')
+        self.plot_rainclouds('learning-rt-diff')
+        self.plot_rainclouds('learning-rt-context-diff')
+        self.plot_rainclouds('transfer-choice-rate')
+        self.plot_rainclouds('transfer-rt')
         self.plot_neutral_transfer_accuracy('transfer-choice-rate-neutral')
         self.plot_neutral_transfer_accuracy('transfer-rt-neutral', metric='rt')
 
@@ -130,36 +138,104 @@ class Plotting:
                 ax.add_patch(plt.Rectangle((factor_index+1-0.4, (mean_data.loc[factor] - CIs.loc[factor])['score']), 0.8, 2*CIs.loc[factor], fill=None, edgecolor='darkgrey'))
                 ax.hlines(mean_data.loc[factor], factor_index+1-0.4, factor_index+1+0.4, color='darkgrey')            
 
-    def plot_transfer_accuracy(self, save_name, metric='choice_rate'):
+    def plot_rainclouds(self, save_name):
 
-        #Copy choice rate data
-        choice_rate = self.choice_rate if metric == 'choice_rate' else self.choice_rt
+        #Set data specific parameters
+        match save_name:
+            case 'learning-accuracy' | 'learning-accuracy-context':
+                data = self.learning_accuracy
+                metric_label = 'accuracy'
+                y_label = 'Accuracy (%)'
+            case 'learning-accuracy-diff' | 'learning-accuracy-context-diff':
+                data = self.learning_accuracy_diff
+                metric_label = 'accuracy'
+                y_label = 'Difference in Accuracy (%), Reward - Punish'
+            case 'learning-rt' | 'learning-rt-context':
+                data = self.learning_rt
+                metric_label = 'rt'
+                y_label = 'Reaction Time (ms)'
+            case 'learning-rt-diff' | 'learning-rt-context-diff':
+                data = self.learning_rt_diff
+                metric_label = 'rt'
+                y_label = 'Difference in Reaction Time (ms), Reward - Punish'    
+            case 'transfer-choice-rate':
+                data = self.choice_rate
+                metric_label = 'choice_rate'
+                y_label = 'Choice Rate (%)'
+            case 'transfer-rt':
+                data = self.choice_rt
+                metric_label = 'choice_rt'
+                y_label = 'Reaction Time (ms)'
+
+        if 'context' in save_name:
+            data = data.reset_index().set_index(['symbol_name', self.group_code, 'participant_id'])
+
+        if 'diff' in save_name or 'context' in save_name:
+            condition_name = self.group_code
+            condition_values = self.group_labels
+            x_values = np.arange(1, len(self.group_labels)+1).tolist()
+            x_labels = self.group_labels_formatted
+        elif save_name == 'learning-accuracy' or save_name == 'learning-rt':
+            condition_name = 'symbol_name'
+            condition_values = ['Reward', 'Punish']
+            x_values = [1, 2]
+            x_labels = ['Reward', 'Punish']
+        else:
+            condition_name = 'symbol'
+            condition_values = [4, 3, 2, 1, 0]
+            x_values = [1, 2, 3, 4, 5]
+            x_labels = ['High\nReward', 'Low\nReward', 'Low\nPunish', 'High\nPunish', 'Novel']
+
+        if 'diff' in save_name:
+            plot_labels = ['']
+        elif 'context' in save_name:
+            plot_labels = ['Reward', 'Punish']
+        else:
+            plot_labels = self.group_labels
         
         #Create a bar plot of the choice rate for each symbol
-        num_subplots = 3 if self.split_by_group == 'pain' else 2
+        if 'diff' in save_name:
+            num_subplots = 1
+        elif 'context' in save_name:
+            num_subplots = 2
+        else:
+            num_subplots = 3 if self.split_by_group == 'pain' else 2
+        
         fig, ax = plt.subplots(1, num_subplots, figsize=(5*num_subplots, 5))
-        for group_index, group in enumerate(self.group_labels):
-            group_choice_rate = choice_rate.loc[group].reset_index()
-            group_choice_rate['symbol'] = pd.Categorical(group_choice_rate['symbol'], [4, 3, 2, 1, 0])
-            group_choice_rate = group_choice_rate.sort_values('symbol')
+        for group_index, group in enumerate(plot_labels):
+            if group != '':
+                group_data = data.loc[group].reset_index()
+            else:
+                group_data = data.reset_index()
+            group_data[condition_name] = pd.Categorical(group_data[condition_name], condition_values)
+            group_data = group_data.sort_values(condition_name)
 
             #Compute t-statistic
-            _, t_scores = self.compute_n_and_t(group_choice_rate, 'symbol')
+            _, t_scores = self.compute_n_and_t(group_data, condition_name)
 
             #Get descriptive statistics for the group
-            metric_label = 'choice_rate' if metric == 'choice_rate' else 'choice_rt'
-            group_choice_rate = group_choice_rate.set_index('symbol')[metric_label].astype(float)
+            group_data = group_data.set_index(condition_name)[metric_label].astype(float)
 
             #Create plot
-            self.raincloud_plot(data=group_choice_rate, ax=ax[group_index], t_scores=t_scores)
+            if 'diff' not in save_name:
+                self.raincloud_plot(data=group_data, ax=ax[group_index], t_scores=t_scores)
+            else:
+                self.raincloud_plot(data=group_data, ax=ax, t_scores=t_scores)
 
             #Create horizontal line for the mean the same width
-            ax[group_index].set_xticks([1, 2, 3, 4, 5], ['High\nReward', 'Low\nReward', 'Low\nPunish', 'High\nPunish', 'Novel'])
-            ax[group_index].set_xlabel('')
-            ax[group_index].set_ylabel('Choice Rate (%)' if metric == 'choice_rate' else 'Reaction Time (ms)')
-            if metric == 'choice_rate':
-                ax[group_index].set_ylim(-4, 104)
-            ax[group_index].set_title(group.capitalize())
+            if 'diff' not in save_name:
+                ax[group_index].set_xticks(x_values, x_labels)
+                ax[group_index].set_xlabel('')
+                ax[group_index].set_ylabel(y_label)
+                if '(%)' in y_label:
+                    ax[group_index].set_ylim(-4, 104)
+                ax[group_index].set_title(group.capitalize())
+            else:
+                ax.set_xticks(x_values, x_labels)
+                ax.set_xlabel('')
+                ax.set_ylabel(y_label)
+                ax.set_title('')
+                ax.axhline(y=0, color='darkgrey', linestyle='--')
 
         #Save the plot
         plt.savefig(f'SOMA_AL/plots/{save_name}.png')

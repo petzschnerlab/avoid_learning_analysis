@@ -99,25 +99,25 @@ class Statistics:
             self.demo_clinical_planned = {'metadata': self.demo_metadata, 'model_summary': self.demo_clinical_planned}
     
         #Linear Mixed Effects Models group*context + (1|participant)
-        self.learning_accuracy = self.linear_model(f'accuracy~1+{self.group_code}*symbol_name+(1|participant_id)', 
+        self.learning_accuracy_glmm = self.linear_model(f'accuracy~1+{self.group_code}*symbol_name+(1|participant_id)', 
                                                self.learning_data,
                                                path=self.repo_directory,
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
                                                family='binomial')
         
-        self.learning_rt = self.linear_model(f'rt~1+{self.group_code}*symbol_name+(1|participant_id)', 
+        self.learning_rt_glmm = self.linear_model(f'rt~1+{self.group_code}*symbol_name+(1|participant_id)', 
                                                self.learning_data,
                                                path=self.repo_directory,
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
                                                family='Gamma')
         
-        self.transfer_accuracy = self.linear_model(f'accuracy~1+{self.group_code}*context+(1|participant_id)', 
+        self.transfer_accuracy_glmm = self.linear_model(f'accuracy~1+{self.group_code}*context+(1|participant_id)', 
                                                self.transfer_data_reduced,
                                                path=self.repo_directory,
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv",
                                                family='binomial')
 
-        self.transfer_rt = self.linear_model(f'rt~1+{self.group_code}*context+(1|participant_id)', 
+        self.transfer_rt_glmm = self.linear_model(f'rt~1+{self.group_code}*context+(1|participant_id)', 
                                                self.transfer_data_reduced,
                                                path=self.repo_directory,
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv",

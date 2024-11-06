@@ -76,6 +76,7 @@ class Processing:
 
         #Compute metrics
         self.compute_accuracy()
+        self.compute_learning_averages()
         self.compute_choice_rate()
         self.compute_choice_rate(neutral=True)
 
@@ -227,6 +228,30 @@ class Processing:
 
         #Track number of participants excluded
         self.trials_excluded_rt = (learning_excluded + transfer_excluded)/(learning_trials + transfer_trials) * 100
+
+    def compute_learning_averages(self):
+        
+        #Compute accuracy for each participant and symbol_name within each group
+        self.learning_accuracy = self.learning_data.groupby([self.group_code, 'participant_id', 'symbol_name'])['accuracy'].mean().reset_index()
+        self.learning_accuracy['symbol_name'] = pd.Categorical(self.learning_accuracy['symbol_name'], ['Reward', 'Punish'])
+        self.learning_accuracy = self.learning_accuracy.sort_values(by=['participant_id', 'symbol_name'])
+
+        self.learning_accuracy_diff = self.learning_accuracy.groupby(['participant_id'])['accuracy'].diff()
+        self.learning_accuracy_diff = pd.concat([self.learning_accuracy[[self.group_code, 'participant_id']], self.learning_accuracy_diff], axis=1).dropna()
+        self.learning_accuracy_diff['symbol_name'] = 'Difference' 
+
+        self.learning_rt = self.learning_data.groupby([self.group_code, 'participant_id', 'symbol_name'])['rt'].mean().reset_index()
+        self.learning_rt['symbol_name'] = pd.Categorical(self.learning_rt['symbol_name'], ['Reward', 'Punish'])
+        self.learning_rt = self.learning_rt.sort_values(by=['participant_id', 'symbol_name'])
+
+        self.learning_rt_diff = self.learning_rt.groupby(['participant_id'])['rt'].diff()
+        self.learning_rt_diff = pd.concat([self.learning_rt[[self.group_code, 'participant_id']], self.learning_rt_diff], axis=1).dropna()
+        self.learning_rt_diff['symbol_name'] = 'Difference'
+
+        self.learning_accuracy.set_index([self.group_code, 'participant_id', 'symbol_name'], inplace=True)
+        self.learning_accuracy_diff.set_index([self.group_code, 'participant_id', 'symbol_name'], inplace=True)
+        self.learning_rt.set_index([self.group_code, 'participant_id', 'symbol_name'], inplace=True)
+        self.learning_rt_diff.set_index([self.group_code, 'participant_id', 'symbol_name'], inplace=True)
 
     def compute_choice_rate(self, neutral = False):
 
