@@ -98,29 +98,45 @@ class Statistics:
 
             self.demo_clinical_planned = {'metadata': self.demo_metadata, 'model_summary': self.demo_clinical_planned}
     
-        #Linear Mixed Effects Models group*context + (1|participant)
-        self.learning_accuracy_glmm = self.linear_model(f'accuracy~1+{self.group_code}*symbol_name+(1|participant_id)', 
+        #Linear Mixed Effects Models
+        formula = f'accuracy~1+{self.group_code}*symbol_name+(1|participant_id)'
+        if self.covariate is not None:
+            formula = f'accuracy~1+{self.group_code}*symbol_name+{self.covariate}+(1|participant_id)'
+        self.learning_accuracy_glmm = self.linear_model(formula, 
                                                self.learning_data,
                                                path=self.repo_directory,
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
+                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_learning_data_trials.csv",
                                                family='binomial')
         
-        self.learning_rt_glmm = self.linear_model(f'rt~1+{self.group_code}*symbol_name+(1|participant_id)', 
+        formula = f'rt~1+{self.group_code}*symbol_name+(1|participant_id)'
+        if self.covariate is not None:
+            formula = f'rt~1+{self.group_code}*symbol_name+{self.covariate}+(1|participant_id)'
+        self.learning_rt_glmm = self.linear_model(formula, 
                                                self.learning_data,
                                                path=self.repo_directory,
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
+                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_learning_data_trials.csv",
                                                family='Gamma')
         
-        self.transfer_accuracy_glmm = self.linear_model(f'accuracy~1+{self.group_code}*context+(1|participant_id)', 
+        formula = f'accuracy~1+{self.group_code}*context+(1|participant_id)'
+        if self.covariate is not None:
+            formula = f'accuracy~1+{self.group_code}*context+{self.covariate}+(1|participant_id)'
+        self.transfer_accuracy_glmm = self.linear_model(formula, 
                                                self.transfer_data_reduced,
                                                path=self.repo_directory,
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv",
+                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_transfer_data_trials_reduced.csv",
                                                family='binomial')
 
-        self.transfer_rt_glmm = self.linear_model(f'rt~1+{self.group_code}*context+(1|participant_id)', 
+        formula = f'rt~1+{self.group_code}*context+(1|participant_id)'
+        if self.covariate is not None:
+            formula = f'rt~1+{self.group_code}*context+{self.covariate}+(1|participant_id)'
+        self.transfer_rt_glmm = self.linear_model(formula, 
                                                self.transfer_data_reduced,
                                                path=self.repo_directory,
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv",
+                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_transfer_data_trials_reduced.csv",
                                                family='Gamma')
         
         self.learning_accuracy_planned = self.planned_ttests('accuracy', self.learning_data, average=True)
@@ -156,7 +172,7 @@ class Statistics:
             depression_results = pd.DataFrame({'p-value': [f'{self.get_pvalue(self.stats_depression)}']}, index=self.depression_summary.index)
             self.depression_summary = pd.concat([self.depression_summary, depression_results], axis=1)
 
-    def linear_model(self, formula, data, path=None, filename=None, family='gaussian'):
+    def linear_model(self, formula, data, path=None, filename=None, savename=None, family='gaussian'):
         """
         Linear mixed effects model
 
@@ -187,17 +203,18 @@ class Statistics:
             outcome = formula.split('~')[0]
             file_exists = os.path.isfile(filename.replace('.csv', f'_{outcome}_results.csv'))
             if not self.load_stats or not file_exists:
-                if not file_exists:
+                if self.load_stats and not file_exists:
                     warnings.warn(f'''You requested to load rather than run the statistics using the load_stats=True parameter.
                                   However, the file {filename.replace(".csv", f"_{outcome}_results.csv")} does not exist. 
                                   So, we will run the linear mixed effects model now.''', stacklevel=2)
                 _ = subprocess.call([self.rscripts_path,
                                     'SOMA_AL/helpers/mixed_effects_models.R', 
                                     path, 
-                                    filename, 
+                                    filename,
+                                    savename, 
                                     formula,
                                     family])
-            model_summary = pd.read_csv(filename.replace('.csv', f'_{outcome}_results.csv'))
+            model_summary = pd.read_csv(savename.replace('.csv', f'_{outcome}_results.csv'))
             if family == 'gaussian':
                 model_summary = model_summary[['Unnamed: 0', 'NumDF', 'F value', 'Pr(>F)']]
             else: 

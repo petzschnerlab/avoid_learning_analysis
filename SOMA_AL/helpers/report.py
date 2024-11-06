@@ -219,7 +219,7 @@ class Report:
         subsection = f'**{target.replace("-", " ").title()} Statistics**\n\n'
         if data['metadata']['outcome'] == 'metric':
             outcomes = ', '.join(data['model_summary']['factor'].unique())
-            subsection += f"""{outcomes.capitalize()} were modelled using linear regression with the following formula: *{formula.replace('*', ':').replace('*',':').replace('group_code','group')}*."""
+            subsection += f"""{outcomes.capitalize()} were modelled using linear regression with the following formula: *{formula}*."""
         else:
             subsection += f"""{outcome.capitalize()} in the {phase} phase was modelled using a linear mixed effects model with the following formula: *{formula.replace('*', ':').replace('group_code','group').replace('symbol_name','context')}*, 
             where *{', '.join([f.replace('*',':').replace('group_code','group').replace('symbol_name','context') for f in fixed])}* are the fixed effects {f'and *{random}* is the random effect.' if random else '.'}"""

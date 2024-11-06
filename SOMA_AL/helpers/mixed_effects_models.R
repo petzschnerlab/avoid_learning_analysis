@@ -9,8 +9,9 @@ args = commandArgs(trailingOnly = TRUE)
 
 working_directory = args[[1]] 
 filename = args[[2]]
-formula = args[[3]]
-family = args[[4]]
+savename = args[[3]]
+formula = args[[4]]
+family = args[[5]]
 
 #working_directory = 'C:/Users/cwill/Documents/GitHub/SOMA_avoidance_learning'
 #filename = 'SOMA_AL/stats/stats_learning_data_trials.csv'
@@ -34,5 +35,5 @@ if (family == 'None' | family == 'gaussian'){
 
 #Save results as csv
 outcome = strsplit(formula, '~')[[1]][1]
-save_name = gsub('.csv', paste('_',outcome,'_results.csv',sep=''), filename)
+save_name = gsub('.csv', paste('_',outcome,'_results.csv',sep=''), savename)
 write.csv(results, save_name)

@@ -60,23 +60,39 @@ if __name__ == '__main__':
 
     #Other parameters
     hide_stats = False
-    load_stats = True
+    load_stats = False
     verbose = True
 
     #Run the pipeline for each split_by_group
-    for split_by_group in ['pain', 'depression']:
+    for split_by_group in ['pain-co-depression', 'pain', 'pain-depression' 'depression', ]:
 
+        covariate = None
+        split_by_group_id = split_by_group
         if split_by_group == 'pain':
             file_name = [r'v1a_avoid_pain\v1a_avoid_pain.csv', r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
+            dataset = 'Both pain datasets'
+        if split_by_group == 'pain-depression':
+            file_name = [r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
+            split_by_group = 'pain'
+            dataset = 'Pain with depression dataset'
         elif split_by_group == 'depression':
             file_name = [r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
+            dataset = 'Pain with depression dataset'
+        elif split_by_group == 'pain-co-depression':
+            file_name = [r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
+            split_by_group = 'pain'
+            covariate = 'depression'
+            dataset = 'Pain with depression covariate'
         
         #Create a dict of args
         kwargs = {'author': author,
+                  'dataset': dataset,
                   'rscripts_path': rscripts_path,
                   'file_path': file_path,
                   'file_name': file_name,
                   'split_by_group': split_by_group,
+                  'split_by_group_id': split_by_group_id,
+                  'covariate': covariate,
                   'depression_cutoff': depression_cutoff,
                   'rolling_mean': rolling_mean,
                   'accuracy_exclusion_threshold': accuracy_exclusion_threshold,

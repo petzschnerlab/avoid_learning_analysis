@@ -21,6 +21,9 @@ class Parameters:
                            'file_name', 
                            'print_filename', 
                            'split_by_group',
+                           'split_by_group_id',
+                           'dataset',
+                           'covariate',
                            'depression_cutoff',
                            'accuracy_exclusion_threshold',
                            'RT_low_threshold',
@@ -54,8 +57,11 @@ class Parameters:
         self.rscripts_path = kwargs.get('rscripts_path', None)
         self.file_path = kwargs.get('file_path', None)
         self.file_name = kwargs.get('file_name', None)
+        self.dataset = kwargs.get('dataset', '')
         self.print_filename = kwargs.get('print_filename', r'SOMA_AL/reports/SOMA_report.pdf')
         self.split_by_group = kwargs.get('split_by_group', 'pain')
+        self.split_by_group_id = kwargs.get('split_by_group_id', self.split_by_group)
+        self.covariate = kwargs.get('covariate', None)
         self.depression_cutoff = kwargs.get('depression_cutoff', 10)
         self.accuracy_exclusion_threshold = kwargs.get('accuracy_exclusion_threshold', 55)
         self.RT_low_threshold = kwargs.get('RT_low_threshold', 200)
@@ -70,6 +76,7 @@ class Parameters:
         self.verbose = kwargs.get('verbose', False)
         
         #Format parameters
+        self.split_by_group = self.split_by_group if ',' not in self.split_by_group else self.split_by_group
         self.print_filename = self.print_filename.replace('.pdf', f'_{self.split_by_group}.pdf')
         self.group_code = 'group_code' if self.split_by_group == 'pain' else 'depression'
         self.referent_label = 'no pain' if self.split_by_group == 'pain' else 'healthy'
