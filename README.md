@@ -190,7 +190,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
 - *Palminteri et al. - 2015
 - *Vandendriessche et al. - 2023
 - Bavard et al. - 2018
-- Gold - 2012
+- [Gold - 2012](https://jamanetwork.com/journals/jamapsychiatry/fullarticle/1107396)
 - Geana et al. - 2021 
 - https://youtu.be/a483TKDJ7ss?si=LrVM__enUvdC0KSY
 - https://www.youtube.com/watch?v=etQVRd6N8dM&t=697s
