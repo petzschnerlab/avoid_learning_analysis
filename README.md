@@ -187,11 +187,11 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
     - They found no effect here, so is it needed? Might be a good idea since it's a different population
 
 # Literature Reviews
-- *Palminteri et al. - 2015
-- *Vandendriessche et al. - 2023
+- *[Palminteri et al. - 2015](https://www.nature.com/articles/ncomms9096.pdf)
+- *[Vandendriessche et al. - 2023](https://www.cambridge.org/core/services/aop-cambridge-core/content/view/4A99B6789148211973379AB7A8A81036/S0033291722001593a.pdf/div-class-title-contextual-influence-of-reinforcement-learning-performance-of-depression-evidence-for-a-negativity-bias-div.pdf)
 - Bavard et al. - 2018
 - [Gold - 2012](https://jamanetwork.com/journals/jamapsychiatry/fullarticle/1107396)
-- Geana et al. - 2021 
+- [Geana et al. - 2021](https://www.sciencedirect.com/science/article/pii/S2451902221001154?casa_token=O8ktVYVJGI8AAAAA:omzWr6OSLP0ujwii_z51yjP_hdO0EUtzqrkTbj8Fh7hkbSaYVqq5FR9-ecwyjUvKuBUqdlrwfYo) 
 - https://youtu.be/a483TKDJ7ss?si=LrVM__enUvdC0KSY
 - https://www.youtube.com/watch?v=etQVRd6N8dM&t=697s
 - [Lefebvre et al. - 2017](https://www.unicog.org/publications/LefebvreLebretonMeynielBourgeois-GirondePalminteri_2017_NHB_Behavioral-and-neural-characterization-of-optimistic-reinforcement-learning.pdf)
