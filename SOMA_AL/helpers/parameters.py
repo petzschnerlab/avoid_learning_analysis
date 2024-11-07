@@ -79,7 +79,6 @@ class Parameters:
         self.split_by_group = self.split_by_group if ',' not in self.split_by_group else self.split_by_group
         self.print_filename = self.print_filename.replace('.pdf', f'_{self.split_by_group_id}.pdf')
         self.group_code = 'group_code' if self.split_by_group == 'pain' else 'depression'
-        self.referent_label = 'no pain' if self.split_by_group == 'pain' else 'healthy'
         if self.split_by_group == 'pain':
             self.group_labels = ['no pain', 'acute pain', 'chronic pain']
             self.group_labels_formatted = ['No\nPain', 'Acute\nPain', 'Chronic\nPain']

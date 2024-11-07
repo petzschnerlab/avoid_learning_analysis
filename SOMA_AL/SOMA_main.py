@@ -23,7 +23,7 @@ class SOMAPipeline(Master):
         self.set_parameters(**kwargs)
         self.announce(case='start')
         self.load_data(file_path = self.file_path, file_name = self.file_name)
-        if 'depression' in self.split_by_group:
+        if 'depression' in self.split_by_group_id:
             self.recode_depression()
         if self.check_data():
             self.process_data()
@@ -60,11 +60,11 @@ if __name__ == '__main__':
 
     #Other parameters
     hide_stats = False
-    load_stats = False
+    load_stats = True
     verbose = True
 
     #Run the pipeline for each split_by_group
-    for split_by_group in ['pain-co-depression', 'pain', 'pain-depression' 'depression', ]:
+    for split_by_group in ['pain', 'depression', 'pain-depression', 'pain-co-depression']:
 
         covariate = None
         split_by_group_id = split_by_group
@@ -81,7 +81,7 @@ if __name__ == '__main__':
         elif split_by_group == 'pain-co-depression':
             file_name = [r'v1b_avoid_paindepression\v1b_avoid_paindepression.csv']
             split_by_group = 'pain'
-            covariate = 'depression'
+            covariate = 'PHQ8'
             dataset = 'Pain with depression covariate'
         
         #Create a dict of args

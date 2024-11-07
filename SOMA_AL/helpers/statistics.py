@@ -28,19 +28,6 @@ class Statistics:
 
         return planned_t
 
-    def combine_linear_ttest(self, linear_summary, ttest_summary):
-        """
-        Combine linear and t-test summaries
-        """
-        #Create a list of target labels where ttest['model_summary']['p_value'] < 0.05
-        target_labels = ttest_summary['model_summary'][ttest_summary['model_summary']['p_value'] < 0.05]['target'].unique()
-        target_labels = ', '.join(target_labels)
-        
-        #Add these labels to the linear model summary
-        linear_summary['model_summary']['planned_t'] = target_labels
-
-        return linear_summary
-
     def run_statistics(self):
 
         #Demograhpics linear models
@@ -52,20 +39,13 @@ class Statistics:
             self.stats_depression = self.linear_model(f'PHQ8~{self.group_code}', self.depression_scores)
 
         #Demographic planned t-tests
-        self.tstats_age = self.planned_ttests('age', self.demographics)
-        self.tstats_intensity = self.planned_ttests('intensity', self.pain_scores)
-        self.tstats_unpleasant = self.planned_ttests('unpleasant', self.pain_scores)
-        self.tstats_interference = self.planned_ttests('interference', self.pain_scores)
+        comparisons =  [['no pain', 'acute pain'], ['no pain', 'chronic pain']]
+        self.tstats_age = self.planned_ttests('age', comparisons, self.demographics)
+        self.tstats_intensity = self.planned_ttests('intensity', comparisons, self.pain_scores)
+        self.tstats_unpleasant = self.planned_ttests('unpleasant', comparisons, self.pain_scores)
+        self.tstats_interference = self.planned_ttests('interference', comparisons, self.pain_scores)
         if self.depression_scores is not None:
-            self.tstats_depression = self.planned_ttests('PHQ8', self.depression_scores)
-
-        #Combine summaries
-        self.stats_age = self.combine_linear_ttest(self.stats_age, self.tstats_age)
-        self.stats_intensity = self.combine_linear_ttest(self.stats_intensity, self.tstats_intensity)
-        self.stats_unpleasant = self.combine_linear_ttest(self.stats_unpleasant, self.tstats_unpleasant)
-        self.stats_interference = self.combine_linear_ttest(self.stats_interference, self.tstats_interference)
-        if self.depression_scores is not None:
-            self.stats_depression = self.combine_linear_ttest(self.stats_depression, self.tstats_depression)
+            self.tstats_depression = self.planned_ttests('PHQ8', comparisons, self.depression_scores)
 
         #Prepare summaries for statistical reporting
         factor_labels = ['Age', 'Pain Intensity', 'Pain Unpleasantness', 'Pain Interference', 'Depression']
@@ -139,10 +119,11 @@ class Statistics:
                                                savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_transfer_data_trials_reduced.csv",
                                                family='Gamma')
         
-        self.learning_accuracy_planned = self.planned_ttests('accuracy', self.learning_data, average=True)
-        self.learning_rt_planned = self.planned_ttests('rt', self.learning_data, average=True)
-        self.transfer_accuracy_planned = self.planned_ttests('accuracy', self.transfer_data_reduced, average=True)
-        self.transfer_rt_planned = self.planned_ttests('rt', self.transfer_data_reduced, average=True)
+        comparisons = [['no pain', 'acute pain'], ['no pain', 'chronic pain']]
+        self.learning_accuracy_planned = self.planned_ttests('accuracy', comparisons, self.learning_data, average=True)
+        self.learning_rt_planned = self.planned_ttests('rt', comparisons, self.learning_data, average=True)
+        self.transfer_accuracy_planned = self.planned_ttests('accuracy', comparisons, self.transfer_data_reduced, average=True)
+        self.transfer_rt_planned = self.planned_ttests('rt', comparisons, self.transfer_data_reduced, average=True)
         
         self.insert_statistics()
 
@@ -150,22 +131,11 @@ class Statistics:
 
         #Add p-values to summaries
         demographics_results = pd.DataFrame({'p-value': [' ', f'{self.get_pvalue(self.stats_age)}', ' ']}, index=self.demographics_summary.index)
-        if self.split_by_group == 'pain': #Depression group has only two groups, so planned t's are not necessary
-            demographics_planned = pd.DataFrame({'group differences': [' ', f'{self.get_planned_t(self.stats_age)}', ' ']}, index=self.demographics_summary.index)
-            demographics_results = pd.concat([demographics_results, demographics_planned], axis=1)
-                                             
         self.demographics_summary = pd.concat([self.demographics_summary, demographics_results], axis=1)
 
         pain_results = pd.DataFrame({'p-value':                 [f'{self.get_pvalue(self.stats_intensity)}', 
                                                                  f'{self.get_pvalue(self.stats_unpleasant)}', 
                                                                  f'{self.get_pvalue(self.stats_interference)}']}, index=self.pain_summary.index)
-        
-        if self.split_by_group == 'pain':
-            pain_planned = pd.DataFrame({'group differences':   [f'{self.get_planned_t(self.stats_intensity)}', 
-                                                                 f'{self.get_planned_t(self.stats_unpleasant)}', 
-                                                                 f'{self.get_planned_t(self.stats_interference)}']}, index=self.pain_summary.index)
-            pain_results = pd.concat([pain_results, pain_planned], axis=1)
-            
         self.pain_summary = pd.concat([self.pain_summary, pain_results], axis=1)
 
         if self.depression_scores is not None:
@@ -260,48 +230,38 @@ class Statistics:
         return {'metadata': metadata, 'model_summary': model_summary}
     
 
-    def planned_ttests(self, metric, data, referent_label=None, average=False):
+    def planned_ttests(self, metric, comparisons, data, average=False):
             
             """
             Planned t-tests for a referent label
-            Compares a referent group (e.g., healthy controls) to all other groups
+            [[no pain, acute pain], [no pain, chronic pain]]
+            
             """
-
-            #Set referent label
-            if referent_label is None:
-                referent_label = self.referent_label
-
-            #Target condition labels
-            target_labels = data[self.group_code].unique()
-            target_labels = target_labels[target_labels != referent_label]
 
             #Average data
             if average:
-                data = data.groupby(['participant_id', self.group_code])[metric].mean().reset_index()
-
-            #Get referent data
-            referent_data = data[data[self.group_code] == referent_label]
+                data = data.groupby(['participant_id', self.group_code])[metric].mean().reset_index()            
 
             #Run the t-tests
             model_summary = pd.DataFrame()
-            for target_label in target_labels:
+            for comparison in comparisons:
 
                 #Referent data
-                target_data = data[data[self.group_code] == target_label]
+                condition1_data = data[data[self.group_code] == comparison[0]]
+                condition2_data = data[data[self.group_code] == comparison[1]]
 
                 #Run the t-tests
-                ttest = sm.stats.ttest_ind(referent_data[metric], target_data[metric])
-                ttest = pd.DataFrame({'referent': referent_label, 
-                                    'target': target_label, 
-                                    'comparison': f'{referent_label} vs {target_label}',
+                ttest = sm.stats.ttest_ind(condition1_data[metric], condition2_data[metric])
+                ttest = pd.DataFrame({'condition1': comparison[0], 
+                                    'condition2': comparison[1], 
+                                    'comparison': f'{comparison[0]} vs {comparison[1]}',
                                     't_value': ttest[0], 
                                     'p_value': ttest[1],
                                     'df': ttest[2]}, index=[0])
                 model_summary = pd.concat([model_summary, ttest], axis=0)
 
             metadata = {'metric': metric,
-                        'referent_label': referent_label,
-                        'target_labels': target_labels,
+                        'comparisons': comparisons,
                         'test':'t'}
 
             return {'metadata': metadata, 'model_summary': model_summary}
