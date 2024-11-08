@@ -8,26 +8,7 @@ import statsmodels.formula.api as smf
 
 class Statistics:
 
-    def get_pvalue(self, summary):
-        if self.hide_stats:
-            return 'Hidden'
-
-        p_value = summary['model_summary']['p_value'][0].round(4)
-        if p_value < 0.0001:
-            p_value = '<0.0001'
-        else:
-            p_value = str(p_value)
-
-        return p_value
-    
-    def get_planned_t(self, summary):
-        if self.hide_stats:
-            return 'Hidden'
-
-        planned_t = summary['model_summary']['planned_t'][0]
-
-        return planned_t
-
+    #Main statistics function
     def run_statistics(self):
 
         #Demograhpics linear models
@@ -40,12 +21,12 @@ class Statistics:
 
         #Demographic planned t-tests
         comparisons =  [['no pain', 'acute pain'], ['no pain', 'chronic pain']]
-        self.tstats_age = self.planned_ttests('age', comparisons, self.demographics)
-        self.tstats_intensity = self.planned_ttests('intensity', comparisons, self.pain_scores)
-        self.tstats_unpleasant = self.planned_ttests('unpleasant', comparisons, self.pain_scores)
-        self.tstats_interference = self.planned_ttests('interference', comparisons, self.pain_scores)
+        self.tstats_age = self.planned_ttests('age', self.group_code, comparisons, self.demographics)
+        self.tstats_intensity = self.planned_ttests('intensity', self.group_code, comparisons, self.pain_scores)
+        self.tstats_unpleasant = self.planned_ttests('unpleasant', self.group_code, comparisons, self.pain_scores)
+        self.tstats_interference = self.planned_ttests('interference', self.group_code, comparisons, self.pain_scores)
         if self.depression_scores is not None:
-            self.tstats_depression = self.planned_ttests('PHQ8', comparisons, self.depression_scores)
+            self.tstats_depression = self.planned_ttests('PHQ8', self.group_code, comparisons, self.depression_scores)
 
         #Prepare summaries for statistical reporting
         factor_labels = ['Age', 'Pain Intensity', 'Pain Unpleasantness', 'Pain Interference', 'Depression']
@@ -119,14 +100,44 @@ class Statistics:
                                                savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_transfer_data_trials_reduced.csv",
                                                family='Gamma')
         
-        comparisons = [['no pain', 'acute pain'], ['no pain', 'chronic pain']]
-        self.learning_accuracy_planned = self.planned_ttests('accuracy', comparisons, self.learning_data, average=True)
-        self.learning_rt_planned = self.planned_ttests('rt', comparisons, self.learning_data, average=True)
-        self.transfer_accuracy_planned = self.planned_ttests('accuracy', comparisons, self.transfer_data_reduced, average=True)
-        self.transfer_rt_planned = self.planned_ttests('rt', comparisons, self.transfer_data_reduced, average=True)
+        #Group factor planned comparisons
+        comparisons = [['chronic pain', 'no pain'], ['chronic pain', 'acute pain']]
+
+        data = self.average_data_byfactor(self.learning_data, 'accuracy', self.group_code)
+        self.learning_accuracy_planned_group = self.planned_ttests('accuracy', self.group_code, comparisons, data)
+        
+        data = self.average_transform_data(self.learning_data, 'rt', self.group_code, '1/x')
+        self.learning_rt_planned_group = self.planned_ttests('rt', self.group_code, comparisons, data) 
+        
+        data = self.average_data_byfactor(self.transfer_data_reduced, 'accuracy', self.group_code)
+        self.transfer_accuracy_planned_group = self.planned_ttests('accuracy', self.group_code, comparisons, data)
+        
+        data = self.average_transform_data(self.transfer_data_reduced, 'rt', self.group_code,'1/x')
+        self.transfer_rt_planned_group = self.planned_ttests('rt', self.group_code, comparisons, data)
+        
+        #Context factor planned comparisons
+        comparisons = [['high_reward', 'moderate'], ['moderate', 'high_punish']]
+
+        data = self.average_data_byfactor(self.transfer_data_reduced, 'accuracy', 'context')
+        self.transfer_accuracy_planned_context = self.planned_ttests('accuracy', 'context', comparisons, data)
+                                                                     
+        data = self.average_transform_data(self.transfer_data_reduced, 'rt', 'context', '1/x')
+        self.transfer_rt_planned_context = self.planned_ttests('rt', 'context', comparisons, data)
+
+        #Interactions planned comparisons
+        comparisons = [['chronic pain~Reward', 'no pain~Reward'], 
+                       ['chronic pain~Loss Avoid', 'no pain~Loss Avoid'], 
+                       ['chronic pain~Reward-Loss Avoid', 'no pain~Reward-Loss Avoid']]
+        
+        factors = [self.group_code, 'context_val_name']
+        data1 = self.average_data_byfactor(self.learning_data, 'accuracy', factors)
+        data2 = self.manipulate_data(data1, 'accuracy', 'context_val_name', 'Reward-Loss Avoid')
+        data = [data1, data1, data2]
+        self.learning_accuracy_planned_interaction = self.planned_ttests('accuracy', factors, comparisons, data)
         
         self.insert_statistics()
 
+    #Helper functions
     def insert_statistics(self):
 
         #Add p-values to summaries
@@ -142,6 +153,27 @@ class Statistics:
             depression_results = pd.DataFrame({'p-value': [f'{self.get_pvalue(self.stats_depression)}']}, index=self.depression_summary.index)
             self.depression_summary = pd.concat([self.depression_summary, depression_results], axis=1)
 
+    def get_pvalue(self, summary):
+        if self.hide_stats:
+            return 'Hidden'
+
+        p_value = summary['model_summary']['p_value'][0].round(4)
+        if p_value < 0.0001:
+            p_value = '<0.0001'
+        else:
+            p_value = str(p_value)
+
+        return p_value
+    
+    def get_planned_t(self, summary):
+        if self.hide_stats:
+            return 'Hidden'
+
+        planned_t = summary['model_summary']['planned_t'][0]
+
+        return planned_t
+
+    #Statistical models
     def linear_model(self, formula, data, path=None, filename=None, savename=None, family='gaussian'):
         """
         Linear mixed effects model
@@ -228,29 +260,49 @@ class Statistics:
                     'test': test}
 
         return {'metadata': metadata, 'model_summary': model_summary}
-    
 
-    def planned_ttests(self, metric, comparisons, data, average=False):
+    def planned_ttests(self, metric, factor, comparisons, data):
             
             """
             Planned t-tests for a referent label
             [[no pain, acute pain], [no pain, chronic pain]]
             
-            """
+            """          
 
-            #Average data
-            if average:
-                data = data.groupby(['participant_id', self.group_code])[metric].mean().reset_index()            
+            #Wrap data into a list of dataframes
+            data = [data] if type(data) is not list else data
+            data = data*len(comparisons) if len(data) < len(comparisons) else data
 
             #Run the t-tests
             model_summary = pd.DataFrame()
-            for comparison in comparisons:
+            for dataframe, comparison in zip(data, comparisons):
 
-                #Referent data
-                condition1_data = data[data[self.group_code] == comparison[0]]
-                condition2_data = data[data[self.group_code] == comparison[1]]
+                '''
+                        comparisons = [['chronic pain~Reward', 'no pain~high_Reward'], 
+                       ['chronic pain~Punish', 'no pain~Punish'], 
+                       ['chronic pain~Reward-Punish', 'no pain~Reward-Punish']] #TODO: HERE
+                '''
+
+                #Get data
+                if '~' in comparison[0]:
+                    condition1_index = (dataframe[factor[0]] == comparison[0].split('~')[0]) & (dataframe[factor[1]] == comparison[0].split('~')[1])
+                    condition2_index = (dataframe[factor[0]] == comparison[1].split('~')[0]) & (dataframe[factor[1]] == comparison[1].split('~')[1])
+                    condition1_data = dataframe[condition1_index]
+                    condition2_data = dataframe[condition2_index]
+                else:
+                    condition1_data = dataframe[dataframe[factor] == comparison[0]]
+                    condition2_data = dataframe[dataframe[factor] == comparison[1]]
+
+                #Are there the same participant ids in condition1_data and condition2_data?
+                if len(set(condition1_data['participant_id']).intersection(set(condition2_data['participant_id']))) > 0:
+                    test_type = 'repeated'
+                else:
+                    test_type = 'independent'
 
                 #Run the t-tests
+                #if test_type == 'repeated':
+                #    ttest = sm.stats.ttest_rel(condition1_data[metric], condition2_data[metric]) #TODO: STATSMODELS DOESN"T HAVE THIS
+                #else:
                 ttest = sm.stats.ttest_ind(condition1_data[metric], condition2_data[metric])
                 ttest = pd.DataFrame({'condition1': comparison[0], 
                                     'condition2': comparison[1], 
@@ -261,6 +313,7 @@ class Statistics:
                 model_summary = pd.concat([model_summary, ttest], axis=0)
 
             metadata = {'metric': metric,
+                        'factor': factor,
                         'comparisons': comparisons,
                         'test':'t'}
 

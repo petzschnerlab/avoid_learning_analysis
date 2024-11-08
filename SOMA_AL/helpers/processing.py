@@ -241,6 +241,22 @@ class Processing:
 
         return data
     
+    def manipulate_data(self, data, metric, factor, transformation):
+
+        conditions = transformation.split('-')
+
+        if '-' in transformation:
+            manipulated_data = data[(data[factor] == conditions[0]) | (data[factor] == conditions[1])]
+            manipulated_data = manipulated_data.sort_values(by=['participant_id', factor])
+            manipulated_data = manipulated_data.groupby('participant_id')[metric].diff()
+            manipulated_data = pd.concat([data[[self.group_code, factor, 'participant_id']], manipulated_data], axis=1).dropna()
+            manipulated_data[factor] = transformation
+        else:
+            warnings.warn('Transformation not recognized, only subtraction currently implemented. Returning original data.')
+            manipulated_data = data
+
+        return manipulated_data
+    
     #Metric computations
     def compute_accuracy(self):
         
