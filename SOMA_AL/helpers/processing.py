@@ -226,11 +226,11 @@ class Processing:
     def average_transform_data(self, data, metric, factor, transformation):
 
         data = self.transform_data(data, metric, transformation)
-        data = self.average_data_byfactor(data, metric, factor)
+        data = self.average_byfactor(data, metric, factor)
 
         return data
     
-    def average_data_byfactor(self, data, metric, factor):
+    def average_byfactor(self, data, metric, factor):
 
         avg_factor = [factor] if type(factor) == str else factor
         return data.groupby(['participant_id']+avg_factor)[metric].mean().reset_index()  

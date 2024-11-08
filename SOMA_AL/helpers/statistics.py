@@ -5,6 +5,7 @@ import pandas as pd
 import subprocess
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
+import scipy as sp
 
 class Statistics:
 
@@ -114,13 +115,13 @@ class Statistics:
         comparisons = [['chronic pain', 'no pain'], 
                        ['chronic pain', 'acute pain']]
         
-        data = self.average_data_byfactor(self.learning_data, 'accuracy', self.group_code)
+        data = self.average_byfactor(self.learning_data, 'accuracy', self.group_code)
         self.learning_accuracy_planned_group = self.planned_ttests('accuracy', self.group_code, comparisons, data)
         
         data = self.average_transform_data(self.learning_data, 'rt', self.group_code, '1/x')
         self.learning_rt_planned_group = self.planned_ttests('rt', self.group_code, comparisons, data) 
         
-        data = self.average_data_byfactor(self.transfer_data_reduced, 'accuracy', self.group_code)
+        data = self.average_byfactor(self.transfer_data_reduced, 'accuracy', self.group_code)
         self.transfer_accuracy_planned_group = self.planned_ttests('accuracy', self.group_code, comparisons, data)
         
         data = self.average_transform_data(self.transfer_data_reduced, 'rt', self.group_code,'1/x')
@@ -150,12 +151,12 @@ class Statistics:
                        ['chronic pain~Reward-Loss Avoid', 'no pain~Reward-Loss Avoid']]
         
         factors = [self.group_code, 'context_val_name']
-        data1 = self.average_data_byfactor(self.learning_data, 'accuracy', factors)
+        data1 = self.average_byfactor(self.learning_data, 'accuracy', factors)
         data2 = self.manipulate_data(data1, 'accuracy', 'context_val_name', 'Reward-Loss Avoid')
         data = [data1, data1, data2]
         self.learning_accuracy_planned_interaction = self.planned_ttests('accuracy', factors, comparisons, data)
 
-        data1 = self.average_data_byfactor(self.learning_data, 'rt', factors)
+        data1 = self.average_byfactor(self.learning_data, 'rt', factors)
         data2 = self.manipulate_data(data1, 'rt', 'context_val_name', 'Reward-Loss Avoid')
         data = [data1, data1, data2]
         self.learning_rt_planned_interaction = self.planned_ttests('rt', factors, comparisons, data)
@@ -319,22 +320,17 @@ class Statistics:
                     condition2_data = dataframe[dataframe[factor] == comparison[1]]
 
                 #Are there the same participant ids in condition1_data and condition2_data?
-                if len(set(condition1_data['participant_id']).intersection(set(condition2_data['participant_id']))) > 0:
-                    test_type = 'repeated'
+                if len(set(condition1_data['participant_id']).intersection(set(condition2_data['participant_id']))) == condition1_data['participant_id'].shape[0]:
+                    ttest = sp.stats.ttest_rel(condition1_data[metric], condition2_data[metric])
                 else:
-                    test_type = 'independent'
+                    ttest = sp.stats.ttest_ind(condition1_data[metric], condition2_data[metric])
 
-                #Run the t-tests
-                #if test_type == 'repeated':
-                #    ttest = sm.stats.ttest_rel(condition1_data[metric], condition2_data[metric]) #TODO: STATSMODELS DOESN"T HAVE THIS
-                #else:
-                ttest = sm.stats.ttest_ind(condition1_data[metric], condition2_data[metric])
                 ttest = pd.DataFrame({'condition1': comparison[0], 
                                     'condition2': comparison[1], 
                                     'comparison': f'{comparison[0]} vs {comparison[1]}',
-                                    't_value': ttest[0], 
-                                    'p_value': ttest[1],
-                                    'df': ttest[2]}, index=[0])
+                                    't_value': ttest.statistic, 
+                                    'p_value': ttest.pvalue,
+                                    'df': ttest.df}, index=[0])
                 model_summary = pd.concat([model_summary, ttest], axis=0)
 
             metadata = {'metric': metric,
