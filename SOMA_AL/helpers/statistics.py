@@ -101,8 +101,19 @@ class Statistics:
                                                family='Gamma')
         
         #Group factor planned comparisons
-        comparisons = [['chronic pain', 'no pain'], ['chronic pain', 'acute pain']]
+        '''
+        Learning Phase:
+        1. Chronic Pain vs No Pain
+        2. Chronic Pain vs Acute Pain
 
+        Transfer Phase:
+        1. Chronic Pain vs No Pain
+        2. Chronic Pain vs Acute Pain
+
+        '''
+        comparisons = [['chronic pain', 'no pain'], 
+                       ['chronic pain', 'acute pain']]
+        
         data = self.average_data_byfactor(self.learning_data, 'accuracy', self.group_code)
         self.learning_accuracy_planned_group = self.planned_ttests('accuracy', self.group_code, comparisons, data)
         
@@ -116,15 +127,24 @@ class Statistics:
         self.transfer_rt_planned_group = self.planned_ttests('rt', self.group_code, comparisons, data)
         
         #Context factor planned comparisons
-        comparisons = [['high_reward', 'moderate'], ['moderate', 'high_punish']]
+        '''
+        Learning Phase:
+           None needed
 
-        data = self.average_data_byfactor(self.transfer_data_reduced, 'accuracy', 'context')
-        self.transfer_accuracy_planned_context = self.planned_ttests('accuracy', 'context', comparisons, data)
-                                                                     
-        data = self.average_transform_data(self.transfer_data_reduced, 'rt', 'context', '1/x')
-        self.transfer_rt_planned_context = self.planned_ttests('rt', 'context', comparisons, data)
+        Transfer Phase:
+           TBD
+        '''
 
         #Interactions planned comparisons
+        '''
+        Learning Phase:
+        1. Chronic Pain vs No Pain: Reward
+        2. Chronic Pain vs No Pain: Loss Avoid
+        3. Chronic Pain vs No Pain: Reward-Loss Avoid
+
+        Transfer Phase:
+           TBD
+        '''
         comparisons = [['chronic pain~Reward', 'no pain~Reward'], 
                        ['chronic pain~Loss Avoid', 'no pain~Loss Avoid'], 
                        ['chronic pain~Reward-Loss Avoid', 'no pain~Reward-Loss Avoid']]
@@ -134,6 +154,11 @@ class Statistics:
         data2 = self.manipulate_data(data1, 'accuracy', 'context_val_name', 'Reward-Loss Avoid')
         data = [data1, data1, data2]
         self.learning_accuracy_planned_interaction = self.planned_ttests('accuracy', factors, comparisons, data)
+
+        data1 = self.average_data_byfactor(self.learning_data, 'rt', factors)
+        data2 = self.manipulate_data(data1, 'rt', 'context_val_name', 'Reward-Loss Avoid')
+        data = [data1, data1, data2]
+        self.learning_rt_planned_interaction = self.planned_ttests('rt', factors, comparisons, data)
         
         self.insert_statistics()
 
