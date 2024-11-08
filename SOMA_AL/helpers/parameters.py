@@ -8,6 +8,7 @@ class Parameters:
     Class to set parameters for the SOMA pipeline
     """
 
+    #Project organization
     def set_parameters(self, **kwargs):
         
         """
@@ -86,6 +87,7 @@ class Parameters:
             self.group_labels = ['healthy', 'depressed']
             self.group_labels_formatted = ['Healthy', 'Depressed']
 
+    #Print parameters
     def announce(self, case='start'):
         if case == 'start' and self.verbose:
             print('\n*******************************************')

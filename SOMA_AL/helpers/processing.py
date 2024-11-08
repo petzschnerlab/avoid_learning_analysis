@@ -12,7 +12,7 @@ class Processing:
     Class to hold processing functions for the SOMA project
     """
 
-    #Create a method to load the data
+    #Data loading and checks
     def load_data(self, file_path, file_name):
         #Create variables to store the file path and file name
         self.file_path = file_path
@@ -64,6 +64,7 @@ class Processing:
 
         return True
     
+    #Data processing
     def recode_depression(self):
         self.data['depression'] = (self.data['PHQ8'] >= self.depression_cutoff).astype(int)
         self.data['depression'] = self.data['depression'].replace({0: 'healthy', 1: 'depressed'})
@@ -98,6 +99,7 @@ class Processing:
         self.learning_data.to_csv(self.file.replace('.csv', '_learning_processed.csv'))
         self.transfer_data.to_csv(self.file.replace('.csv', '_transfer_processed.csv'))
 
+    #Data filtering
     def filter_learning_data(self):
 
         #Filter data
@@ -151,6 +153,41 @@ class Processing:
         self.transfer_data.loc[high_punish, 'context'] = 'high_punish'
         self.transfer_data.loc[moderate, 'context'] = 'moderate'
     
+    #Data exclusion
+    def exclude_low_accuracy(self, threshold=60):
+        #Compute accuracy for each participant
+        accuracy = pd.DataFrame(columns=['accuracy'], index=pd.MultiIndex(levels=[[]], codes=[[]], names=['participant']))
+        for participant in self.learning_data['participant_id'].unique():
+            participant_data = self.learning_data[self.learning_data['participant_id'] == participant]
+            accuracy_rate = participant_data['accuracy'].mean()
+            accuracy.loc[participant, 'accuracy'] = accuracy_rate
+
+        #Find participants with accuracy less than 60%
+        low_accuracy = accuracy[accuracy['accuracy'] < threshold].reset_index()
+
+        #Remove participants with accuracy less than 60%
+        self.data = self.data[~self.data['participant_id'].isin(low_accuracy['participant'])]
+        self.learning_data = self.learning_data[~self.learning_data['participant_id'].isin(low_accuracy['participant'])]
+        self.transfer_data = self.transfer_data[~self.transfer_data['participant_id'].isin(low_accuracy['participant'])]
+
+        #Track number of participants excluded
+        self.participants_excluded_accuracy = len(low_accuracy)
+        self.accuracy_threshold = threshold
+
+    def exclude_low_rt(self, low_threshold=200, high_threshold=5000):
+
+        self.learning_data['excluded_rt'] = (self.learning_data['rt'] < low_threshold) | (self.learning_data['rt'] > high_threshold)
+        learning_excluded, learning_trials = self.learning_data['excluded_rt'].sum(), self.learning_data.shape[0]
+        self.learning_data = self.learning_data[self.learning_data['excluded_rt'] == False]
+
+        self.transfer_data['excluded_rt'] = (self.transfer_data['rt'] < low_threshold) | (self.transfer_data['rt'] > high_threshold)
+        transfer_excluded, transfer_trials = self.transfer_data['excluded_rt'].sum(), self.transfer_data.shape[0]
+        self.transfer_data = self.transfer_data[self.transfer_data['excluded_rt'] == False]
+
+        #Track number of participants excluded
+        self.trials_excluded_rt = (learning_excluded + transfer_excluded)/(learning_trials + transfer_trials) * 100
+
+    #Data collapsing and transformation
     def average_data(self):
 
         #Create participant average for learning data
@@ -186,6 +223,25 @@ class Processing:
         self.transfer_data.to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials.csv', index=False)
         self.transfer_data_reduced.to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv', index=False)
 
+    def average_transform_data(self, data, metric, factor, transformation):
+
+        data = self.transform_data(data, metric, transformation)
+        data = self.average_data_byfactor(data, metric, factor)
+
+        return data
+    
+    def average_data_byfactor(self, data, metric, factor):
+
+        avg_factor = [factor] if type(factor) == str else factor
+        return data.groupby(['participant_id']+avg_factor)[metric].mean().reset_index()  
+    
+    def transform_data(self, data, metric, transformation):
+
+        data[metric] = data[metric].transform(lambda x: eval(transformation))
+
+        return data
+    
+    #Metric computations
     def compute_accuracy(self):
         
         #Compute learning accuracy
@@ -196,39 +252,6 @@ class Processing:
         self.transfer_data['larger_value'] = (self.transfer_data['symbol_R_value'] > self.transfer_data['symbol_L_value']).astype(int) #1 = Right has larger value, 0 = Left has larger value
         self.transfer_data['accuracy'] = (self.transfer_data['larger_value'] == self.transfer_data['choice_made']).astype(int)*100 #100 = Correct, 0 = Incorrect
         
-    def exclude_low_accuracy(self, threshold=60):
-        #Compute accuracy for each participant
-        accuracy = pd.DataFrame(columns=['accuracy'], index=pd.MultiIndex(levels=[[]], codes=[[]], names=['participant']))
-        for participant in self.learning_data['participant_id'].unique():
-            participant_data = self.learning_data[self.learning_data['participant_id'] == participant]
-            accuracy_rate = participant_data['accuracy'].mean()
-            accuracy.loc[participant, 'accuracy'] = accuracy_rate
-
-        #Find participants with accuracy less than 60%
-        low_accuracy = accuracy[accuracy['accuracy'] < threshold].reset_index()
-
-        #Remove participants with accuracy less than 60%
-        self.data = self.data[~self.data['participant_id'].isin(low_accuracy['participant'])]
-        self.learning_data = self.learning_data[~self.learning_data['participant_id'].isin(low_accuracy['participant'])]
-        self.transfer_data = self.transfer_data[~self.transfer_data['participant_id'].isin(low_accuracy['participant'])]
-
-        #Track number of participants excluded
-        self.participants_excluded_accuracy = len(low_accuracy)
-        self.accuracy_threshold = threshold
-
-    def exclude_low_rt(self, low_threshold=200, high_threshold=5000):
-
-        self.learning_data['excluded_rt'] = (self.learning_data['rt'] < low_threshold) | (self.learning_data['rt'] > high_threshold)
-        learning_excluded, learning_trials = self.learning_data['excluded_rt'].sum(), self.learning_data.shape[0]
-        self.learning_data = self.learning_data[self.learning_data['excluded_rt'] == False]
-
-        self.transfer_data['excluded_rt'] = (self.transfer_data['rt'] < low_threshold) | (self.transfer_data['rt'] > high_threshold)
-        transfer_excluded, transfer_trials = self.transfer_data['excluded_rt'].sum(), self.transfer_data.shape[0]
-        self.transfer_data = self.transfer_data[self.transfer_data['excluded_rt'] == False]
-
-        #Track number of participants excluded
-        self.trials_excluded_rt = (learning_excluded + transfer_excluded)/(learning_trials + transfer_trials) * 100
-
     def compute_learning_averages(self):
         
         #Compute accuracy for each participant and symbol_name within each group

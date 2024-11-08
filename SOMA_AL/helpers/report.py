@@ -11,6 +11,84 @@ class Report:
     Class to hold reporting functions for the SOMA project
     """
 
+    #Report builders
+    def build_report(self):
+
+        #Initiate processes
+        self.print_plots()
+        self.pdf = MarkdownPdf(toc_level=3)
+
+        #Add metadata
+        self.insert_title_page()
+        self.insert_report_details()
+        self.insert_analysis_details()
+
+        #Demographics
+        self.insert_demographics_table()
+        section_text = self.insert_table('demo-scores')
+        section_text.extend(self.insert_image('demo-clinical-scores'))
+        section_text.extend(self.get_statistics('demographics-and-clinical-scores'))
+        self.add_data_pdf(section_text, center=True)
+        
+        #Results
+        section_text = []
+        section_text.append(f'## Results')
+        section_text.append(f'### Learning Accuracy')
+        section_text.extend(self.insert_image('learning-accuracy-by-group'))
+        section_text.extend(self.insert_image('learning-accuracy'))
+        section_text.extend(self.insert_image('learning-accuracy-diff'))
+        section_text.extend(self.insert_image('learning-accuracy-by-context'))
+        section_text.extend(self.get_statistics('learning-accuracy-by-group'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
+        section_text.append('### Learning Reaction Time')
+        section_text.extend(self.insert_image('learning-rt-by-group'))
+        section_text.extend(self.insert_image('learning-rt'))
+        section_text.extend(self.insert_image('learning-rt-diff'))
+        section_text.extend(self.insert_image('learning-rt-by-context'))
+        section_text.extend(self.get_statistics('learning-rt-by-group'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
+        section_text.append('### Choice Rate')
+        section_text.extend(self.insert_image('transfer-choice-rate'))
+        section_text.extend(self.insert_image('transfer-choice-rate-neutral'))
+        section_text.extend(self.get_statistics('transfer-choice-rate-by-group'))
+        section_text.extend(self.get_statistics('transfer-choice-rate-by-context'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
+        section_text.append('### Transfer Reaction Time')   
+        section_text.extend(self.insert_image('transfer-rt'))
+        section_text.extend(self.insert_image('transfer-rt-neutral'))
+        section_text.extend(self.get_statistics('transfer-rt-by-group'))
+        section_text.extend(self.get_statistics('transfer-rt-by-context'))
+        self.add_data_pdf(section_text, center=True)
+
+        #Save to pdf
+        self.save_report()
+
+    def save_report(self):
+        try:
+            #Save pdf with default filename
+            self.pdf.save(self.print_filename)
+        except: 
+            #If file is opened, it will need to save with alternative filename
+            original_filename = self.print_filename
+            i = 1
+            while os.path.exists(self.print_filename):
+                try:
+                    self.print_filename = original_filename.replace('.pdf', f'-{i}.pdf')
+                    self.pdf.save(self.print_filename)
+                    break
+                except:
+                    i += 1
+                
+            #Raise warning
+            warnings.warn(f'File {original_filename} is currently opened. Saving as {self.print_filename}', stacklevel=2)
+    
+    #Formatting functions
     def add_data_pdf(self, content:list, toc:bool=True, center:bool=False):
         #Formatting
         user_css = 'h4 {text-align:center;}' if center else None
@@ -42,6 +120,7 @@ class Report:
         #Save the table as a png
         dfi.export(table, save_name, table_conversion="selenium", max_rows=-1)#, table_conversion='matplotlib')
     
+    #Data retrieval functions   
     def add_figure_caption(self, text):
         section_text = f'**Figure {self.figure_count}.** {text}'
         self.figure_count += 1
@@ -53,26 +132,6 @@ class Report:
         self.table_count += 1
         
         return section_text
-
-    def save_report(self):
-        try:
-            #Save pdf with default filename
-            self.pdf.save(self.print_filename)
-        except: 
-            #If file is opened, it will need to save with alternative filename
-            original_filename = self.print_filename
-            i = 1
-            while os.path.exists(self.print_filename):
-                try:
-                    self.print_filename = original_filename.replace('.pdf', f'-{i}.pdf')
-                    self.pdf.save(self.print_filename)
-                    break
-                except:
-                    i += 1
-                
-            #Raise warning
-            warnings.warn(f'File {original_filename} is currently opened. Saving as {self.print_filename}', stacklevel=2)
-    
 
     def get_caption(self, target, target_type='figure'):
         match target:
@@ -169,20 +228,6 @@ class Report:
 
         return caption
     
-    def insert_image(self, image_name):
-        subsection = [f'#### ![{image_name}](SOMA_AL/plots/{image_name}.png)\n', 
-                      f'{self.get_caption(image_name)}\n']
-       
-        return subsection
-    
-    def insert_table(self, table_name):
-        self.table_to_png(self.demographics, save_name=f'SOMA_AL/plots/{table_name}.png')
-
-        subsection = [f'{self.get_caption(table_name)}',
-                      f'#### ![{table_name}](SOMA_AL/plots/{table_name}.png)\n']
-       
-        return subsection
-    
     def get_metadata(self, data):
         formula = data['metadata']['formula']
         fixed_effects = data['metadata']['fixed_effects']
@@ -209,10 +254,12 @@ class Report:
         summary = data['model_summary']
 
         if self.split_by_group == 'pain':
-            self.data_planned_legend = {'learning-accuracy': self.learning_accuracy_planned,
-                                        'learning-rt': self.learning_rt_planned,
-                                        'transfer-choice-rate': self.transfer_accuracy_planned,
-                                        'transfer-rt': self.transfer_rt_planned,
+            self.data_planned_legend = {'learning-accuracy-by-group': self.learning_accuracy_planned_group,
+                                        'learning-rt-by-group': self.learning_rt_planned_group,
+                                        'transfer-choice-rate-by-group': self.transfer_accuracy_planned_group,
+                                        'transfer-choice-rate-by-context': self.transfer_accuracy_planned_context,
+                                        'transfer-rt-by-group': self.transfer_rt_planned_group,
+                                        'transfer-rt-by-context': self.transfer_rt_planned_context,
                                         'demographics-and-clinical-scores': self.demo_clinical_planned}
             planned_summary = self.data_planned_legend[target]['model_summary']
 
@@ -268,6 +315,21 @@ class Report:
 
         return [subsection]
     
+    #Content builders
+    def insert_image(self, image_name):
+        subsection = [f'#### ![{image_name}](SOMA_AL/plots/{image_name}.png)\n', 
+                      f'{self.get_caption(image_name)}\n']
+       
+        return subsection
+    
+    def insert_table(self, table_name):
+        self.table_to_png(self.demographics, save_name=f'SOMA_AL/plots/{table_name}.png')
+
+        subsection = [f'{self.get_caption(table_name)}',
+                      f'#### ![{table_name}](SOMA_AL/plots/{table_name}.png)\n']
+       
+        return subsection
+    
     def insert_title_page(self):
         section_text = [f'# SOMA Report',
                         f'![SOMA_logo](SOMA_AL/media/SOMA_preview.png)']
@@ -319,58 +381,3 @@ class Report:
                                            blank_row, 
                                            depression_title, 
                                            self.depression_summary], axis=0)
-    
-    def build_report(self):
-
-        #Initiate processes
-        self.print_plots()
-        self.pdf = MarkdownPdf(toc_level=3)
-
-        #Add metadata
-        self.insert_title_page()
-        self.insert_report_details()
-        self.insert_analysis_details()
-
-        #Demographics
-        self.insert_demographics_table()
-        section_text = self.insert_table('demo-scores')
-        section_text.extend(self.insert_image('demo-clinical-scores'))
-        section_text.extend(self.get_statistics('demographics-and-clinical-scores'))
-        self.add_data_pdf(section_text, center=True)
-        
-        #Results
-        section_text = []
-        section_text.append(f'## Results')
-        section_text.append(f'### Learning Accuracy')
-        section_text.extend(self.insert_image('learning-accuracy-by-group'))
-        section_text.extend(self.insert_image('learning-accuracy'))
-        section_text.extend(self.insert_image('learning-accuracy-diff'))
-        section_text.extend(self.insert_image('learning-accuracy-by-context'))
-        section_text.extend(self.get_statistics('learning-accuracy'))
-        self.add_data_pdf(section_text, center=True)
-
-        section_text = []
-        section_text.append('### Learning Reaction Time')
-        section_text.extend(self.insert_image('learning-rt-by-group'))
-        section_text.extend(self.insert_image('learning-rt'))
-        section_text.extend(self.insert_image('learning-rt-diff'))
-        section_text.extend(self.insert_image('learning-rt-by-context'))
-        section_text.extend(self.get_statistics('learning-rt'))
-        self.add_data_pdf(section_text, center=True)
-
-        section_text = []
-        section_text.append('### Choice Rate')
-        section_text.extend(self.insert_image('transfer-choice-rate'))
-        section_text.extend(self.insert_image('transfer-choice-rate-neutral'))
-        section_text.extend(self.get_statistics('transfer-choice-rate'))
-        self.add_data_pdf(section_text, center=True)
-
-        section_text = []
-        section_text.append('### Transfer Reaction Time')   
-        section_text.extend(self.insert_image('transfer-rt'))
-        section_text.extend(self.insert_image('transfer-rt-neutral'))
-        section_text.extend(self.get_statistics('transfer-rt'))
-        self.add_data_pdf(section_text, center=True)
-
-        #Save to pdf
-        self.save_report()

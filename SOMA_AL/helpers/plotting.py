@@ -11,6 +11,7 @@ class Plotting:
     Class to hold plotting functions for the SOMA project
     """
 
+    #Helper functions
     def print_plots(self):
         self.plot_clinical_scores('demo-clinical-scores')
         self.plot_learning_curves('learning-accuracy-by-group', rolling_mean=self.rolling_mean, grouping='clinical')
@@ -44,6 +45,47 @@ class Plotting:
             t_scores = [stats.t.ppf(0.975, s-1) for s in sample_sizes]
 
         return sample_sizes, t_scores
+
+    #Plotting functions
+    def raincloud_plot(self, data, ax, t_scores, alpha=0.25):
+            
+            #Set parameters
+            if data.index.nunique() == 2:
+                colors = ['#B2DF8A', '#FB9A99']
+            elif data.index.nunique() == 3:
+                colors = ['#B2DF8A', '#FFD92F', '#FB9A99']
+            else:
+                colors = ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C', '#D3D3D3']
+
+            #Set index name
+            data.index.name = 'code'
+            #Turn series into dataframe
+            data = data.to_frame()
+            data.columns = ['score']
+
+            #Create a violin plot of the data for each level
+            wide_data = data.reset_index().pivot(columns='code', values='score')
+            wide_list = [wide_data[code].dropna() for code in wide_data.columns]
+            vp = ax.violinplot(wide_list, showmeans=False, showmedians=False, showextrema=False)
+            
+            for bi, b in enumerate(vp['bodies']):
+                m = np.mean(b.get_paths()[0].vertices[:, 0])
+                b.get_paths()[0].vertices[:, 0] = np.clip(b.get_paths()[0].vertices[:, 0], m, np.inf)
+                b.set_color(colors[bi])
+
+            #Add jittered scatter plot of the choice rate for each column
+            for factor_index, factor in enumerate(data.index.unique()):
+                x = np.random.normal([factor_index+1-.2]*data.loc[factor].shape[0], 0.02)
+                ax.scatter(x+.02, data.loc[factor], color=colors[factor_index], s=10, alpha=alpha)
+            
+            #Compute the mean and 95% CIs for the choice rate for each symbol
+            mean_data = data.groupby('code').mean()
+            CIs = data.groupby('code').sem()['score'] * t_scores
+
+            #Draw rectangle for each symbol that rerpesents the top and bottom of the 95% CI that has no fill and a black outline
+            for factor_index, factor in enumerate(data.index.unique()):
+                ax.add_patch(plt.Rectangle((factor_index+1-0.4, (mean_data.loc[factor] - CIs.loc[factor])['score']), 0.8, 2*CIs.loc[factor], fill=None, edgecolor='darkgrey'))
+                ax.hlines(mean_data.loc[factor], factor_index+1-0.4, factor_index+1+0.4, color='darkgrey')            
 
     def plot_learning_curves(self, save_name, rolling_mean=None,  metric='accuracy', grouping = 'clinical'):
 
@@ -97,46 +139,6 @@ class Plotting:
 
         #Close figure
         plt.close()
-
-    def raincloud_plot(self, data, ax, t_scores, alpha=0.25):
-            
-            #Set parameters
-            if data.index.nunique() == 2:
-                colors = ['#B2DF8A', '#FB9A99']
-            elif data.index.nunique() == 3:
-                colors = ['#B2DF8A', '#FFD92F', '#FB9A99']
-            else:
-                colors = ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C', '#D3D3D3']
-
-            #Set index name
-            data.index.name = 'code'
-            #Turn series into dataframe
-            data = data.to_frame()
-            data.columns = ['score']
-
-            #Create a violin plot of the data for each level
-            wide_data = data.reset_index().pivot(columns='code', values='score')
-            wide_list = [wide_data[code].dropna() for code in wide_data.columns]
-            vp = ax.violinplot(wide_list, showmeans=False, showmedians=False, showextrema=False)
-            
-            for bi, b in enumerate(vp['bodies']):
-                m = np.mean(b.get_paths()[0].vertices[:, 0])
-                b.get_paths()[0].vertices[:, 0] = np.clip(b.get_paths()[0].vertices[:, 0], m, np.inf)
-                b.set_color(colors[bi])
-
-            #Add jittered scatter plot of the choice rate for each column
-            for factor_index, factor in enumerate(data.index.unique()):
-                x = np.random.normal([factor_index+1-.2]*data.loc[factor].shape[0], 0.02)
-                ax.scatter(x+.02, data.loc[factor], color=colors[factor_index], s=10, alpha=alpha)
-            
-            #Compute the mean and 95% CIs for the choice rate for each symbol
-            mean_data = data.groupby('code').mean()
-            CIs = data.groupby('code').sem()['score'] * t_scores
-
-            #Draw rectangle for each symbol that rerpesents the top and bottom of the 95% CI that has no fill and a black outline
-            for factor_index, factor in enumerate(data.index.unique()):
-                ax.add_patch(plt.Rectangle((factor_index+1-0.4, (mean_data.loc[factor] - CIs.loc[factor])['score']), 0.8, 2*CIs.loc[factor], fill=None, edgecolor='darkgrey'))
-                ax.hlines(mean_data.loc[factor], factor_index+1-0.4, factor_index+1+0.4, color='darkgrey')            
 
     def plot_rainclouds(self, save_name):
 
