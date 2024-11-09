@@ -172,6 +172,37 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
         - Significant group and interaction effects
             - Post-Hocs: Patients were better at seeking 75R than avoiding 75P (controls these were equal)
 
+### Transfer Phase Choice Rate Statistics (*Post-Hocs*)
+
+- **Palminteri et al., 2015**
+    - **Choice Rate:*** Calculated as number of times chosen vs all other conditions (4 levels)
+    - All between option choices (difference measures) were analyzed using one-sample ttests (no corrections for post-hocs!)
+    - Intermediate values (low reward | low punishment) were also compared to all other conditions (high reward, low punish/low reward, high punish)
+    - **Results:**
+        - low reward not equal to low punish
+        - high reward > low punish
+
+- **Vandendriessche et al., 2023**
+    - **Choice Rate:** Calculated as number of times chosen vs all other conditions (4 levels)
+        - *Note: For the GLMM, calculated as number of times chosen dependent on whether it was in contrast to High Reward, Moderate Values, or High Punish (3 levels)*
+        - Compared marginal means to zero with Tukey post-hoc corrections
+    - **Results:** 
+        - *Note, this task had rich and poor conditions not reward/punish but it will be written as reward/punish here for consistency*
+        - Controls: High reward (choice) = High punish (avoid)
+        - Patients: High reward (choice) > high punish (avoid) -> better at seeking reward than avoiding loss
+        - All groups: High reward vs low punish
+
+- **Gold et al., 2012**
+    - Group differences~High Reward - Low Punish (testing the relative value)
+        - Healthy: Preference for High Reward, Clincial (Schz): equal preference?
+    - Group differences~Low Reward - Low punish (testing the absolute value)
+        - All groups: Low punish > low reward
+
+
+- **Specific Analyses**
+    - High Reward vs Low Punish (Palminteri et al., 2015, Gold et al., 2012, Vandendriessche et al., 2023)
+    - Low Reward vs Low Punish (Palminteri et al., 2015, Gold et al., 2012)
+
 ## Computational Modelling
 ### Steps:
 1. Develop the Q-learning benchmark RL model (Palminteri et al., 2015)
