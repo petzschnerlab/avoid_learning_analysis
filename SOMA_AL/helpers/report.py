@@ -38,7 +38,7 @@ class Report:
         section_text.extend(self.insert_image('learning-accuracy'))
         section_text.extend(self.insert_image('learning-accuracy-diff'))
         section_text.extend(self.insert_image('learning-accuracy-by-context'))
-        section_text.extend(self.get_statistics('learning-accuracy-by-group'))
+        section_text.extend(self.get_statistics('learning-accuracy'))
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
@@ -47,23 +47,21 @@ class Report:
         section_text.extend(self.insert_image('learning-rt'))
         section_text.extend(self.insert_image('learning-rt-diff'))
         section_text.extend(self.insert_image('learning-rt-by-context'))
-        section_text.extend(self.get_statistics('learning-rt-by-group'))
+        section_text.extend(self.get_statistics('learning-rt'))
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
         section_text.append('### Choice Rate')
         section_text.extend(self.insert_image('transfer-choice-rate'))
         section_text.extend(self.insert_image('transfer-choice-rate-neutral'))
-        section_text.extend(self.get_statistics('transfer-choice-rate-by-group'))
-        section_text.extend(self.get_statistics('transfer-choice-rate-by-context'))
+        section_text.extend(self.get_statistics('transfer-choice-rate'))
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
         section_text.append('### Transfer Reaction Time')   
         section_text.extend(self.insert_image('transfer-rt'))
         section_text.extend(self.insert_image('transfer-rt-neutral'))
-        section_text.extend(self.get_statistics('transfer-rt-by-group'))
-        section_text.extend(self.get_statistics('transfer-rt-by-context'))
+        section_text.extend(self.get_statistics('transfer-rt'))
         self.add_data_pdf(section_text, center=True)
 
         #Save to pdf
@@ -87,7 +85,30 @@ class Report:
                 
             #Raise warning
             warnings.warn(f'File {original_filename} is currently opened. Saving as {self.print_filename}', stacklevel=2)
-    
+     
+    def print_planned_statistics(self, comparison, model_summary):
+        if '~' in comparison:
+            comparisons = comparison.split(' vs ')
+            comparison = f"{comparisons[0].split('~')[0]} vs {comparisons[1].split('~')[0]}: {comparisons[0].split('~')[1]}"
+            comparison = comparison.replace('no pain vs acute pain', 'no vs acute pain')
+            comparison = comparison.replace('no pain vs chronic pain', 'no vs chronic pain')
+            comparison = comparison.replace('acute pain vs chronic pain', 'acute vs chronic')
+        significance = '\*' if (model_summary['p_value'].values < 0.05) else ''
+        df = round(float(model_summary['df'].values[0]))
+        test_value = model_summary['t_value'].values[0].round(2)
+        p = model_summary['p_value'].values[0].round(4) if (model_summary['p_value'] >= 0.0001).values else '<0.0001'
+        p = f'= {p}' if p != '<0.0001' else p
+        d = model_summary['cohens_d'].values[0].round(2)
+
+        if self.hide_stats:
+            significance = 'hidden'
+            df = '__'
+            test_value = 'hidden'
+            p = '= hidden'
+            d = 'hidden'
+
+        return f"\n\n&nbsp;&nbsp;&nbsp;&nbsp;**{comparison.title()}{significance}:** *t*(*{df}*) = {test_value}, *p* {p}, *d* = {d}"
+
     #Formatting functions
     def add_data_pdf(self, content:list, toc:bool=True, center:bool=False):
         #Formatting
@@ -257,12 +278,18 @@ class Report:
             self.data_planned_legend = {'learning-accuracy-by-group': self.learning_accuracy_planned_group,
                                         'learning-rt-by-group': self.learning_rt_planned_group,
                                         'transfer-choice-rate-by-group': self.transfer_accuracy_planned_group,
-                                        'transfer-choice-rate-by-context': self.transfer_accuracy_planned_context,
                                         'transfer-rt-by-group': self.transfer_rt_planned_group,
-                                        'transfer-rt-by-context': self.transfer_rt_planned_context,
-                                        'demographics-and-clinical-scores': self.demo_clinical_planned}
-            planned_summary = self.data_planned_legend[target]['model_summary']
 
+                                        'transfer-choice-rate-by-context': self.transfer_accuracy_planned_context,
+                                        'transfer-rt-by-context': self.transfer_rt_planned_context,
+
+                                        'learning-accuracy-by-interaction': self.learning_accuracy_planned_interaction,
+                                        'learning-rt-by-interaction': self.learning_rt_planned_interaction,
+                                        'transfer-choice-rate-by-interaction': self.transfer_accuracy_planned_interaction,
+                                        'transfer-rt-by-interaction': self.transfer_rt_planned_interaction,
+
+                                        'demographics-and-clinical-scores': self.demo_clinical_planned}
+            
         subsection = f'**{target.replace("-", " ").title()} Statistics**\n\n'
         if data['metadata']['outcome'] == 'metric':
             outcomes = ', '.join(data['model_summary']['factor'].unique())
@@ -274,44 +301,43 @@ class Report:
         #Iterate through summary and format each row into a sentence
         for i, factor in enumerate(summary['factor'].unique()):
             factor_data = summary[summary['factor']==factor]
-            significance = 'significant' if (factor_data['p_value'].values < 0.05) else 'not significant'
+            significance = '\*' if (factor_data['p_value'].values < 0.05) else ''
             df_1 = round(float(factor_data['df'].values[0])) #TODO: Check these - they are not the same as k-1 but probably bc of the method used
             df_2 = round(float(df_residual)) if test == 'F' else f'N={sample_size}'
             test_value = factor_data['test_value'].values.round(2)[0]
             p = factor_data['p_value'].values.round(3)[0] if (factor_data['p_value'] >= 0.001).values else '<0.001'
+            p = f'= {p}' if p != '<0.001' else p
 
             if self.hide_stats:
                 significance = 'hidden'
                 df_1 = '__'
                 df_2 = '__'
                 test_value = 'hidden'
-                p = 'hidden'
+                p = ' = hidden'
 
             factor_named = factor.replace('*',':').replace('group_code','group').replace('symbol_name','context')
-            subsection += f"\n\n**{factor_named}:** {significance}, *{test}*(*{df_1}, {df_2}*) = {test_value}, *p* = {p}"
+            subsection += f"\n\n**{factor_named.title()}{significance}:** *{test}*(*{df_1}, {df_2}*) = {test_value}, *p* {p}"
 
             #Add planned comparisons for pain analyses (with groups > 2)
             if self.split_by_group == 'pain':
-                if 'factor' in planned_summary.columns:
-                    factor_summary = planned_summary[planned_summary['factor']==factor]
+                if ':' in factor:
+                    planned_target = f'{target}-by-interaction'
+                elif 'group' in factor:
+                    planned_target = f'{target}-by-group'
                 else:
-                    factor_summary = planned_summary
+                    planned_target = f'{target}-by-context'
 
-                if 'factor' in planned_summary.columns or self.group_code == factor:
+                if planned_target in self.data_planned_legend.keys():
+                    planned_summary = self.data_planned_legend[planned_target]['model_summary']
+
+                    if 'factor' in planned_summary.columns:
+                        factor_summary = planned_summary[planned_summary['factor']==factor]
+                    else:
+                        factor_summary = planned_summary
+
                     for comparison in factor_summary['comparison'].unique():
                         comparison_summary = factor_summary[factor_summary['comparison']==comparison]
-                        significance = 'significant' if (comparison_summary['p_value'].values < 0.05) else 'not significant'
-                        df = round(float(comparison_summary['df'].values[0]))
-                        test_value = comparison_summary['t_value'].values[0].round(2)
-                        p = comparison_summary['p_value'].values[0].round(4) if (comparison_summary['p_value'] >= 0.0001).values else '<0.0001'
-
-                        if self.hide_stats:
-                            significance = 'hidden'
-                            df = '__'
-                            test_value = 'hidden'
-                            p = 'hidden'
-
-                        subsection += f"\n\n&nbsp;&nbsp;&nbsp;&nbsp;**{comparison}**: {significance}, *t*(*{df}*) = {test_value}, *p* = {p}"
+                        subsection += self.print_planned_statistics(comparison, comparison_summary)
 
         return [subsection]
     

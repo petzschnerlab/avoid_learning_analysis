@@ -75,15 +75,17 @@ class Processing:
         self.filter_learning_data()
         self.filter_transfer_data()
 
-        #Compute metrics
+        #Compute accuracy
         self.compute_accuracy()
-        self.compute_learning_averages()
-        self.compute_choice_rate()
-        self.compute_choice_rate(neutral=True)
 
         #Exclude participants with low accuracy and trials with low reaction times
         self.exclude_low_accuracy(self.accuracy_exclusion_threshold)
         self.exclude_low_rt(self.RT_low_threshold, self.RT_high_threshold)
+
+        #Compute metrics
+        self.compute_learning_averages()
+        self.compute_choice_rate()
+        self.compute_choice_rate(neutral=True)
 
         #Compute demographics and scores
         self.compute_demographics()
@@ -139,8 +141,8 @@ class Processing:
         self.transfer_data = self.transfer_data[self.transfer_data['symbol_L_value'] != self.transfer_data['symbol_R_value']] #Remove trials where the same valued symbol was presented together
 
         #Determine which symbol_n_value was chosen using the choice_made column where 1 = Right, 0 = Left in the transfer data
-        self.transfer_data['symbol_chosen'] = self.transfer_data['symbol_L_value']
-        self.transfer_data.loc[self.transfer_data['choice_made'] == 1, 'symbol_chosen'] = self.transfer_data['symbol_R_value']
+        self.transfer_data['symbol_chosen'] = self.transfer_data['symbol_L_value'] #Default to chose left
+        self.transfer_data.loc[self.transfer_data['choice_made'] == 1, 'symbol_chosen'] = self.transfer_data['symbol_R_value'] #Switch to chose right if appropriate
         self.transfer_data['symbol_ignored'] = self.transfer_data['symbol_R_value']
         self.transfer_data.loc[self.transfer_data['choice_made'] == 1, 'symbol_ignored'] = self.transfer_data['symbol_L_value']
 
@@ -152,6 +154,17 @@ class Processing:
         self.transfer_data.loc[high_reward, 'context'] = 'high_reward'
         self.transfer_data.loc[high_punish, 'context'] = 'high_punish'
         self.transfer_data.loc[moderate, 'context'] = 'moderate'
+
+        '''
+        symbol_L_value & symbol_R_value -> symbol_chosen (0-4)
+        ----
+
+        High Reward -> % times chosen
+        Low Reward
+        Low Punish
+        High Punish
+        Novel
+        '''
     
     #Data exclusion
     def exclude_low_accuracy(self, threshold=60):
@@ -301,8 +314,8 @@ class Processing:
         data = self.transfer_data if not neutral else self.transfer_data[self.transfer_data['neutral_values']]
 
         #Compute choice rates for each participant and symbol within each group
-        choice_rate = pd.DataFrame(columns=['choice_rate'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=['group', 'participant', 'symbol']))
-        choice_rt = pd.DataFrame(columns=['choice_rt'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=['group', 'participant', 'symbol']))
+        choice_rate = pd.DataFrame(columns=['choice_rate'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=[self.group_code, 'participant_id', 'symbol']))
+        choice_rt = pd.DataFrame(columns=['choice_rt'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=[self.group_code, 'participant_id', 'symbol']))
 
         for group in self.group_labels:
             group_data = data[data[self.group_code] == group]
@@ -318,18 +331,27 @@ class Processing:
                     choice_rate.loc[(group, participant, symbol), 'choice_rate'] = symbol_choice_rate
                     choice_rt.loc[(group, participant, symbol), 'choice_rt'] = participant_data[participant_data['symbol_chosen'] == symbol]['rt'].mean()
 
+
         if not neutral:
+            choice_rate = choice_rate.reset_index()
+            choice_rate['symbol'] = choice_rate['symbol'].replace({0: 'Novel', 1: 'High Punish', 2: 'Low Punish', 3: 'Low Reward', 4: 'High Reward'})
+            choice_rate = choice_rate.set_index([self.group_code, 'participant_id', 'symbol'])
+
+            choice_rt = choice_rt.reset_index()
+            choice_rt['symbol'] = choice_rt['symbol'].replace({0: 'Novel', 1: 'High Punish', 2: 'Low Punish', 3: 'Low Reward', 4: 'High Reward'})
+            choice_rt = choice_rt.set_index([self.group_code, 'participant_id', 'symbol'])
+
             self.choice_rate = choice_rate
             self.choice_rt = choice_rt
         else:
             choice_rate = choice_rate.reset_index()
             choice_rate = choice_rate[choice_rate['symbol'] == 3] #Choose rewarding 
-            choice_rate = choice_rate.set_index(['group', 'participant', 'symbol'])
+            choice_rate = choice_rate.set_index([self.group_code, 'participant_id', 'symbol'])
             self.neutral_choice_rate = choice_rate
 
             choice_rt = choice_rt.reset_index()
             choice_rt = choice_rt[choice_rt['symbol'] == 3] #Choose rewarding
-            choice_rt = choice_rt.set_index(['group', 'participant', 'symbol'])
+            choice_rt = choice_rt.set_index([self.group_code, 'participant_id', 'symbol'])
             self.neutral_choice_rt = choice_rt
 
     def compute_demographics(self):

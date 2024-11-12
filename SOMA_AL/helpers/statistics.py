@@ -1,6 +1,6 @@
-
 import os
 import warnings
+import numpy as np
 import pandas as pd
 import subprocess
 import statsmodels.api as sm
@@ -133,9 +133,14 @@ class Statistics:
            None needed
 
         Transfer Phase:
-           TBD
+        1. High Reward vs Low Punish
+        2. Low Reward vs Low Punish
         '''
 
+        comparisons = [['High Reward', 'Low Punish'], ['Low Reward', 'Low Punish']]
+        self.transfer_accuracy_planned_context = self.planned_ttests('choice_rate', 'symbol', comparisons, self.choice_rate.reset_index())
+        self.transfer_rt_planned_context = self.planned_ttests('choice_rt', 'symbol', comparisons, self.choice_rt.reset_index())
+        
         #Interactions planned comparisons
         '''
         Learning Phase:
@@ -144,7 +149,13 @@ class Statistics:
         3. Chronic Pain vs No Pain: Reward-Loss Avoid
 
         Transfer Phase:
-           TBD
+        1. No Pain vs Chronic Pain: High Reward - Low Punish
+        2. No Pain vs Acute Pain: High Reward - Low Punish
+        3. Acute Pain vs Chronic Pain: High Reward - Low Punish
+
+        4. No Pain vs Chronic Pain: Low Reward - Low Punish
+        5. No Pain vs Acute Pain: Low Reward - Low Punish
+        6. Acute Pain vs Chronic Pain: Low Reward - Low Punish
         '''
         comparisons = [['chronic pain~Reward', 'no pain~Reward'], 
                        ['chronic pain~Loss Avoid', 'no pain~Loss Avoid'], 
@@ -160,7 +171,26 @@ class Statistics:
         data2 = self.manipulate_data(data1, 'rt', 'context_val_name', 'Reward-Loss Avoid')
         data = [data1, data1, data2]
         self.learning_rt_planned_interaction = self.planned_ttests('rt', factors, comparisons, data)
+
+        comparisons = [['no pain~High Reward-Low Punish', 'acute pain~High Reward-Low Punish'],
+                          ['no pain~High Reward-Low Punish', 'chronic pain~High Reward-Low Punish'],
+                          ['acute pain~High Reward-Low Punish', 'chronic pain~High Reward-Low Punish'],
+
+                          ['no pain~Low Reward-Low Punish', 'acute pain~Low Reward-Low Punish'],
+                          ['no pain~Low Reward-Low Punish', 'chronic pain~Low Reward-Low Punish'],
+                          ['acute pain~Low Reward-Low Punish', 'chronic pain~Low Reward-Low Punish']]
         
+        factors = [self.group_code, 'symbol']
+        data1 = self.manipulate_data(self.choice_rate.reset_index(), 'choice_rate', 'symbol', 'High Reward-Low Punish')
+        data2 = self.manipulate_data(self.choice_rate.reset_index(), 'choice_rate', 'symbol', 'Low Reward-Low Punish')
+        data = [data1, data1, data1, data2, data2, data2]
+        self.transfer_accuracy_planned_interaction = self.planned_ttests('choice_rate', factors, comparisons, data)
+
+        data1 = self.manipulate_data(self.choice_rt.reset_index(), 'choice_rt', 'symbol', 'High Reward-Low Punish')
+        data2 = self.manipulate_data(self.choice_rt.reset_index(), 'choice_rt', 'symbol', 'Low Reward-Low Punish')
+        data = [data1, data1, data1, data2, data2, data2]
+        self.transfer_rt_planned_interaction = self.planned_ttests('choice_rt', factors, comparisons, data)
+
         self.insert_statistics()
 
     #Helper functions
@@ -198,6 +228,31 @@ class Statistics:
         planned_t = summary['model_summary']['planned_t'][0]
 
         return planned_t
+
+    #Statistical helpers
+    def cohens_d(self, group1, group2, test_type='independent'):
+        
+        #Calculating statistics
+        n1, n2 = len(group1), len(group2)
+
+        mean1, mean2 = np.mean(group1), np.mean(group2)
+        mean_diff = mean1 - mean2
+
+        std1, std2 = np.std(group1, ddof=1), np.std(group2, ddof=1)
+        std_diff = np.std(group1 - group2, ddof=1)
+        s1, s2 = (std1 ** 2) * (n1 - 1), (std2 ** 2) * (n2 - 1)
+        npooled = n1 + n2 - 2
+        pooled_std = np.sqrt((s1 + s2) / npooled)
+        
+        #Calculating Cohen's d
+        if test_type == 'independent':
+            d = mean_diff / pooled_std
+        elif test_type == 'paired':
+            d = mean_diff / std_diff
+        else:
+            raise ValueError('test_type must be either independent or paired')
+    
+        return d
 
     #Statistical models
     def linear_model(self, formula, data, path=None, filename=None, savename=None, family='gaussian'):
@@ -322,14 +377,21 @@ class Statistics:
                 #Are there the same participant ids in condition1_data and condition2_data?
                 if len(set(condition1_data['participant_id']).intersection(set(condition2_data['participant_id']))) == condition1_data['participant_id'].shape[0]:
                     ttest = sp.stats.ttest_rel(condition1_data[metric], condition2_data[metric])
+                    cohens_d = self.cohens_d(condition1_data.sort_values('participant_id')[metric].reset_index(drop=True), 
+                                             condition2_data.sort_values('participant_id')[metric].reset_index(drop=True), 
+                                             test_type='paired')
                 else:
-                    ttest = sp.stats.ttest_ind(condition1_data[metric], condition2_data[metric])
+                    ttest = sp.stats.ttest_ind(condition1_data[metric].astype(float), condition2_data[metric].astype(float))
+                    cohens_d = self.cohens_d(condition1_data[metric], 
+                                             condition2_data[metric], 
+                                             test_type='independent')
 
                 ttest = pd.DataFrame({'condition1': comparison[0], 
                                     'condition2': comparison[1], 
                                     'comparison': f'{comparison[0]} vs {comparison[1]}',
                                     't_value': ttest.statistic, 
                                     'p_value': ttest.pvalue,
+                                    'cohens_d': cohens_d,
                                     'df': ttest.df}, index=[0])
                 model_summary = pd.concat([model_summary, ttest], axis=0)
 

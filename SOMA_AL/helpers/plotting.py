@@ -162,10 +162,16 @@ class Plotting:
                 y_label = 'Difference in Reaction Time (ms), Reward - Punish'    
             case 'transfer-choice-rate':
                 data = self.choice_rate
+                data = data.reset_index()
+                data['symbol'] = data['symbol'].replace({'Novel': 0, 'High Reward': 4, 'Low Reward': 3, 'Low Punish': 2, 'High Punish': 1})
+                data = data.set_index([self.group_code, 'participant_id', 'symbol'])
                 metric_label = 'choice_rate'
                 y_label = 'Choice Rate (%)'
             case 'transfer-rt':
                 data = self.choice_rt
+                data = data.reset_index()
+                data['symbol'] = data['symbol'].replace({'Novel': 0, 'High Reward': 4, 'Low Reward': 3, 'Low Punish': 2, 'High Punish': 1})
+                data = data.set_index([self.group_code, 'participant_id', 'symbol'])
                 metric_label = 'choice_rt'
                 y_label = 'Reaction Time (ms)'
 
@@ -254,14 +260,14 @@ class Plotting:
         #Create a bar plot of the choice rate for each symbol
 
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-        choice_rate['symbol'] = pd.Categorical(choice_rate['group'], self.group_labels)
+        choice_rate['symbol'] = pd.Categorical(choice_rate[self.group_code], self.group_labels)
 
         #Compute t-statistic
-        _, t_scores = self.compute_n_and_t(choice_rate, 'group')
+        _, t_scores = self.compute_n_and_t(choice_rate, self.group_code)
 
         #Get descriptive statistics for the group
         metric_label = 'choice_rate' if metric == 'choice_rate' else 'choice_rt'
-        choice_rate = choice_rate.set_index('group')[metric_label].astype(float)
+        choice_rate = choice_rate.set_index(self.group_code)[metric_label].astype(float)
 
         #Create plot
         self.raincloud_plot(data=choice_rate, ax=ax, t_scores=t_scores)
