@@ -90,9 +90,6 @@ class Report:
         if '~' in comparison:
             comparisons = comparison.split(' vs ')
             comparison = f"{comparisons[0].split('~')[0]} vs {comparisons[1].split('~')[0]}: {comparisons[0].split('~')[1]}"
-            comparison = comparison.replace('no pain vs acute pain', 'no vs acute pain')
-            comparison = comparison.replace('no pain vs chronic pain', 'no vs chronic pain')
-            comparison = comparison.replace('acute pain vs chronic pain', 'acute vs chronic')
         significance = '\*' if (model_summary['p_value'].values < 0.05) else ''
         df = round(float(model_summary['df'].values[0]))
         test_value = model_summary['t_value'].values[0].round(2)
@@ -101,13 +98,17 @@ class Report:
         d = model_summary['cohens_d'].values[0].round(2)
 
         if self.hide_stats:
-            significance = 'hidden'
+            significance = ''
             df = '__'
             test_value = 'hidden'
             p = '= hidden'
             d = 'hidden'
 
-        return f"\n\n&nbsp;&nbsp;&nbsp;&nbsp;**{comparison.title()}{significance}:** *t*(*{df}*) = {test_value}, *p* {p}, *d* = {d}"
+        subsection = f"\n\n&nbsp;&nbsp;&nbsp;&nbsp;**{comparison.title()}**"
+        t_type = '<sub>Welch</sub>' if model_summary['homogeneity_assumption'][0] == 'violated' else ''
+        subsection += f"\n\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*t{t_type}*(*{df}*) = {test_value}, *p* {p}{significance}, *d* = {d}."
+
+        return subsection
 
     #Formatting functions
     def add_data_pdf(self, content:list, toc:bool=True, center:bool=False):
@@ -292,7 +293,7 @@ class Report:
         else:
             self.data_planned_legend = {'transfer-choice-rate-by-context': self.transfer_accuracy_planned_context,
                                         'transfer-rt-by-context': self.transfer_rt_planned_context,
-                                        
+
                                         'learning-accuracy-by-interaction': self.learning_accuracy_planned_interaction,
                                         'learning-rt-by-interaction': self.learning_rt_planned_interaction,
                                         'transfer-choice-rate-by-interaction': self.transfer_accuracy_planned_interaction,
@@ -317,7 +318,7 @@ class Report:
             p = f'= {p}' if p != '<0.001' else p
 
             if self.hide_stats:
-                significance = 'hidden'
+                significance = ''
                 df_1 = '__'
                 df_2 = '__'
                 test_value = 'hidden'

@@ -263,7 +263,27 @@ class Statistics:
 
         return planned_t
 
-    #Statistical helpers
+    #Statistical metrics and tests
+    def ttest_assumption_check(self, group1, group2, test_type='independent'):
+
+        #Test for homogeneity of variance
+        levene_results = sp.stats.levene(group1, group2)
+        homogeneity_assumption = 'violated' if levene_results.pvalue < 0.05 else 'met'
+        homogeneity_assumption = 'met' if test_type == 'paired' else homogeneity_assumption #Paired t-tests do not require homogeneity of variance
+        assumption_results = {'homogeneity_assumption': homogeneity_assumption}
+
+        #Test for normality
+        if test_type == 'independent':
+            normality_results_1, normality_results_2 = sp.stats.shapiro(group1), sp.stats.shapiro(group2)
+            normality_met = normality_results_1.pvalue > 0.05 and normality_results_2.pvalue > 0.05
+            assumption_results['normality_assumption'] = 'met' if normality_met else 'violated'
+        else:
+            normality_results = sp.stats.shapiro(group1-group2)
+            normality_assumption = 'violated' if normality_results.pvalue < 0.05 else 'met'
+            assumption_results['normality_assumption'] = normality_assumption
+
+        return assumption_results
+
     def cohens_d(self, group1, group2, test_type='independent'):
         
         #Calculating statistics
@@ -410,15 +430,21 @@ class Statistics:
 
                 #Are there the same participant ids in condition1_data and condition2_data?
                 if len(set(condition1_data['participant_id']).intersection(set(condition2_data['participant_id']))) == condition1_data['participant_id'].shape[0]:
-                    ttest = sp.stats.ttest_rel(condition1_data[metric], condition2_data[metric])
-                    cohens_d = self.cohens_d(condition1_data.sort_values('participant_id')[metric].reset_index(drop=True), 
-                                             condition2_data.sort_values('participant_id')[metric].reset_index(drop=True), 
-                                             test_type='paired')
+                    condition1_data = condition1_data.sort_values('participant_id')[metric].reset_index(drop=True)
+                    condition2_data = condition2_data.sort_values('participant_id')[metric].reset_index(drop=True)
+                    
+                    assumption_check = self.ttest_assumption_check(condition1_data, condition2_data, test_type='paired')
+                    ttest = sp.stats.ttest_rel(condition1_data, condition2_data)
+                    cohens_d = self.cohens_d(condition1_data, condition2_data, test_type='paired')
+
                 else:
-                    ttest = sp.stats.ttest_ind(condition1_data[metric].astype(float), condition2_data[metric].astype(float))
-                    cohens_d = self.cohens_d(condition1_data[metric], 
-                                             condition2_data[metric], 
-                                             test_type='independent')
+                    condition1_data = condition1_data[metric].astype(float)
+                    condition2_data = condition2_data[metric].astype(float)
+
+                    assumption_check = self.ttest_assumption_check(condition1_data, condition2_data, test_type='independent')
+                    equal_var = assumption_check['homogeneity_assumption'] == 'met'
+                    ttest = sp.stats.ttest_ind(condition1_data, condition2_data, equal_var=equal_var)
+                    cohens_d = self.cohens_d(condition1_data, condition2_data, test_type='independent')
 
                 ttest = pd.DataFrame({'condition1': comparison[0], 
                                     'condition2': comparison[1], 
@@ -426,7 +452,10 @@ class Statistics:
                                     't_value': ttest.statistic, 
                                     'p_value': ttest.pvalue,
                                     'cohens_d': cohens_d,
-                                    'df': ttest.df}, index=[0])
+                                    'df': ttest.df,
+                                    'homogeneity_assumption': assumption_check['homogeneity_assumption'],
+                                    'normality_assumption': assumption_check['normality_assumption']},
+                                    index=[0])
                 model_summary = pd.concat([model_summary, ttest], axis=0)
 
             metadata = {'metric': metric,
