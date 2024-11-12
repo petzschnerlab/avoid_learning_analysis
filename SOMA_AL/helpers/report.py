@@ -289,6 +289,14 @@ class Report:
                                         'transfer-rt-by-interaction': self.transfer_rt_planned_interaction,
 
                                         'demographics-and-clinical-scores': self.demo_clinical_planned}
+        else:
+            self.data_planned_legend = {'transfer-choice-rate-by-context': self.transfer_accuracy_planned_context,
+                                        'transfer-rt-by-context': self.transfer_rt_planned_context,
+                                        
+                                        'learning-accuracy-by-interaction': self.learning_accuracy_planned_interaction,
+                                        'learning-rt-by-interaction': self.learning_rt_planned_interaction,
+                                        'transfer-choice-rate-by-interaction': self.transfer_accuracy_planned_interaction,
+                                        'transfer-rt-by-interaction': self.transfer_rt_planned_interaction}
             
         subsection = f'**{target.replace("-", " ").title()} Statistics**\n\n'
         if data['metadata']['outcome'] == 'metric':
@@ -319,25 +327,24 @@ class Report:
             subsection += f"\n\n**{factor_named.title()}{significance}:** *{test}*(*{df_1}, {df_2}*) = {test_value}, *p* {p}"
 
             #Add planned comparisons for pain analyses (with groups > 2)
-            if self.split_by_group == 'pain':
-                if ':' in factor:
-                    planned_target = f'{target}-by-interaction'
-                elif 'group' in factor:
-                    planned_target = f'{target}-by-group'
+            if ':' in factor:
+                planned_target = f'{target}-by-interaction'
+            elif 'group' in factor:
+                planned_target = f'{target}-by-group'
+            else:
+                planned_target = f'{target}-by-context'
+
+            if planned_target in self.data_planned_legend.keys():
+                planned_summary = self.data_planned_legend[planned_target]['model_summary']
+
+                if 'factor' in planned_summary.columns:
+                    factor_summary = planned_summary[planned_summary['factor']==factor]
                 else:
-                    planned_target = f'{target}-by-context'
+                    factor_summary = planned_summary
 
-                if planned_target in self.data_planned_legend.keys():
-                    planned_summary = self.data_planned_legend[planned_target]['model_summary']
-
-                    if 'factor' in planned_summary.columns:
-                        factor_summary = planned_summary[planned_summary['factor']==factor]
-                    else:
-                        factor_summary = planned_summary
-
-                    for comparison in factor_summary['comparison'].unique():
-                        comparison_summary = factor_summary[factor_summary['comparison']==comparison]
-                        subsection += self.print_planned_statistics(comparison, comparison_summary)
+                for comparison in factor_summary['comparison'].unique():
+                    comparison_summary = factor_summary[factor_summary['comparison']==comparison]
+                    subsection += self.print_planned_statistics(comparison, comparison_summary)
 
         return [subsection]
     

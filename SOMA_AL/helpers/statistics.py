@@ -103,6 +103,8 @@ class Statistics:
         
         #Group factor planned comparisons
         '''
+
+        == Pain Analyses ==
         Learning Phase:
         1. Chronic Pain vs No Pain
         2. Chronic Pain vs Acute Pain
@@ -110,6 +112,13 @@ class Statistics:
         Transfer Phase:
         1. Chronic Pain vs No Pain
         2. Chronic Pain vs Acute Pain
+
+        == Depression Analyses ==
+        Learning Phase:
+           None needed
+        
+        Transfer Phase:
+           None needed
 
         '''
         comparisons = [['chronic pain', 'no pain'], 
@@ -129,6 +138,8 @@ class Statistics:
         
         #Context factor planned comparisons
         '''
+
+        == Pain and Depression Analyses ==
         Learning Phase:
            None needed
 
@@ -143,6 +154,9 @@ class Statistics:
         
         #Interactions planned comparisons
         '''
+
+        == Pain Analyses ==
+
         Learning Phase:
         1. Chronic Pain vs No Pain: Reward
         2. Chronic Pain vs No Pain: Loss Avoid
@@ -156,10 +170,26 @@ class Statistics:
         4. No Pain vs Chronic Pain: Low Reward - Low Punish
         5. No Pain vs Acute Pain: Low Reward - Low Punish
         6. Acute Pain vs Chronic Pain: Low Reward - Low Punish
+
+        == Depression Analyses ==
+        Learning Phase:
+        1. Health vs Depression: Reward
+        2. Health vs Depression: Loss Avoid
+        3. Health vs Depression: Reward-Loss Avoid
+
+        Transfer Phase:
+        1. Health vs Depression: High Reward - Low Punish
+        2. Health vs Depression: Low Reward - Low Punish
+        
         '''
-        comparisons = [['chronic pain~Reward', 'no pain~Reward'], 
-                       ['chronic pain~Loss Avoid', 'no pain~Loss Avoid'], 
-                       ['chronic pain~Reward-Loss Avoid', 'no pain~Reward-Loss Avoid']]
+        if self.split_by_group == 'pain':
+            comparisons = [['chronic pain~Reward', 'no pain~Reward'], 
+                        ['chronic pain~Loss Avoid', 'no pain~Loss Avoid'], 
+                        ['chronic pain~Reward-Loss Avoid', 'no pain~Reward-Loss Avoid']]
+        else: #Depression
+            comparisons = [['healthy~Reward', 'depressed~Reward'], 
+                        ['healthy~Loss Avoid', 'depressed~Loss Avoid'], 
+                        ['healthy~Reward-Loss Avoid', 'depressed~Reward-Loss Avoid']]
         
         factors = [self.group_code, 'context_val_name']
         data1 = self.average_byfactor(self.learning_data, 'accuracy', factors)
@@ -172,23 +202,27 @@ class Statistics:
         data = [data1, data1, data2]
         self.learning_rt_planned_interaction = self.planned_ttests('rt', factors, comparisons, data)
 
-        comparisons = [['no pain~High Reward-Low Punish', 'acute pain~High Reward-Low Punish'],
-                          ['no pain~High Reward-Low Punish', 'chronic pain~High Reward-Low Punish'],
-                          ['acute pain~High Reward-Low Punish', 'chronic pain~High Reward-Low Punish'],
+        if self.split_by_group == 'pain':
+            comparisons = [['no pain~High Reward-Low Punish', 'acute pain~High Reward-Low Punish'],
+                            ['no pain~High Reward-Low Punish', 'chronic pain~High Reward-Low Punish'],
+                            ['acute pain~High Reward-Low Punish', 'chronic pain~High Reward-Low Punish'],
 
-                          ['no pain~Low Reward-Low Punish', 'acute pain~Low Reward-Low Punish'],
-                          ['no pain~Low Reward-Low Punish', 'chronic pain~Low Reward-Low Punish'],
-                          ['acute pain~Low Reward-Low Punish', 'chronic pain~Low Reward-Low Punish']]
+                            ['no pain~Low Reward-Low Punish', 'acute pain~Low Reward-Low Punish'],
+                            ['no pain~Low Reward-Low Punish', 'chronic pain~Low Reward-Low Punish'],
+                            ['acute pain~Low Reward-Low Punish', 'chronic pain~Low Reward-Low Punish']]
+        else: #Depression
+            comparisons = [['healthy~High Reward-Low Punish', 'depressed~High Reward-Low Punish'],
+                           ['healthy~Low Reward-Low Punish', 'depressed~Low Reward-Low Punish']]
         
         factors = [self.group_code, 'symbol']
         data1 = self.manipulate_data(self.choice_rate.reset_index(), 'choice_rate', 'symbol', 'High Reward-Low Punish')
         data2 = self.manipulate_data(self.choice_rate.reset_index(), 'choice_rate', 'symbol', 'Low Reward-Low Punish')
-        data = [data1, data1, data1, data2, data2, data2]
+        data = [data1, data1, data1, data2, data2, data2] if self.split_by_group == 'pain' else [data1, data2]
         self.transfer_accuracy_planned_interaction = self.planned_ttests('choice_rate', factors, comparisons, data)
 
         data1 = self.manipulate_data(self.choice_rt.reset_index(), 'choice_rt', 'symbol', 'High Reward-Low Punish')
         data2 = self.manipulate_data(self.choice_rt.reset_index(), 'choice_rt', 'symbol', 'Low Reward-Low Punish')
-        data = [data1, data1, data1, data2, data2, data2]
+        data = [data1, data1, data1, data2, data2, data2] if self.split_by_group == 'pain' else [data1, data2]
         self.transfer_rt_planned_interaction = self.planned_ttests('choice_rt', factors, comparisons, data)
 
         self.insert_statistics()
