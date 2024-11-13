@@ -35,6 +35,7 @@ class Parameters:
                            'test_context_type',
                            'hide_stats',
                            'load_stats',
+                           'hide_posthocs',
                            'verbose']
         for key in kwargs:
             if key not in accepted_params:
@@ -74,10 +75,12 @@ class Parameters:
         self.rscripts_path = kwargs.get('rscripts_path', None)
         self.hide_stats = kwargs.get('hide_stats', False)
         self.load_stats = kwargs.get('load_stats', False)
+        self.hide_posthocs = kwargs.get('hide_posthocs', False)
         self.verbose = kwargs.get('verbose', False)
         
         #Format parameters
         self.split_by_group = self.split_by_group if ',' not in self.split_by_group else self.split_by_group
+        self.hide_posthocs = True if self.load_stats == False else self.hide_posthocs
         self.print_filename = self.print_filename.replace('.pdf', f'_{self.split_by_group_id}.pdf')
         self.group_code = 'group_code' if self.split_by_group == 'pain' else 'depression'
         if self.split_by_group == 'pain':

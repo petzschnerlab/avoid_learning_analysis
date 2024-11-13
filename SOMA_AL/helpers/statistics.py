@@ -156,15 +156,19 @@ class Statistics:
         
         data = self.average_byfactor(self.learning_data, 'accuracy', self.group_code)
         self.learning_accuracy_planned_group = self.planned_ttests('accuracy', self.group_code, comparisons, data)
+        self.learning_accuracy_posthoc_group = self.post_hoc_tests('accuracy', self.group_code, data)
         
         data = self.average_transform_data(self.learning_data, 'rt', self.group_code, '1/x')
         self.learning_rt_planned_group = self.planned_ttests('rt', self.group_code, comparisons, data) 
+        self.learning_rt_posthoc_group = self.post_hoc_tests('rt', self.group_code, data)
         
         data = self.average_byfactor(self.transfer_data_reduced, 'accuracy', self.group_code)
         self.transfer_accuracy_planned_group = self.planned_ttests('accuracy', self.group_code, comparisons, data)
+        self.transfer_accuracy_posthoc_group = self.post_hoc_tests('accuracy', self.group_code, data)
         
         data = self.average_transform_data(self.transfer_data_reduced, 'rt', self.group_code,'1/x')
         self.transfer_rt_planned_group = self.planned_ttests('rt', self.group_code, comparisons, data)
+        self.transfer_rt_posthoc_group = self.post_hoc_tests('rt', self.group_code, data)
         
         #Context factor planned comparisons
         '''
@@ -180,7 +184,9 @@ class Statistics:
 
         comparisons = [['High Reward', 'Low Punish'], ['Low Reward', 'Low Punish']]
         self.transfer_accuracy_planned_context = self.planned_ttests('choice_rate', 'symbol', comparisons, self.choice_rate.reset_index())
+        self.transfer_accuracy_posthoc_context = self.post_hoc_tests('choice_rate', 'symbol', self.choice_rate.reset_index())
         self.transfer_rt_planned_context = self.planned_ttests('choice_rt', 'symbol', comparisons, self.choice_rt.reset_index())
+        self.transfer_rt_posthoc_context = self.post_hoc_tests('choice_rt', 'symbol', self.choice_rt.reset_index())
         
         #Interactions planned comparisons
         '''
@@ -226,11 +232,13 @@ class Statistics:
         data2 = self.manipulate_data(data1, 'accuracy', 'context_val_name', 'Reward-Loss Avoid')
         data = [data1, data1, data2]
         self.learning_accuracy_planned_interaction = self.planned_ttests('accuracy', factors, comparisons, data)
+        self.learning_accuracy_posthoc_interaction = self.post_hoc_tests('accuracy', factors, data1)
 
         data1 = self.average_byfactor(self.learning_data, 'rt', factors)
         data2 = self.manipulate_data(data1, 'rt', 'context_val_name', 'Reward-Loss Avoid')
         data = [data1, data1, data2]
         self.learning_rt_planned_interaction = self.planned_ttests('rt', factors, comparisons, data)
+        self.learning_rt_posthoc_interaction = self.post_hoc_tests('rt', factors, data1)
 
         if self.split_by_group == 'pain':
             comparisons = [['no pain~High Reward-Low Punish', 'acute pain~High Reward-Low Punish'],
@@ -249,11 +257,13 @@ class Statistics:
         data2 = self.manipulate_data(self.choice_rate.reset_index(), 'choice_rate', 'symbol', 'Low Reward-Low Punish')
         data = [data1, data1, data1, data2, data2, data2] if self.split_by_group == 'pain' else [data1, data2]
         self.transfer_accuracy_planned_interaction = self.planned_ttests('choice_rate', factors, comparisons, data)
+        self.transfer_accuracy_posthoc_interaction = self.post_hoc_tests('choice_rate', factors, self.choice_rate.reset_index())
 
         data1 = self.manipulate_data(self.choice_rt.reset_index(), 'choice_rt', 'symbol', 'High Reward-Low Punish')
         data2 = self.manipulate_data(self.choice_rt.reset_index(), 'choice_rt', 'symbol', 'Low Reward-Low Punish')
         data = [data1, data1, data1, data2, data2, data2] if self.split_by_group == 'pain' else [data1, data2]
         self.transfer_rt_planned_interaction = self.planned_ttests('choice_rt', factors, comparisons, data)
+        self.transfer_rt_posthoc_interaction = self.post_hoc_tests('choice_rt', factors, self.choice_rt.reset_index())
 
         self.insert_statistics()
 
@@ -586,3 +596,24 @@ class Statistics:
                         'test':'t'}
 
             return {'metadata': metadata, 'model_summary': model_summary}
+
+    def post_hoc_tests(self, metric, factor, data):
+        
+        #Create combined factor
+        if type(factor) is list:
+            data['factor'] = data.apply(lambda x: str(x[factor[0]]) + ' & ' + str(x[factor[1]]), axis=1)
+            factor = 'factor'
+
+        #Remove any nans
+        if data[metric].astype(float).isnull().sum() > 0:
+            data = data.dropna(subset=[metric])
+
+        #Run the post-hoc tests
+        tukey = sm.stats.multicomp.pairwise_tukeyhsd(data[metric].astype(float), data[factor].astype("string"))._results_table.data
+        tukey_table = pd.DataFrame(tukey[1:], columns=tukey[0])
+        tukey_table['factor'] = tukey_table.apply(lambda x: str(x['group1']) + ' vs ' + str(x['group2']), axis=1)
+        tukey_table = tukey_table.drop(columns=['group1', 'group2'])
+        tukey_table.set_index('factor', inplace=True)
+        tukey_table = tukey_table.drop(columns=['lower', 'upper'])
+
+        return tukey_table

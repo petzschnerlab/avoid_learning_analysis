@@ -25,7 +25,7 @@ class Report:
 
         #Demographics
         self.insert_demographics_table()
-        section_text = self.insert_table('demo-scores')
+        section_text = self.insert_table(self.demographics, 'demo-scores')
         section_text.extend(self.insert_image('demo-clinical-scores'))
         section_text.extend(self.get_statistics('demographics-and-clinical-scores'))
         self.add_data_pdf(section_text, center=True)
@@ -36,8 +36,8 @@ class Report:
         section_text.append(f'### Learning Accuracy')
         section_text.extend(self.insert_image('learning-accuracy-by-group'))
         section_text.extend(self.insert_image('learning-accuracy'))
-        section_text.extend(self.insert_image('learning-accuracy-diff'))
-        section_text.extend(self.insert_image('learning-accuracy-by-context'))
+        #section_text.extend(self.insert_image('learning-accuracy-diff'))
+        #section_text.extend(self.insert_image('learning-accuracy-by-context'))
         section_text.extend(self.get_statistics('learning-accuracy'))
         self.add_data_pdf(section_text, center=True)
 
@@ -45,24 +45,61 @@ class Report:
         section_text.append('### Learning Reaction Time')
         section_text.extend(self.insert_image('learning-rt-by-group'))
         section_text.extend(self.insert_image('learning-rt'))
-        section_text.extend(self.insert_image('learning-rt-diff'))
-        section_text.extend(self.insert_image('learning-rt-by-context'))
+        #section_text.extend(self.insert_image('learning-rt-diff'))
+        #section_text.extend(self.insert_image('learning-rt-by-context'))
         section_text.extend(self.get_statistics('learning-rt'))
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
         section_text.append('### Choice Rate')
         section_text.extend(self.insert_image('transfer-choice-rate'))
-        section_text.extend(self.insert_image('transfer-choice-rate-neutral'))
+        #section_text.extend(self.insert_image('transfer-choice-rate-neutral'))
         section_text.extend(self.get_statistics('transfer-choice-rate'))
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
         section_text.append('### Transfer Reaction Time')   
         section_text.extend(self.insert_image('transfer-rt'))
-        section_text.extend(self.insert_image('transfer-rt-neutral'))
+        #section_text.extend(self.insert_image('transfer-rt-neutral'))
         section_text.extend(self.get_statistics('transfer-rt'))
         self.add_data_pdf(section_text, center=True)
+
+        if self.hide_posthocs == False:
+            section_text = []
+            section_text.append('## Appendix A')
+            self.add_data_pdf(section_text, center=True)
+
+            section_text = []
+            section_text.append('## Post-Hoc Comparisons: Group Comparisons')
+            section_text.append('### Learning Accuracy')
+            section_text.extend(self.insert_table(self.learning_accuracy_posthoc_group, 'learning_accuracy_group'))
+            section_text.append('### Learning Reaction Time')
+            section_text.extend(self.insert_table(self.learning_rt_posthoc_group, 'learning_rt_group'))
+            section_text.append('### Transfer Accuracy')
+            section_text.extend(self.insert_table(self.transfer_accuracy_posthoc_group, 'transfer_accuracy_group'))
+            section_text.append('### Transfer Reaction Time')
+            section_text.extend(self.insert_table(self.transfer_rt_posthoc_group, 'transfer_rt_group'))
+            self.add_data_pdf(section_text, center=True)
+
+            section_text = []
+            section_text.append('## Post-Hoc Comparisons: Context Comparisons')
+            section_text.append('### Transfer Accuracy')
+            section_text.extend(self.insert_table(self.transfer_accuracy_posthoc_context, 'transfer_accuracy_context'))
+            section_text.append('### Transfer Reaction Time')
+            section_text.extend(self.insert_table(self.transfer_rt_posthoc_context, 'transfer_rt_context'))
+            self.add_data_pdf(section_text, center=True)
+
+            section_text = []
+            section_text.append('## Post-Hoc Comparisons: Interaction Comparisons')
+            section_text.append('### Learning Accuracy')
+            section_text.extend(self.insert_table(self.learning_accuracy_posthoc_interaction, 'learning_accuracy_interaction'))
+            section_text.append('### Learning Reaction Time')
+            section_text.extend(self.insert_table(self.learning_rt_posthoc_interaction, 'learning_rt_interaction'))
+            section_text.append('### Transfer Accuracy')
+            section_text.extend(self.insert_table(self.transfer_accuracy_posthoc_interaction, 'transfer_accuracy_interaction'))
+            section_text.append('### Transfer Reaction Time')
+            section_text.extend(self.insert_table(self.transfer_rt_posthoc_interaction, 'transfer_rt_interaction'))
+            self.add_data_pdf(section_text, center=True)
 
         #Save to pdf
         self.save_report()
@@ -156,8 +193,9 @@ class Report:
         return section_text
 
     def get_caption(self, target, target_type='figure'):
-        match target:
         
+        caption = ''
+        match target:
             case 'demo-scores':
                 target_type = 'table'
                 caption = 'Demographic information for each group.'
@@ -356,11 +394,11 @@ class Report:
        
         return subsection
     
-    def insert_table(self, table_name):
-        self.table_to_png(self.demographics, save_name=f'SOMA_AL/plots/{table_name}.png')
+    def insert_table(self, table, save_name):
+        self.table_to_png(table, save_name=f'SOMA_AL/plots/{save_name}.png')
 
-        subsection = [f'{self.get_caption(table_name)}',
-                      f'#### ![{table_name}](SOMA_AL/plots/{table_name}.png)\n']
+        subsection = [f'{self.get_caption(save_name, target_type="table")}',
+                      f'#### ![{save_name}](SOMA_AL/plots/{save_name}.png)\n']
        
         return subsection
     
