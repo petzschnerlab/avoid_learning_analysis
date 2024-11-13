@@ -60,11 +60,12 @@ if __name__ == '__main__':
 
     #Other parameters
     hide_stats = False
+    hide_posthocs = False
     load_stats = True
     verbose = True
 
     #Run the pipeline for each split_by_group
-    for split_by_group in ['pain', 'depression', 'pain-depression', 'pain-co-depression']:
+    for split_by_group in ['pain', 'depression']:#, 'pain-depression', 'pain-co-depression']:
 
         covariate = None
         split_by_group_id = split_by_group
@@ -102,6 +103,7 @@ if __name__ == '__main__':
                   'test_rolling_mean': test_rolling_mean,
                   'test_context_type': test_context_type,
                   'hide_stats': hide_stats,
+                  'hide_posthocs': hide_posthocs,
                   'load_stats': load_stats,
                   'verbose': verbose}
         

@@ -39,6 +39,8 @@ class Report:
         #section_text.extend(self.insert_image('learning-accuracy-diff'))
         #section_text.extend(self.insert_image('learning-accuracy-by-context'))
         section_text.extend(self.get_statistics('learning-accuracy'))
+        if self.hide_posthocs == False:
+            section_text.append(f'*Tukey HSD post-hoc comparisons can be found in Appendix A.*')
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
@@ -48,6 +50,8 @@ class Report:
         #section_text.extend(self.insert_image('learning-rt-diff'))
         #section_text.extend(self.insert_image('learning-rt-by-context'))
         section_text.extend(self.get_statistics('learning-rt'))
+        if self.hide_posthocs == False:
+            section_text.append(f'*Tukey HSD post-hoc comparisons can be found in Appendix A.*')
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
@@ -55,6 +59,8 @@ class Report:
         section_text.extend(self.insert_image('transfer-choice-rate'))
         #section_text.extend(self.insert_image('transfer-choice-rate-neutral'))
         section_text.extend(self.get_statistics('transfer-choice-rate'))
+        if self.hide_posthocs == False:
+            section_text.append(f'*Tukey HSD post-hoc comparisons can be found in Appendix A.*')
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
@@ -62,6 +68,8 @@ class Report:
         section_text.extend(self.insert_image('transfer-rt'))
         #section_text.extend(self.insert_image('transfer-rt-neutral'))
         section_text.extend(self.get_statistics('transfer-rt'))
+        if self.hide_posthocs == False:
+            section_text.append(f'*Tukey HSD post-hoc comparisons can be found in Appendix A.*')
         self.add_data_pdf(section_text, center=True)
 
         if self.hide_posthocs == False:
