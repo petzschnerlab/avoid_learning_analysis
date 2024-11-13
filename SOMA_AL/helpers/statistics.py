@@ -6,6 +6,7 @@ import subprocess
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 import scipy as sp
+import matplotlib.pyplot as plt
 
 class Statistics:
 
@@ -13,12 +14,12 @@ class Statistics:
     def run_statistics(self):
 
         #Demograhpics linear models
-        self.stats_age = self.linear_model(f'age~{self.group_code}', self.demographics)
-        self.stats_intensity = self.linear_model(f'intensity~{self.group_code}', self.pain_scores)
-        self.stats_unpleasant = self.linear_model(f'unpleasant~{self.group_code}', self.pain_scores)
-        self.stats_interference = self.linear_model(f'interference~{self.group_code}', self.pain_scores)
+        self.stats_age = self.generalized_linear_model(f'age~{self.group_code}', self.demographics)
+        self.stats_intensity = self.generalized_linear_model(f'intensity~{self.group_code}', self.pain_scores)
+        self.stats_unpleasant = self.generalized_linear_model(f'unpleasant~{self.group_code}', self.pain_scores)
+        self.stats_interference = self.generalized_linear_model(f'interference~{self.group_code}', self.pain_scores)
         if self.depression_scores is not None:
-            self.stats_depression = self.linear_model(f'PHQ8~{self.group_code}', self.depression_scores)
+            self.stats_depression = self.generalized_linear_model(f'PHQ8~{self.group_code}', self.depression_scores)
 
         #Demographic planned t-tests
         comparisons =  [['no pain', 'acute pain'], ['no pain', 'chronic pain']]
@@ -61,40 +62,69 @@ class Statistics:
             self.demo_clinical_planned = {'metadata': self.demo_metadata, 'model_summary': self.demo_clinical_planned}
     
         #Linear Mixed Effects Models
+        #Learning accuracy
         formula = f'accuracy~1+{self.group_code}*symbol_name+(1|participant_id)'
         if self.covariate is not None:
             formula = f'accuracy~1+{self.group_code}*symbol_name+{self.covariate}+(1|participant_id)'
-        self.learning_accuracy_glmm = self.linear_model(formula, 
+        
+        assumption_data = self.average_byfactor(self.learning_data, 'accuracy', [self.group_code, 'symbol_name'])
+        assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
+        assumption_data['symbol_name'] = pd.Categorical(assumption_data['symbol_name'], ['Reward', 'Punish'])
+        self.learning_accuracy_glmm_assumptions = self.glmm_assumption_check(assumption_data, formula, phase='learning')
+
+        self.learning_accuracy_glmm = self.generalized_linear_model(formula, 
                                                self.learning_data,
                                                path=self.repo_directory,
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
                                                savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_learning_data_trials.csv",
                                                family='binomial')
         
+        #Learning RT
         formula = f'rt~1+{self.group_code}*symbol_name+(1|participant_id)'
         if self.covariate is not None:
             formula = f'rt~1+{self.group_code}*symbol_name+{self.covariate}+(1|participant_id)'
-        self.learning_rt_glmm = self.linear_model(formula, 
+
+        assumption_data = self.average_byfactor(self.learning_data, 'rt', [self.group_code, 'symbol_name'])
+        assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
+        assumption_data['symbol_name'] = pd.Categorical(assumption_data['symbol_name'], ['Reward', 'Punish'])
+        self.learning_rt_glmm_assumptions = self.glmm_assumption_check(assumption_data, formula, phase='learning')
+
+        self.learning_rt_glmm = self.generalized_linear_model(formula, 
                                                self.learning_data,
                                                path=self.repo_directory,
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
                                                savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_learning_data_trials.csv",
                                                family='Gamma')
         
-        formula = f'accuracy~1+{self.group_code}*context+(1|participant_id)'
+        #Transfer choice rate
+        formula = f'accuracy~1+{self.group_code}*paired_symbols+(1|participant_id)'
         if self.covariate is not None:
-            formula = f'accuracy~1+{self.group_code}*context+{self.covariate}+(1|participant_id)'
-        self.transfer_accuracy_glmm = self.linear_model(formula, 
+            formula = f'accuracy~1+{self.group_code}*paired_symbols+{self.covariate}+(1|participant_id)'
+
+        paired_combinations = ['4_0', '4_1', '4_2', '4_3', '3_0', '3_1', '3_2', '2_0', '2_1', '1_0']
+        assumption_data = self.average_byfactor(self.transfer_data_reduced, 'accuracy', [self.group_code, 'paired_symbols'])
+        assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
+        assumption_data['paired_symbols'] = pd.Categorical(assumption_data['paired_symbols'], paired_combinations)
+        self.transfer_accuracy_glmm_assumptions = self.glmm_assumption_check(assumption_data, formula, phase='transfer')
+
+        self.transfer_accuracy_glmm = self.generalized_linear_model(formula, 
                                                self.transfer_data_reduced,
                                                path=self.repo_directory,
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv",
                                                savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_transfer_data_trials_reduced.csv",
                                                family='binomial')
 
-        formula = f'rt~1+{self.group_code}*context+(1|participant_id)'
+        #Transfer RT
+        formula = f'rt~1+{self.group_code}*paired_symbols+(1|participant_id)'
         if self.covariate is not None:
-            formula = f'rt~1+{self.group_code}*context+{self.covariate}+(1|participant_id)'
-        self.transfer_rt_glmm = self.linear_model(formula, 
+            formula = f'rt~1+{self.group_code}*paired_symbols+{self.covariate}+(1|participant_id)'
+
+        assumption_data = self.average_byfactor(self.transfer_data_reduced, 'rt', [self.group_code, 'paired_symbols'])
+        assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
+        assumption_data['paired_symbols'] = pd.Categorical(assumption_data['paired_symbols'], paired_combinations)
+        self.transfer_rt_glmm_assumptions = self.glmm_assumption_check(assumption_data, formula, phase='transfer')
+
+        self.transfer_rt_glmm = self.generalized_linear_model(formula, 
                                                self.transfer_data_reduced,
                                                path=self.repo_directory,
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv",
@@ -264,6 +294,78 @@ class Statistics:
         return planned_t
 
     #Statistical metrics and tests
+    def contrast_code(self, data):
+
+        #Contrast code categorical variables
+        num_categories = len(data.cat.categories)
+        contrast_codes = np.arange(1, num_categories+1)
+        if len(contrast_codes) % 2 == 0:
+            contrast_codes = contrast_codes + (contrast_codes > np.median(contrast_codes)).astype(int)
+        contrast_codes = contrast_codes - np.median(contrast_codes)
+
+        return contrast_codes
+    
+    def glmm_assumption_check(self, data, formula, phase='learning'):
+
+        #Extract effects
+        dependent_variable = formula.split('~')[0]
+        fixed_effects = formula.split('~1+')[1].split('+')
+        fixed_effects_expanded = []
+        for fixed_effect in fixed_effects:
+            if '(1|' in fixed_effect:
+                pass
+            elif '*' in fixed_effect:
+                fixed_effects_expanded.extend(fixed_effect.split('*'))
+            else:
+                fixed_effects_expanded.append(fixed_effect)
+
+        #Check assumptions
+        assumptions_results = pd.DataFrame(columns=['factor', 'linearity', 'homoskedasticity', 'normality', 'note'])
+        for effect_index, fixed_effect in enumerate(fixed_effects_expanded):
+
+            #Compute residuals
+            linear_coeffs = self.linear_model_categorical(f'{dependent_variable}~{fixed_effect}', data)
+            fitted = data[fixed_effect].apply(lambda x: linear_coeffs[x]).astype(float)
+            residuals = data[dependent_variable] - fitted
+
+            #plot residuals
+            plt.scatter(fitted, residuals, alpha=0.05)
+            plt.xlabel('Fitted')
+            plt.ylabel('Residuals')
+            plt.title(f'{dependent_variable}~{fixed_effect}'.title())
+            plt.axhline(y=0, color='black', linestyle='--')
+            plt.savefig(f"{self.repo_directory}/SOMA_AL/stats/assumptions/{self.split_by_group_id}_assumption_{phase}_{dependent_variable.replace('_','')}_{fixed_effect.replace('_','')}_residuals.png")
+            plt.close()
+
+            #Run linearity test
+            #We will run a simple linear test vs the null hypothesis that the slope is 0
+            #However, this does not cover curvilinear relationships, so it is important to also check the residuals plot
+            linearity_results = self.linear_model_continous(f'fitted~residuals', 
+                                                               pd.DataFrame({'fitted': fitted, 'residuals': residuals}))
+            linearity_assumption = 'met' if linearity_results.pvalues['residuals'] > 0.05 else 'violated'
+
+            #Run homoskedasticity test
+            #We will run a simple Levene test to test the null hypothesis that the variances are equal
+            #This is a bit of a simplification, as we should also check the residuals plot
+            homoskedasticity_results = sp.stats.levene(data[dependent_variable], fitted).pvalue
+            homoskedasticity_assumption = 'met' if homoskedasticity_results > 0.05 else 'violated'
+
+            #Run normality of residuals test
+            normality_results = sp.stats.shapiro(residuals)
+            normality_assumption = 'met' if normality_results.pvalue > 0.05 else 'violated'
+
+            #Add to results dataframe
+            effect_results = {'factor': fixed_effect,
+                              'linearity': linearity_assumption,
+                              'homoskedasticity': homoskedasticity_assumption,
+                              'normality': normality_assumption,
+                              'note':'Check residual plots for true assessment'}
+            
+            assumptions_results = pd.concat([assumptions_results, pd.DataFrame(effect_results, index=[effect_index])], axis=0)
+            
+            
+        return assumptions_results
+    
     def ttest_assumption_check(self, group1, group2, test_type='independent'):
 
         #Test for homogeneity of variance
@@ -309,7 +411,27 @@ class Statistics:
         return d
 
     #Statistical models
-    def linear_model(self, formula, data, path=None, filename=None, savename=None, family='gaussian'):
+    def linear_model_categorical(self, formula, data):
+        """
+        Linear model
+        """        
+
+        categories = data[formula.split('~')[-1]].cat.categories
+        coeffs = smf.ols(formula=formula, data=data).fit().params
+        coeffs_dict = {categories[0]: coeffs[0]}
+        for category, coeff in zip(categories[1:], coeffs[1:]):
+            coeffs_dict[category] = coeffs[0] + coeff
+
+        return coeffs_dict
+    
+    def linear_model_continous(self, formula, data):
+        """
+        Linear model
+        """        
+
+        return smf.ols(formula=formula, data=data).fit()
+
+    def generalized_linear_model(self, formula, data, path=None, filename=None, savename=None, family='gaussian'):
         """
         Linear mixed effects model
 

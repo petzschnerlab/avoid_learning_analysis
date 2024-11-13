@@ -65,6 +65,14 @@ class Processing:
         return True
     
     #Data processing
+    def combine_columns(self, x):
+        if x['symbol_L_value'] > x['symbol_R_value']:
+            column = str(x['symbol_L_value']) + '_' + str(x['symbol_R_value'])
+        else:
+            column = str(x['symbol_R_value']) + '_' + str(x['symbol_L_value'])
+
+        return column
+    
     def recode_depression(self):
         self.data['depression'] = (self.data['PHQ8'] >= self.depression_cutoff).astype(int)
         self.data['depression'] = self.data['depression'].replace({0: 'healthy', 1: 'depressed'})
@@ -155,16 +163,7 @@ class Processing:
         self.transfer_data.loc[high_punish, 'context'] = 'high_punish'
         self.transfer_data.loc[moderate, 'context'] = 'moderate'
 
-        '''
-        symbol_L_value & symbol_R_value -> symbol_chosen (0-4)
-        ----
-
-        High Reward -> % times chosen
-        Low Reward
-        Low Punish
-        High Punish
-        Novel
-        '''
+        self.transfer_data['paired_symbols'] = self.transfer_data.apply(self.combine_columns, axis=1)
     
     #Data exclusion
     def exclude_low_accuracy(self, threshold=60):
@@ -216,9 +215,9 @@ class Processing:
             self.avg_learning_data.loc[self.avg_learning_data[self.group_code] == 'depressed', 'group'] = 1
 
         #Create participant average for transfer data
-        self.transfer_data_reduced = self.transfer_data[~self.transfer_data['context'].isna()]
+        self.transfer_data_reduced = self.transfer_data[~self.transfer_data['paired_symbols'].isna()]
 
-        self.avg_transfer_data = self.transfer_data.groupby(['participant_id', self.group_code, 'context'])['accuracy'].mean().reset_index()
+        self.avg_transfer_data = self.transfer_data.groupby(['participant_id', self.group_code, 'paired_symbols'])['accuracy'].mean().reset_index()
         if self.split_by_group == 'pain':
             self.avg_transfer_data['group'] = 0
             self.avg_transfer_data.loc[self.avg_transfer_data[self.group_code] == 'no pain', 'group'] = -1
