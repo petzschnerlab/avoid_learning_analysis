@@ -369,9 +369,11 @@ class Report:
         else:
             subsection += f"""{outcome.capitalize()} in the {phase} phase was modelled using a linear mixed effects model with the following formula: *{formula.replace('*', ':').replace('group_code','group').replace('symbol_name','context')}*, 
             where *{', '.join([f.replace('*',':').replace('group_code','group').replace('symbol_name','context') for f in fixed])}* are the fixed effects {f'and *{random}* is the random effect.' if random else '.'}"""
-        subsection += ' Following each main and interaction finding from the linear model, we report planned comparison t-tests, corrected using a Welch\'s t-test when the assumption of homogeneity of variance was violated.'
-        if self.hide_posthocs == False:
-            subsection += (' Further, Tukey HSD post-hoc comparisons can be found in Appendix A.')
+        
+        if target != 'demographics-and-clinical-scores':
+            subsection += ' Following each main and interaction finding from the linear model, we report planned comparison t-tests, corrected using a Welch\'s t-test when the assumption of homogeneity of variance was violated.'
+            if self.hide_posthocs == False:
+                subsection += (' Further, Tukey HSD post-hoc comparisons can be found in Appendix A.')
 
         #Iterate through summary and format each row into a sentence
         for i, factor in enumerate(summary['factor'].unique()):
