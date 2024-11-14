@@ -38,9 +38,10 @@ class Report:
         section_text.extend(self.insert_image('learning-accuracy'))
         #section_text.extend(self.insert_image('learning-accuracy-diff'))
         #section_text.extend(self.insert_image('learning-accuracy-by-context'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
         section_text.extend(self.get_statistics('learning-accuracy'))
-        if self.hide_posthocs == False:
-            section_text.append(f'*Tukey HSD post-hoc comparisons can be found in Appendix A.*')
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
@@ -49,27 +50,30 @@ class Report:
         section_text.extend(self.insert_image('learning-rt'))
         #section_text.extend(self.insert_image('learning-rt-diff'))
         #section_text.extend(self.insert_image('learning-rt-by-context'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
         section_text.extend(self.get_statistics('learning-rt'))
-        if self.hide_posthocs == False:
-            section_text.append(f'*Tukey HSD post-hoc comparisons can be found in Appendix A.*')
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
         section_text.append('### Choice Rate')
         section_text.extend(self.insert_image('transfer-choice-rate'))
         #section_text.extend(self.insert_image('transfer-choice-rate-neutral'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
         section_text.extend(self.get_statistics('transfer-choice-rate'))
-        if self.hide_posthocs == False:
-            section_text.append(f'*Tukey HSD post-hoc comparisons can be found in Appendix A.*')
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
         section_text.append('### Transfer Reaction Time')   
         section_text.extend(self.insert_image('transfer-rt'))
         #section_text.extend(self.insert_image('transfer-rt-neutral'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
         section_text.extend(self.get_statistics('transfer-rt'))
-        if self.hide_posthocs == False:
-            section_text.append(f'*Tukey HSD post-hoc comparisons can be found in Appendix A.*')
         self.add_data_pdf(section_text, center=True)
 
         if self.hide_posthocs == False:
@@ -352,6 +356,9 @@ class Report:
         else:
             subsection += f"""{outcome.capitalize()} in the {phase} phase was modelled using a linear mixed effects model with the following formula: *{formula.replace('*', ':').replace('group_code','group').replace('symbol_name','context')}*, 
             where *{', '.join([f.replace('*',':').replace('group_code','group').replace('symbol_name','context') for f in fixed])}* are the fixed effects {f'and *{random}* is the random effect.' if random else '.'}"""
+        subsection += ' Following each main and interaction finding from the linear model, we report planned comparison t-tests, corrected using a Welch\'s t-test when the assumption of homogeneity of variance was violated.'
+        if self.hide_posthocs == False:
+            subsection += (' Further, Tukey HSD post-hoc comparisons can be found in Appendix A.')
 
         #Iterate through summary and format each row into a sentence
         for i, factor in enumerate(summary['factor'].unique()):
@@ -373,8 +380,10 @@ class Report:
             factor_named = factor.replace('*',':').replace('group_code','group').replace('symbol_name','context')
             subsection += f"\n\n**{factor_named.title()}{significance}:** *{test}*(*{df_1}, {df_2}*) = {test_value}, *p* {p}"
 
-            #Add planned comparisons for pain analyses (with groups > 2)
-            if ':' in factor:
+            #Add planned comparisons
+            if 'binned_trial' in factor:
+                planned_target = ''
+            elif ':' in factor:
                 planned_target = f'{target}-by-interaction'
             elif 'group' in factor:
                 planned_target = f'{target}-by-group'

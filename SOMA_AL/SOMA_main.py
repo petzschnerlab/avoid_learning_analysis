@@ -58,7 +58,7 @@ if __name__ == '__main__':
     test_rolling_mean = 5
     test_context_type = 'context' #'context' or 'symbol'
 
-    #Other parameters
+    #Run parameters
     hide_stats = False
     hide_posthocs = False
     load_stats = True
@@ -112,5 +112,4 @@ if __name__ == '__main__':
         SOMA_pipeline.run(**kwargs)
 
     #Debug stop
-
     print()

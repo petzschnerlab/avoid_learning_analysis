@@ -139,6 +139,10 @@ class Processing:
         #Create trial indices - computes both cases (75R1, 75R2) of reward and both cases of punish (75P1, 75P2) seperately to later be averaged
         self.learning_data['trial_number'] = self.learning_data.groupby(['participant_id', 'symbol_names']).cumcount() + 1
 
+        #Create binned trial indices
+        self.learning_data['binned_trial'] = np.ceil(self.learning_data['trial_number'] / 6).astype(int)
+        self.learning_data['binned_trial'].replace({1: 'Early', 2: 'Mid-Early', 3: 'Mid-Late', 4: 'Late'}, inplace=True)
+
         #Create trial indices per participant and symbol_name #TODO: Check this
         self.learning_data['trial_number_symbol'] = self.learning_data.groupby(['participant_id', 'symbol_names']).cumcount() + 1
 

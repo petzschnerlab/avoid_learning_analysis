@@ -63,13 +63,14 @@ class Statistics:
     
         #Linear Mixed Effects Models
         #Learning accuracy
-        formula = f'accuracy~1+{self.group_code}*symbol_name+(1|participant_id)'
+        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)'
         if self.covariate is not None:
-            formula = f'accuracy~1+{self.group_code}*symbol_name+{self.covariate}+(1|participant_id)'
+            formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+{self.covariate}+(1|participant_id)'
         
-        assumption_data = self.average_byfactor(self.learning_data, 'accuracy', [self.group_code, 'symbol_name'])
+        assumption_data = self.average_byfactor(self.learning_data, 'accuracy', [self.group_code, 'symbol_name', 'binned_trial'])
         assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
         assumption_data['symbol_name'] = pd.Categorical(assumption_data['symbol_name'], ['Reward', 'Punish'])
+        assumption_data['binned_trial'] = pd.Categorical(assumption_data['binned_trial'], ['Early', 'Mid-Early', 'Mid-Late', 'Late'])
         self.learning_accuracy_glmm_assumptions = self.glmm_assumption_check(assumption_data, formula, phase='learning')
 
         self.learning_accuracy_glmm = self.generalized_linear_model(formula, 
@@ -80,13 +81,14 @@ class Statistics:
                                                family='binomial')
         
         #Learning RT
-        formula = f'rt~1+{self.group_code}*symbol_name+(1|participant_id)'
+        formula = f'rt~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)'
         if self.covariate is not None:
-            formula = f'rt~1+{self.group_code}*symbol_name+{self.covariate}+(1|participant_id)'
+            formula = f'rt~1+{self.group_code}*symbol_name*binned_trial+{self.covariate}+(1|participant_id)'
 
-        assumption_data = self.average_byfactor(self.learning_data, 'rt', [self.group_code, 'symbol_name'])
+        assumption_data = self.average_byfactor(self.learning_data, 'rt', [self.group_code, 'symbol_name', 'binned_trial'])
         assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
         assumption_data['symbol_name'] = pd.Categorical(assumption_data['symbol_name'], ['Reward', 'Punish'])
+        assumption_data['binned_trial'] = pd.Categorical(assumption_data['binned_trial'], ['Early', 'Mid-Early', 'Mid-Late', 'Late'])
         self.learning_rt_glmm_assumptions = self.glmm_assumption_check(assumption_data, formula, phase='learning')
 
         self.learning_rt_glmm = self.generalized_linear_model(formula, 
@@ -227,7 +229,7 @@ class Statistics:
                         ['healthy~Loss Avoid', 'depressed~Loss Avoid'], 
                         ['healthy~Reward-Loss Avoid', 'depressed~Reward-Loss Avoid']]
         
-        factors = [self.group_code, 'context_val_name']
+        factors = [self.group_code, 'context_val_name', 'binned_trial']
         data1 = self.average_byfactor(self.learning_data, 'accuracy', factors)
         data2 = self.manipulate_data(data1, 'accuracy', 'context_val_name', 'Reward-Loss Avoid')
         data = [data1, data1, data2]
@@ -601,7 +603,7 @@ class Statistics:
         
         #Create combined factor
         if type(factor) is list:
-            data['factor'] = data.apply(lambda x: str(x[factor[0]]) + ' & ' + str(x[factor[1]]), axis=1)
+            data['factor'] = data.apply(lambda x: ' & '.join([str(x[f]) for f in factor]), axis=1)
             factor = 'factor'
 
         #Remove any nans
