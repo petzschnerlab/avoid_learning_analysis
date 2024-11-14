@@ -79,6 +79,9 @@ class Report:
         if self.hide_posthocs == False:
             section_text = []
             section_text.append('## Appendix A')
+            section_text.append("""Appendix A contains a collection of all possible post-hoc comparisons. 
+                                Some of these are the same as the planned comparisons and should be ignored.
+                                In addition, many of these comparisons are not meaningful, but we included them for completeness.""")
             self.add_data_pdf(section_text, center=True)
 
             section_text = []
@@ -101,16 +104,26 @@ class Report:
             section_text.extend(self.insert_table(self.transfer_rt_posthoc_context, 'transfer_rt_context'))
             self.add_data_pdf(section_text, center=True)
 
+            max_rows = 30
             section_text = []
             section_text.append('## Post-Hoc Comparisons: Interaction Comparisons')
             section_text.append('### Learning Accuracy')
-            section_text.extend(self.insert_table(self.learning_accuracy_posthoc_interaction, 'learning_accuracy_interaction'))
+            section_text.extend(self.insert_table(self.learning_accuracy_posthoc_interaction, 'learning_accuracy_interaction', max_rows))
+            self.add_data_pdf(section_text, center=True)
+
+            section_text = []
             section_text.append('### Learning Reaction Time')
-            section_text.extend(self.insert_table(self.learning_rt_posthoc_interaction, 'learning_rt_interaction'))
+            section_text.extend(self.insert_table(self.learning_rt_posthoc_interaction, 'learning_rt_interaction', max_rows))
+            self.add_data_pdf(section_text, center=True)
+
+            section_text = []
             section_text.append('### Transfer Accuracy')
-            section_text.extend(self.insert_table(self.transfer_accuracy_posthoc_interaction, 'transfer_accuracy_interaction'))
+            section_text.extend(self.insert_table(self.transfer_accuracy_posthoc_interaction, 'transfer_accuracy_interaction', max_rows))
+            self.add_data_pdf(section_text, center=True)
+
+            section_text = []
             section_text.append('### Transfer Reaction Time')
-            section_text.extend(self.insert_table(self.transfer_rt_posthoc_interaction, 'transfer_rt_interaction'))
+            section_text.extend(self.insert_table(self.transfer_rt_posthoc_interaction, 'transfer_rt_interaction', max_rows))
             self.add_data_pdf(section_text, center=True)
 
         #Save to pdf
@@ -411,11 +424,22 @@ class Report:
        
         return subsection
     
-    def insert_table(self, table, save_name):
-        self.table_to_png(table, save_name=f'SOMA_AL/plots/{save_name}.png')
+    def insert_table(self, table, save_name, max_rows=None):
 
-        subsection = [f'{self.get_caption(save_name, target_type="table")}',
-                      f'#### ![{save_name}](SOMA_AL/plots/{save_name}.png)\n']
+        #Set title
+        subsection = [f'{self.get_caption(save_name, target_type="table")}']
+        
+        #Split into subtables
+        if max_rows is not None:
+            table = table.reset_index()
+            n = len(table)
+            subtables = [table[i:i+max_rows] for i in range(0, n, max_rows)]
+            for i, subtable in enumerate(subtables):
+                self.table_to_png(subtable.set_index('factor'), save_name=f'SOMA_AL/plots/{save_name}_{i}.png')
+                subsection += [f'#### ![{save_name}_{i}](SOMA_AL/plots/{save_name}_{i}.png)\n']
+        else: #Print full table
+            self.table_to_png(table, save_name=f'SOMA_AL/plots/{save_name}.png')
+            subsection += [f'#### ![{save_name}](SOMA_AL/plots/{save_name}.png)\n']
        
         return subsection
     

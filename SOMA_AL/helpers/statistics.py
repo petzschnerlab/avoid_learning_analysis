@@ -603,7 +603,7 @@ class Statistics:
         
         #Create combined factor
         if type(factor) is list:
-            data['factor'] = data.apply(lambda x: ' & '.join([str(x[f]) for f in factor]), axis=1)
+            data['factor'] = data.apply(lambda x: ' vs '.join([str(x[f]) for f in factor]), axis=1)
             factor = 'factor'
 
         #Remove any nans
