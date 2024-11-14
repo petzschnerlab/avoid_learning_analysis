@@ -229,18 +229,20 @@ class Statistics:
                         ['healthy~Loss Avoid', 'depressed~Loss Avoid'], 
                         ['healthy~Reward-Loss Avoid', 'depressed~Reward-Loss Avoid']]
         
-        factors = [self.group_code, 'context_val_name', 'binned_trial']
+        factors = [self.group_code, 'context_val_name']
         data1 = self.average_byfactor(self.learning_data, 'accuracy', factors)
         data2 = self.manipulate_data(data1, 'accuracy', 'context_val_name', 'Reward-Loss Avoid')
         data = [data1, data1, data2]
         self.learning_accuracy_planned_interaction = self.planned_ttests('accuracy', factors, comparisons, data)
-        self.learning_accuracy_posthoc_interaction = self.post_hoc_tests('accuracy', factors, data1)
+        data = self.average_byfactor(self.learning_data, 'accuracy', [self.group_code, 'context_val_name', 'binned_trial'])
+        self.learning_accuracy_posthoc_interaction = self.post_hoc_tests('accuracy', factors, data)
 
         data1 = self.average_byfactor(self.learning_data, 'rt', factors)
         data2 = self.manipulate_data(data1, 'rt', 'context_val_name', 'Reward-Loss Avoid')
         data = [data1, data1, data2]
         self.learning_rt_planned_interaction = self.planned_ttests('rt', factors, comparisons, data)
-        self.learning_rt_posthoc_interaction = self.post_hoc_tests('rt', factors, data1)
+        data = self.average_byfactor(self.learning_data, 'rt', [self.group_code, 'context_val_name', 'binned_trial'])
+        self.learning_rt_posthoc_interaction = self.post_hoc_tests('rt', factors, data)
 
         if self.split_by_group == 'pain':
             comparisons = [['no pain~High Reward-Low Punish', 'acute pain~High Reward-Low Punish'],
@@ -603,7 +605,7 @@ class Statistics:
         
         #Create combined factor
         if type(factor) is list:
-            data['factor'] = data.apply(lambda x: ' vs '.join([str(x[f]) for f in factor]), axis=1)
+            data['factor'] = data.apply(lambda x: ' & '.join([str(x[f]) for f in factor]), axis=1)
             factor = 'factor'
 
         #Remove any nans
