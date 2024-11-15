@@ -244,7 +244,7 @@ class Report:
                 caption = """Averaged behavioral performance during learning for the reward and punishment contexts for each group.
                 Boxplots show the mean and 95\% confidence intervals of the accuracy for each context across participants within each group.
                 Half-violin plots show the distribution of accuracy for each context across participants within each group.
-                Scatter points show the averaged accuracy for each participant within each symbol type."""
+                Scatter points show the averaged accuracy for each participant within each context."""
 
             case 'learning-accuracy-diff':
                 caption = """Averaged difference (Reward - Punish) of behavioral performance during learning for each group.
@@ -256,7 +256,7 @@ class Report:
                 caption = """Averaged behavioral performance during learning for the reward and punishment contexts for each group.
                 Boxplots show the mean and 95\% confidence intervals of the reaction times for each context across participants within each group.
                 Half-violin plots show the distribution of reaction times for each context across participants within each group.
-                Scatter points show the averaged reaction times for each participant within each symbol type."""
+                Scatter points show the averaged reaction times for each participant within each context."""
 
             case 'learning-rt-diff':
                 caption = """Averaged difference (Reward - Punish) of behavioral performance during learning for each group.
@@ -284,7 +284,7 @@ class Report:
 
             case 'transfer-choice-rate':
                 caption = """Choice rate for each symbol during transfer trials for each group.
-                Choice rate is computed as the number of times a symbol was chosen given the number of times it was presented.
+                Choice rate is computed as the percentage of times a symbol was chosen given the number of times it was presented.
                 Boxplots show the mean and 95\% confidence intervals of the choice rate for each symbol type across participants within each group.
                 Half-violin plots show the distribution of choice rates for each symbol type across participants within each group.
                 Scatter points show the averaged choice rate for each participant within each symbol type."""
@@ -396,7 +396,7 @@ class Report:
             subsection += f"\n\n**{factor_named.title()}{significance}:** *{test}*(*{df_1}, {df_2}*) = {test_value}, *p* {p}"
 
             #Add planned comparisons
-            if 'binned_trial' in factor:
+            if 'binned_trial' in factor or 'depression' == factor:
                 planned_target = ''
             elif ':' in factor:
                 planned_target = f'{target}-by-interaction'
