@@ -107,13 +107,43 @@ class Report:
             max_rows = 30
             section_text = []
             section_text.append('## Post-Hoc Comparisons: Interaction Comparisons')
-            section_text.append('### Learning Accuracy')
-            section_text.extend(self.insert_table(self.learning_accuracy_posthoc_interaction, 'learning_accuracy_interaction', max_rows))
+            section_text.append('### Learning Accuracy: Group x Context')
+            section_text.extend(self.insert_table(self.learning_accuracy_posthoc_group_context, 'learning_accuracy_group_context', max_rows))
             self.add_data_pdf(section_text, center=True)
 
             section_text = []
-            section_text.append('### Learning Reaction Time')
-            section_text.extend(self.insert_table(self.learning_rt_posthoc_interaction, 'learning_rt_interaction', max_rows))
+            section_text.append('### Learning Accuracy: Group x Trial')
+            section_text.extend(self.insert_table(self.learning_accuracy_posthoc_group_trial, 'learning_accuracy_group_trial', max_rows))
+            self.add_data_pdf(section_text, center=True)
+
+            section_text = []
+            section_text.append('### Learning Accuracy: Context x Trial')
+            section_text.extend(self.insert_table(self.learning_accuracy_posthoc_context_trial, 'learning_accuracy_context_trial', max_rows))
+            self.add_data_pdf(section_text, center=True)
+
+            section_text = []
+            section_text.append('### Learning Accuracy: Group x Context x Trial')
+            section_text.extend(self.insert_table(self.learning_accuracy_posthoc_group_context_trial, 'learning_accuracy_group_context_trial', max_rows))
+            self.add_data_pdf(section_text, center=True)
+
+            section_text = []
+            section_text.append('### Learning Reaction Time: Group x Context')
+            section_text.extend(self.insert_table(self.learning_rt_posthoc_group_context, 'learning_rt_group_context', max_rows))
+            self.add_data_pdf(section_text, center=True)
+
+            section_text = []
+            section_text.append('### Learning Reaction Time: Group x Trial')
+            section_text.extend(self.insert_table(self.learning_rt_posthoc_group_trial, 'learning_rt_group_trial', max_rows))
+            self.add_data_pdf(section_text, center=True)
+
+            section_text = []
+            section_text.append('### Learning Reaction Time: Context x Trial')
+            section_text.extend(self.insert_table(self.learning_rt_posthoc_context_trial, 'learning_rt_context_trial', max_rows))
+            self.add_data_pdf(section_text, center=True)
+
+            section_text = []
+            section_text.append('### Learning Reaction Time: Group x Context x Trial')
+            section_text.extend(self.insert_table(self.learning_rt_posthoc_group_context_trial, 'learning_rt_group_context_trial', max_rows))
             self.add_data_pdf(section_text, center=True)
 
             section_text = []

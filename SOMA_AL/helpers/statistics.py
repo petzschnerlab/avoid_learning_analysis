@@ -234,17 +234,43 @@ class Statistics:
         data2 = self.manipulate_data(data1, 'accuracy', 'context_val_name', 'Reward-Loss Avoid')
         data = [data1, data1, data2]
         self.learning_accuracy_planned_interaction = self.planned_ttests('accuracy', factors, comparisons, data)
-        factors = [self.group_code, 'context_val_name', 'binned_trial']
+        
+        factors = [self.group_code, 'context_val_name'] #Interaction - group|context
         data = self.average_byfactor(self.learning_data, 'accuracy', factors)
-        self.learning_accuracy_posthoc_interaction = self.post_hoc_tests('accuracy', factors, data)
+        self.learning_accuracy_posthoc_group_context = self.post_hoc_tests('accuracy', factors, data)
+
+        factors = [self.group_code, 'binned_trial'] #Interaction - group|trial
+        data = self.average_byfactor(self.learning_data, 'accuracy', factors)
+        self.learning_accuracy_posthoc_group_trial = self.post_hoc_tests('accuracy', factors, data)
+
+        factors = ['context_val_name', 'binned_trial'] #Interaction - context|trial
+        data = self.average_byfactor(self.learning_data, 'accuracy', factors)
+        self.learning_accuracy_posthoc_context_trial = self.post_hoc_tests('accuracy', factors, data)
+        
+        factors = [self.group_code, 'context_val_name', 'binned_trial'] #Interaction - group|context|trial
+        data = self.average_byfactor(self.learning_data, 'accuracy', factors)
+        self.learning_accuracy_posthoc_group_context_trial = self.post_hoc_tests('accuracy', factors, data)
 
         data1 = self.average_byfactor(self.learning_data, 'rt', factors)
         data2 = self.manipulate_data(data1, 'rt', 'context_val_name', 'Reward-Loss Avoid')
         data = [data1, data1, data2]
         self.learning_rt_planned_interaction = self.planned_ttests('rt', factors, comparisons, data)
-        factors = [self.group_code, 'context_val_name', 'binned_trial']
+
+        factors = [self.group_code, 'context_val_name'] #Interaction - group|context
         data = self.average_byfactor(self.learning_data, 'rt', factors)
-        self.learning_rt_posthoc_interaction = self.post_hoc_tests('rt', factors, data)
+        self.learning_rt_posthoc_group_context = self.post_hoc_tests('rt', factors, data)
+
+        factors = [self.group_code, 'binned_trial'] #Interaction - group|trial
+        data = self.average_byfactor(self.learning_data, 'rt', factors)
+        self.learning_rt_posthoc_group_trial = self.post_hoc_tests('rt', factors, data)
+
+        factors = ['context_val_name', 'binned_trial'] #Interaction - context|trial
+        data = self.average_byfactor(self.learning_data, 'rt', factors)
+        self.learning_rt_posthoc_context_trial = self.post_hoc_tests('rt', factors, data)
+
+        factors = [self.group_code, 'context_val_name', 'binned_trial'] #Interaction - group|context|trial
+        data = self.average_byfactor(self.learning_data, 'rt', factors)
+        self.learning_rt_posthoc_group_context_trial = self.post_hoc_tests('rt', factors, data)
 
         if self.split_by_group == 'pain':
             comparisons = [['no pain~High Reward-Low Punish', 'acute pain~High Reward-Low Punish'],
