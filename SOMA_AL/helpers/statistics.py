@@ -234,14 +234,16 @@ class Statistics:
         data2 = self.manipulate_data(data1, 'accuracy', 'context_val_name', 'Reward-Loss Avoid')
         data = [data1, data1, data2]
         self.learning_accuracy_planned_interaction = self.planned_ttests('accuracy', factors, comparisons, data)
-        data = self.average_byfactor(self.learning_data, 'accuracy', [self.group_code, 'context_val_name', 'binned_trial'])
+        factors = [self.group_code, 'context_val_name', 'binned_trial']
+        data = self.average_byfactor(self.learning_data, 'accuracy', factors)
         self.learning_accuracy_posthoc_interaction = self.post_hoc_tests('accuracy', factors, data)
 
         data1 = self.average_byfactor(self.learning_data, 'rt', factors)
         data2 = self.manipulate_data(data1, 'rt', 'context_val_name', 'Reward-Loss Avoid')
         data = [data1, data1, data2]
         self.learning_rt_planned_interaction = self.planned_ttests('rt', factors, comparisons, data)
-        data = self.average_byfactor(self.learning_data, 'rt', [self.group_code, 'context_val_name', 'binned_trial'])
+        factors = [self.group_code, 'context_val_name', 'binned_trial']
+        data = self.average_byfactor(self.learning_data, 'rt', factors)
         self.learning_rt_posthoc_interaction = self.post_hoc_tests('rt', factors, data)
 
         if self.split_by_group == 'pain':
@@ -491,7 +493,7 @@ class Statistics:
             if family == 'gaussian':
                 model_summary = model_summary[['Unnamed: 0', 'NumDF', 'F value', 'Pr(>F)']]
             else: 
-                model_summary = model_summary[['Unnamed: 0', 'Df', 'Chisq', 'Pr(>Chisq)']]
+                model_summary = model_summary[['Unnamed: 0', 'Chi Df', 'Chisq', 'Pr(>Chisq)']]
             model_summary.columns = ['factor', 'df', 'test_value', 'p_value']
         else:
             if random_effect:
