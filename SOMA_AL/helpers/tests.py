@@ -9,14 +9,23 @@ class Tests:
     Class to run tests for the SOMA project
     """
 
-    def run_tests(self):
+    def run_tests(self) -> None:
+
+        """
+        Run tests for the SOMA project    
+        """
+
         #self.test_trial_counts() #Due to exclusion of trials via RT violations, this test no longer works
         if self.tests == 'extensive':
             self.test_plot_learning_accuracy(self.test_rolling_mean, self.test_context_type)
         self.test_determine_contingencies()
         self.check_condition_order()
 
-    def test_trial_counts(self):
+    def test_trial_counts(self) -> None:
+
+        """
+        Test to ensure that each participant has the correct number of trials
+        """
 
         #for each articiant plot the trial indexes as the y axis using matlpotlib
         for participant in self.learning_data['participant_id'].unique():
@@ -29,7 +38,11 @@ class Tests:
             if participant_trial_counts[0] != 48 or participant_trial_counts[1] != 48:
                 raise ValueError(f'Participant {participant} has incorrect number of trials: {participant_trial_counts}') 
             
-    def test_plot_learning_accuracy(self, rolling_mean=None, context_type='context'):
+    def test_plot_learning_accuracy(self, rolling_mean: int = None, context_type: str = 'context' ) -> None:
+
+        """
+        Test to plot learning accuracy for each participant
+        """
 
         #Create folder for plots if non existent
         if not os.path.exists('SOMA_AL/plots/tests'):
@@ -86,7 +99,11 @@ class Tests:
                 #Close figure
                 plt.close()
 
-    def test_determine_contingencies(self):
+    def test_determine_contingencies(self) -> None:
+
+        """
+        Test to determine the contingencies for each symbol
+        """
 
         #Determine the symbols from symbol_L_name and symbol_R_name for the first and second half of data based on trial_number
         split_symbols = []
@@ -152,7 +169,11 @@ class Tests:
             if abs(feedback_freqs[symbol][0] - feedback_freqs[symbol][1]) > 10:
                 raise ValueError(f'Feedback frequencies for symbol {symbol} are incorrect: {feedback_freqs[symbol]}')
             
-    def check_condition_order(self):
+    def check_condition_order(self) -> None:
+
+        """
+        Check whether the conditions are in the same order
+        """
 
         #Check whether the conditions are in the same order for each participant using symbol_L_name
         participant_order = []
