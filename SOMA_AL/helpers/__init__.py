@@ -4,13 +4,15 @@ from helpers.report import Report
 from helpers.parameters import Parameters
 from helpers.tests import Tests
 from helpers.statistics import Statistics
+from helpers.help import Help
 
 class Master(Processing, 
                  Plotting, 
                  Report, 
                  Parameters,
                  Statistics, 
-                 Tests):
+                 Tests,
+                 Help):
     
     """
     Class to hold all functions for the SOMA project

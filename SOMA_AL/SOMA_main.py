@@ -19,8 +19,23 @@ class SOMAPipeline(Master):
 
     def run(self, **kwargs):
 
-        #Run the pipeline
+        '''
+        Run the SOMA pipeline
+
+        Parameters
+        ----------
+        
+        '''
+
+        #Collect the parameters
         self.set_parameters(**kwargs)
+
+        #Run the help
+        if self.help:
+            self.print_help()
+            return None
+        
+        #Run the pipeline
         self.announce(case='start')
         self.load_data(file_path = self.file_path, file_name = self.file_name)
         if 'depression' in self.split_by_group_id:
@@ -86,7 +101,8 @@ if __name__ == '__main__':
             dataset = 'Pain with depression covariate'
         
         #Create a dict of args
-        kwargs = {'author': author,
+        kwargs = {'help': False,
+                  'author': author,
                   'dataset': dataset,
                   'rscripts_path': rscripts_path,
                   'file_path': file_path,

@@ -16,7 +16,8 @@ class Parameters:
         """
 
         #Warning of unknown params
-        accepted_params = ['author',
+        accepted_params = ['help',
+                           'author',
                            'rscripts_path',
                            'file_path', 
                            'file_name', 
@@ -44,9 +45,10 @@ class Parameters:
         #Warning of missing required params
         required_params = ['file_path', 
                            'file_name']
-        for param in required_params:
-            if param not in kwargs:
-                raise ValueError(f'Missing required parameter {param}, which does not contain a default. Please provide a value for this parameter.')
+        if not kwargs.get('help', False):
+            for param in required_params:
+                if param not in kwargs:
+                    raise ValueError(f'Missing required parameter {param}, which does not contain a default. Please provide a value for this parameter.')
 
         #Set internal parameters
         self.figure_count = 1
@@ -55,6 +57,7 @@ class Parameters:
 
         #Unpack parameters
         self.kwargs = kwargs
+        self.help = kwargs.get('help', False)
         self.author = kwargs.get('author', 'SOMA_Team')
         self.rscripts_path = kwargs.get('rscripts_path', None)
         self.file_path = kwargs.get('file_path', None)
@@ -72,7 +75,6 @@ class Parameters:
         self.tests = kwargs.get('tests', 'basic') #'basic' or 'extensive'
         self.test_rolling_mean = kwargs.get('test_rolling_mean', None)
         self.test_context_type = kwargs.get('test_context_type', 'context')
-        self.rscripts_path = kwargs.get('rscripts_path', None)
         self.hide_stats = kwargs.get('hide_stats', False)
         self.load_stats = kwargs.get('load_stats', False)
         self.hide_posthocs = kwargs.get('hide_posthocs', False)
