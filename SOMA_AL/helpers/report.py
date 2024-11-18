@@ -12,7 +12,11 @@ class Report:
     """
 
     #Report builders
-    def build_report(self):
+    def build_report(self) -> None:
+
+        """
+        Builds and prints the SOMA report
+        """
 
         #Initiate processes
         self.print_plots()
@@ -36,8 +40,7 @@ class Report:
         section_text.append(f'### Learning Accuracy')
         section_text.extend(self.insert_image('learning-accuracy-by-group'))
         section_text.extend(self.insert_image('learning-accuracy'))
-        #section_text.extend(self.insert_image('learning-accuracy-diff'))
-        #section_text.extend(self.insert_image('learning-accuracy-by-context'))
+
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
@@ -48,8 +51,7 @@ class Report:
         section_text.append('### Learning Reaction Time')
         section_text.extend(self.insert_image('learning-rt-by-group'))
         section_text.extend(self.insert_image('learning-rt'))
-        #section_text.extend(self.insert_image('learning-rt-diff'))
-        #section_text.extend(self.insert_image('learning-rt-by-context'))
+
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
@@ -59,7 +61,6 @@ class Report:
         section_text = []
         section_text.append('### Choice Rate')
         section_text.extend(self.insert_image('transfer-choice-rate'))
-        #section_text.extend(self.insert_image('transfer-choice-rate-neutral'))
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
@@ -69,13 +70,13 @@ class Report:
         section_text = []
         section_text.append('### Transfer Reaction Time')   
         section_text.extend(self.insert_image('transfer-rt'))
-        #section_text.extend(self.insert_image('transfer-rt-neutral'))
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
         section_text.extend(self.get_statistics('transfer-rt'))
         self.add_data_pdf(section_text, center=True)
 
+        #Post-hocs
         if self.hide_posthocs == False:
             section_text = []
             section_text.append('## Appendix A')
@@ -159,7 +160,12 @@ class Report:
         #Save to pdf
         self.save_report()
 
-    def save_report(self):
+    def save_report(self) -> None:
+
+        """
+        Saves the report as a pdf
+        """
+
         try:
             #Save pdf with default filename
             self.pdf.save(self.print_filename)
@@ -178,7 +184,19 @@ class Report:
             #Raise warning
             warnings.warn(f'File {original_filename} is currently opened. Saving as {self.print_filename}', stacklevel=2)
      
-    def print_planned_statistics(self, comparison, model_summary):
+    def print_planned_statistics(self, comparison: str, model_summary: pd.DataFrame) -> str:
+
+        """
+        Prints the planned comparison statistics
+        
+        Parameters
+        ----------
+        comparison : str
+            The comparisons being made
+        model_summary : pd.DataFrame
+            The summary statistics for the comparison
+        """
+
         if '~' in comparison:
             comparisons = comparison.split(' vs ')
             comparison = f"{comparisons[0].split('~')[0]} vs {comparisons[1].split('~')[0]}: {comparisons[0].split('~')[1]}"
@@ -203,13 +221,38 @@ class Report:
         return subsection
 
     #Formatting functions
-    def add_data_pdf(self, content:list, toc:bool=True, center:bool=False):
+    def add_data_pdf(self, content: list, toc: bool = True, center: bool = False) -> None:
+
+        """
+        Adds the content to the pdf
+        
+        Parameters
+        ----------
+        content : list
+            The content to add to the pdf
+        toc : bool
+            Whether to add a table of contents
+        center : bool
+            Whether to center the content
+        """
+
         #Formatting
         user_css = 'h4 {text-align:center;}' if center else None
         section = Section(' \n '.join(content), toc=toc)
         self.pdf.add_section(section, user_css=user_css)
 
-    def table_to_png(self, table:pd.DataFrame, save_name="SOMA_AL/plots/Table.png"):
+    def table_to_png(self, table: pd.DataFrame, save_name: str = "SOMA_AL/plots/Table.png") -> None:
+
+        """
+        Converts a table to a png
+
+        Parameters
+        ----------
+        table : pd.DataFrame
+            The table to convert
+        save_name : str
+            The name to save the table as
+        """
         
         #Format titles as titles
         for i in range(len(table)):
@@ -235,19 +278,50 @@ class Report:
         dfi.export(table, save_name, table_conversion="selenium", max_rows=-1)#, table_conversion='matplotlib')
     
     #Data retrieval functions   
-    def add_figure_caption(self, text):
+    def add_figure_caption(self, text: str) -> str:
+
+        """
+        Adds a figure mumner to the caption
+
+        Parameters
+        ----------
+        text : str
+            The text to add to the caption
+        """
+
         section_text = f'**Figure {self.figure_count}.** {text}'
         self.figure_count += 1
 
         return section_text
     
-    def add_table_caption(self, text):
+    def add_table_caption(self, text: str) -> str:
+
+        """
+        Adds a table number to the caption
+
+        Parameters
+        ----------
+        text : str
+            The text to add to the caption
+        """
+
         section_text = f'**Table {self.table_count}.** {text}'
         self.table_count += 1
         
         return section_text
 
-    def get_caption(self, target, target_type='figure'):
+    def get_caption(self, target: str, target_type: str = 'figure') -> str:
+
+        """
+        Gets the caption for the target
+
+        Parameters
+        ----------
+        target : str
+            The target to get the caption for
+        target_type : str
+            The type of target
+        """
         
         caption = ''
         match target:
@@ -343,7 +417,17 @@ class Report:
 
         return caption
     
-    def get_metadata(self, data):
+    def get_metadata(self, data: dict) -> tuple:
+        
+        """
+        Gets the metadata for the data
+
+        Parameters
+        ----------
+        data : dict
+            The data to get the metadata for
+        """
+
         formula = data['metadata']['formula']
         fixed_effects = data['metadata']['fixed_effects']
         random_effects = data['metadata']['random_effects']
@@ -354,7 +438,16 @@ class Report:
 
         return formula, outcome, fixed_effects, random_effects, sample_size, df_residual, test
     
-    def get_statistics(self, target):
+    def get_statistics(self, target: str) -> list[str]:
+
+        """
+        Gets the statistics for the target
+
+        Parameters
+        ----------
+        target : str
+            The target to get the statistics for
+        """
 
         self.data_legend = {'learning-accuracy': self.learning_accuracy_glmm,
                             'learning-rt': self.learning_rt_glmm,
@@ -450,13 +543,36 @@ class Report:
         return [subsection]
     
     #Content builders
-    def insert_image(self, image_name):
+    def insert_image(self, image_name: str) -> list[str]:
+
+        """
+        Inserts an image for the report
+
+        Parameters
+        ----------
+        image_name : str
+            The name of the image
+        """
+
         subsection = [f'#### ![{image_name}](SOMA_AL/plots/{image_name}.png)\n', 
                       f'{self.get_caption(image_name)}\n']
        
         return subsection
     
-    def insert_table(self, table, save_name, max_rows=None):
+    def insert_table(self, table: pd.DataFrame, save_name: str, max_rows: int = None) -> list[str]:
+
+        """
+        Inserts a table for the report
+
+        Parameters
+        ----------
+        table : pd.DataFrame
+            The table to insert
+        save_name : str
+            The name to save the table as
+        max_rows : int
+            The maximum number of rows to display in each subtable
+        """
 
         #Set title
         subsection = [f'{self.get_caption(save_name, target_type="table")}']
@@ -475,12 +591,22 @@ class Report:
        
         return subsection
     
-    def insert_title_page(self):
+    def insert_title_page(self) -> None:
+
+        """
+        Inserts the title page for the report
+        """
+
         section_text = [f'# SOMA Report',
                         f'![SOMA_logo](SOMA_AL/media/SOMA_preview.png)']
         self.add_data_pdf(section_text)
 
-    def insert_report_details(self):
+    def insert_report_details(self) -> None:
+
+        """
+        Inserts the report details for the report
+        """
+
         section_text = [f'## SOMA Report Details',
                         f'**Generated by:** {self.author}\n',
                         f'**Date:** {str(pd.Timestamp.now()).split(" ")[0]}',
@@ -491,7 +617,12 @@ class Report:
         section_text.append(f'\n\n{"*Note: statistics are hidden, to reveal them, set hide_stats=False.*" if self.hide_stats else ""}')
         self.add_data_pdf(section_text)
 
-    def insert_analysis_details(self):
+    def insert_analysis_details(self) -> None:
+
+        """
+        Inserts the analysis details for the report
+        """
+
         section_text = [f'## Data Characteristics',
                         f'**File{"s" if len(self.file_name) > 1 else ""}:** {", ".join(self.file_name)}',
                         f'### Grouping',
@@ -508,7 +639,12 @@ class Report:
                         f'**Percentage of Trials Excluded (RT Threshold: < {self.RT_low_threshold}ms or > {self.RT_high_threshold}ms):** {self.trials_excluded_rt.round(2)}%\n']
         self.add_data_pdf(section_text)
     
-    def insert_demographics_table(self):
+    def insert_demographics_table(self) -> None:
+
+        """
+        Inserts the demographics table for the report
+        """
+        
         column_blanks = ['','','',''] if self.split_by_group == 'pain' else ['','','']
         demo_title = pd.DataFrame([column_blanks], columns=self.demographics_summary.columns, index=['Demographics'])
         pain_title = pd.DataFrame([column_blanks], columns=self.demographics_summary.columns, index=['Pain Scores'])
