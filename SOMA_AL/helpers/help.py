@@ -32,7 +32,7 @@ class Help:
 
         }
 
-    def print_help(self):
+    def print_help(self) -> None:
         
         """
         Print the help information.
@@ -41,7 +41,7 @@ class Help:
         self.print_overview()
         self.print_parameters()
 
-    def print_overview(self):
+    def print_overview(self) -> None:
 
         """
         Print the package overview.
@@ -61,7 +61,7 @@ class Help:
         """
         print(overview)
 
-    def print_parameters(self):
+    def print_parameters(self) -> None:
 
         """
         Print the parameter descriptions.
