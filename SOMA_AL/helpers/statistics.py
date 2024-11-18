@@ -19,6 +19,99 @@ class Statistics:
 
         """
         Main function to run the statistical analyses
+
+        Returns (Internal)
+        ------------------
+        self.stats_age : dict
+            The statistics for age
+        self.stats_intensity : dict
+            The statistics for pain intensity
+        self.stats_unpleasant : dict
+            The statistics for pain unpleasantness
+        self.stats_interference : dict
+            The statistics for pain interference
+        self.stats_depression : dict
+            The statistics for depression
+        self.tstats_age : dict
+            The t-tests for age
+        self.tstats_intensity : dict
+            The t-tests for pain intensity
+        self.tstats_unpleasant : dict
+            The t-tests for pain unpleasantness
+        self.tstats_interference : dict
+            The t-tests for pain interference
+        self.tstats_depression : dict
+            The t-tests for depression
+        self.demo_clinical : dict
+            The clinical statistics
+        self.demo_metadata : dict
+            The metadata for the clinical statistics
+        self.demo_clinical_planned : dict
+            The planned ttests for clinical
+
+        self.learning_accuracy_glmm : dict
+            The learning accuracy GLMM
+        self.learning_rt_glmm : dict
+            The learning RT GLMM
+        self.transfer_accuracy_glmm : dict
+            The transfer accuracy GLMM
+        self.transfer_rt_glmm : dict
+            The transfer RT GLMM
+
+        self.learning_accuracy_planned_group : dict
+            The planned ttests for learning accuracy group
+        self.learning_accuracy_posthoc_group : dict
+            The posthoc tests for learning accuracy group
+        self.learning_rt_planned_group : dict
+            The planned ttests for learning RT group
+        self.learning_rt_posthoc_group : dict
+            The posthoc tests for learning RT group
+        self.transfer_accuracy_planned_group : dict
+            The planned ttests for transfer accuracy group
+        self.transfer_accuracy_posthoc_group : dict
+            The posthoc tests for transfer accuracy group
+        self.transfer_rt_planned_group : dict
+            The planned ttests for transfer RT group
+        self.transfer_rt_posthoc_group : dict
+            The posthoc tests for transfer RT group
+
+        self.transfer_accuracy_planned_context : dict
+            The planned ttests for transfer accuracy context
+        self.transfer_accuracy_posthoc_context : dict
+            The posthoc tests for transfer accuracy context
+        self.transfer_rt_planned_context : dict
+            The planned ttests for transfer RT context
+        self.transfer_rt_posthoc_context : dict
+            The posthoc tests for transfer RT context
+
+        self.learning_accuracy_planned_interaction : dict
+            The planned ttests for learning accuracy interaction
+        self.learning_accuracy_posthoc_group_context : dict
+            The posthoc tests for learning accuracy group context
+        self.learning_accuracy_posthoc_group_trial : dict
+            The posthoc tests for learning accuracy group trial
+        self.learning_accuracy_posthoc_context_trial : dict
+            The posthoc tests for learning accuracy context trial
+        self.learning_accuracy_posthoc_group_context_trial : dict
+            The posthoc tests for learning accuracy group context trial
+        self.learning_rt_planned_interaction : dict
+            The planned ttests for learning RT interaction
+        self.learning_rt_posthoc_group_context : dict
+            The posthoc tests for learning RT group context
+        self.learning_rt_posthoc_group_trial : dict
+            The posthoc tests for learning RT group trial
+        self.learning_rt_posthoc_context_trial : dict
+            The posthoc tests for learning RT context trial
+        self.learning_rt_posthoc_group_context_trial : dict
+            The posthoc tests for learning RT group context trial
+        self.transfer_accuracy_planned_interaction : dict
+            The planned ttests for transfer accuracy interaction
+        self.transfer_accuracy_posthoc_interaction : dict
+            The posthoc tests for transfer accuracy interaction
+        self.transfer_rt_planned_interaction : dict
+            The planned ttests for transfer RT interaction
+        self.transfer_rt_posthoc_interaction : dict
+            The posthoc tests for transfer RT interaction
         """
 
         #Demograhpics linear models
@@ -312,6 +405,15 @@ class Statistics:
 
         """
         Insert the statistics into the summaries
+
+        Returns (Internal)
+        ------------------
+        self.demographics_summary : pd.DataFrame
+            The demographics summary
+        self.pain_summary : pd.DataFrame
+            The pain summary
+        self.depression_summary : pd.DataFrame
+            The depression summary
         """
 
         #Add p-values to summaries

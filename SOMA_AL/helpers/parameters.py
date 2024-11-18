@@ -18,6 +18,61 @@ class Parameters:
         ----------
         kwargs : dict
             The parameters to assign to the SOMA pipeline class, see help for details.
+
+        Returns (Internal)
+        ------------------
+        self.figure_count : int
+            The figure count for the report.
+        self.table_count : int
+            The table count for the report.
+        self.repo_directory : str
+            The directory of the SOMA_AL repository.
+        self.kwargs : dict
+            The parameters to assign to the SOMA pipeline class.
+        self.help : bool
+            Whether to print the help information.
+        self.author : str
+            The author of the report.
+        self.rscripts_path : str
+            The path to the R scripts.
+        self.file_path : str
+            The path to the data file.
+        self.file_name : str
+            The name of the data file.
+        self.dataset : str
+            The name of the dataset.
+        self.print_filename : str
+            The filename for the report.
+        self.split_by_group : str
+            The group to split the data by.
+        self.split_by_group_id : str
+            The group ID to split the data by.
+        self.covariate : str
+            The covariate to use in the GLMMs.
+        self.depression_cutoff : int
+            The cutoff for the depression group.
+        self.accuracy_exclusion_threshold : int
+            The threshold for excluding participants based on accuracy.
+        self.RT_low_threshold : int
+            The lower threshold for excluding trials based on reaction times.
+        self.RT_high_threshold : int
+            The upper threshold for excluding trials based on reaction times.
+        self.rolling_mean : int
+            The number of trials to use in the rolling mean for plotting learning curves.
+        self.tests : str
+            The type of tests to run.
+        self.test_rolling_mean : int
+            The number of trials to use in the rolling mean for the tests learning curves.
+        self.test_context_type : str
+            The context type to use in the tests learning curves.
+        self.hide_stats : bool
+            Whether to hide the statistics in the report.
+        self.load_stats : bool
+            Whether to load the statistics from the backend.
+        self.hide_posthocs : bool
+            Whether to hide the posthocs in the report.
+        self.verbose : bool
+            Whether to print verbose output.
         """
 
         #Warning of unknown params

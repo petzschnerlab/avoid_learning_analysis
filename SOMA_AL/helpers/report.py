@@ -16,6 +16,11 @@ class Report:
 
         """
         Builds and prints the SOMA report
+
+        Returns (External)
+        ------------------
+        Report: PDF
+            The SOMA report
         """
 
         #Initiate processes
@@ -164,6 +169,11 @@ class Report:
 
         """
         Saves the report as a pdf
+
+        Returns (External)
+        ------------------
+        Report: PDF
+            The SOMA report
         """
 
         try:
@@ -239,6 +249,11 @@ class Report:
             Whether to add a table of contents
         center : bool
             Whether to center the content
+
+        Returns (External)
+        ------------------ 
+        Report: PDF
+            A section of the SOMA report
         """
 
         #Formatting
@@ -257,6 +272,11 @@ class Report:
             The table to convert
         save_name : str
             The name to save the table as
+
+        Returns (External)
+        ------------------
+        Image: PNG
+            The table as a png
         """
         
         #Format titles as titles
@@ -280,7 +300,7 @@ class Report:
                                                                            ('border-right', '1px solid white')]},])
         
         #Save the table as a png
-        dfi.export(table, save_name, table_conversion="selenium", max_rows=-1)#, table_conversion='matplotlib')
+        dfi.export(table, save_name, table_conversion="selenium", max_rows=-1)
     
     #Data retrieval functions   
     def add_figure_caption(self, text: str) -> str:
@@ -598,7 +618,7 @@ class Report:
         Returns
         -------
         subsection : list
-            The subsection for the image
+            The subsection for the report
         """
 
         subsection = [f'#### ![{image_name}](SOMA_AL/plots/{image_name}.png)\n', 
@@ -623,7 +643,7 @@ class Report:
         Returns
         -------
         subsection : list
-            The subsection for the table
+            The subsection for the report
         """
 
         #Set title
@@ -647,6 +667,11 @@ class Report:
 
         """
         Inserts the title page for the report
+
+        Returns (External)
+        ------------------
+        Report: PDF
+            Adds the title page to the SOMA report
         """
 
         section_text = [f'# SOMA Report',
@@ -657,6 +682,11 @@ class Report:
 
         """
         Inserts the report details for the report
+
+        Returns (External)
+        ------------------
+        Report: PDF
+            Adds the report details to the SOMA report
         """
 
         section_text = [f'## SOMA Report Details',
@@ -673,6 +703,11 @@ class Report:
 
         """
         Inserts the analysis details for the report
+
+        Returns (External)
+        ------------------
+        Report: PDF
+            Adds the analysis details to the SOMA report
         """
 
         section_text = [f'## Data Characteristics',
@@ -695,6 +730,11 @@ class Report:
 
         """
         Inserts the demographics table for the report
+
+        Returns (Internal)
+        ------------------
+        self.demographics : pd.DataFrame
+            The demographics table for the report
         """
         
         column_blanks = ['','','',''] if self.split_by_group == 'pain' else ['','','']

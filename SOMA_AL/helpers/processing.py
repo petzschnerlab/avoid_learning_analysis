@@ -24,6 +24,17 @@ class Processing:
             The path to the file
         file_name : str 
             The name of the file
+
+        Returns (Internal)
+        ------------------
+        self.file_path : str
+            The path to the file
+        self.file_name : str
+            The name of the file
+        self.data : pd.DataFrame
+            The data loaded from the file
+        self.participants_original : int
+            The number of participants in the original data
         """
         
         #Create variables to store the file path and file name
@@ -144,6 +155,11 @@ class Processing:
 
         """
         Function to recode the depression scores into a binary variable
+
+        Returns (Internal)
+        ------------------
+        self.data : pd.DataFrame
+            The data with the depression scores recoded
         """
 
         self.data['depression'] = (self.data['PHQ8'] >= self.depression_cutoff).astype(int)
@@ -153,6 +169,13 @@ class Processing:
 
         """
         Function to save the processed data to a new file
+
+        Returns (External)
+        ------------------
+        Data: csv
+            The processed data
+            The learning data
+            The transfer data
         """
 
         #Save the processed data to a new file
@@ -165,6 +188,11 @@ class Processing:
 
         """
         Function to filter and manipulate the learning data
+
+        Returns (Internal)
+        ------------------
+        self.learning_data : pd.DataFrame
+            The filtered learning data
         """
 
         #Filter data
@@ -205,6 +233,11 @@ class Processing:
 
         """
         Function to filter and manipulate the transfer data
+
+        Returns (Internal)
+        ------------------
+        self.transfer_data : pd.DataFrame
+            The filtered transfer data
         """
 
         #Filter data
@@ -238,6 +271,19 @@ class Processing:
         -----------
         threshold : int
             The threshold for accuracy below which participants are excluded.
+
+        Returns (Internal)
+        ------------------
+        self.data : pd.DataFrame
+            The data with participants excluded
+        self.learning_data : pd.DataFrame
+            The learning data with participants excluded
+        self.transfer_data : pd.DataFrame
+            The transfer data with participants excluded
+        self.participants_excluded_accuracy : int
+            The number of participants excluded
+        self.accuracy_threshold : int
+            The threshold for accuracy below which participants are excluded
         """
 
         #Compute accuracy for each participant
@@ -264,12 +310,21 @@ class Processing:
         """
         Function to exclude trials with low/high reaction times.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         low_threshold : int
             The lower threshold for reaction time below which trials are excluded.
         high_threshold : int
             The upper threshold for reaction time above which trials are excluded.
+
+        Returns (Internal)
+        ------------------
+        self.learning_data : pd.DataFrame
+            The learning data with trials excluded
+        self.transfer_data : pd.DataFrame
+            The transfer data with trials excluded
+        self.trials_excluded_rt : float
+            The percentage of trials excluded
         """
 
         self.learning_data['excluded_rt'] = (self.learning_data['rt'] < low_threshold) | (self.learning_data['rt'] > high_threshold)
@@ -288,6 +343,13 @@ class Processing:
 
         """
         Function to average the data for each participant and symbol
+
+        Returns (Internal)
+        ------------------
+        self.avg_learning_data : pd.DataFrame
+            The averaged learning data
+        self.avg_transfer_data : pd.DataFrame
+            The averaged transfer data
         """
 
         #Create participant average for learning data
@@ -439,6 +501,13 @@ class Processing:
 
         """
         Function to compute the accuracy of the learning and transfer data
+
+        Returns (Internal)
+        ------------------
+        self.learning_data : pd.DataFrame
+            The learning data with accuracy computed
+        self.transfer_data : pd.DataFrame
+            The transfer data with accuracy computed
         """
         
         #Compute learning accuracy
@@ -453,6 +522,18 @@ class Processing:
 
         """
         Function to compute the learning averages
+
+        Returns (Internal)
+        ------------------
+        self.learning_accuracy : pd.DataFrame
+            The averaged learning accuracy
+        self.learning_accuracy_diff : pd.DataFrame
+            The difference in learning accuracy
+        self.learning_rt : pd.DataFrame
+            The averaged learning reaction time
+        self.learning_rt_diff : pd.DataFrame
+            The difference in learning reaction time
+
         """
         
         #Compute accuracy for each participant and symbol_name within each group
@@ -486,6 +567,17 @@ class Processing:
         -----------
         neutral : bool
             Whether to compute the choice rate for the neutral analyses
+
+        Returns (Internal)
+        ------------------
+        self.choice_rate : pd.DataFrame
+            The choice rate for each participant and symbol within each group
+        self.choice_rt : pd.DataFrame
+            The reaction time for each participant and symbol within each group
+        self.neutral_choice_rate : pd.DataFrame
+            The choice rate for each participant and symbol within each group for the neutral analyses
+        self.neutral_choice_rt : pd.DataFrame
+            The reaction time for each participant and symbol within each group for the neutral analyses
         '''
 
         data = self.transfer_data if not neutral else self.transfer_data[self.transfer_data['neutral_values']]
@@ -535,6 +627,29 @@ class Processing:
 
         """
         Function to compute the demographics of the participants
+
+        Returns (Internal)
+        ------------------
+        self.demographics : pd.DataFrame
+            The demographics of the participants
+        self.mean_age : pd.Series
+            The mean age of the participants
+        self.std_age : pd.Series
+            The standard deviation of the age of the participants
+        self.female_counts : pd.Series
+            Count of number of females
+        self.male_counts : pd.Series
+            Count of number of males
+        self.not_specified_counts : pd.Series
+            Count of number of participants who did not specify
+        self.demo_sample_size : pd.Series
+            The sample size for each group
+        self.demo_age : pd.Series
+            The mean age of the participants
+        self.demo_gender : pd.Series
+            Counts of gender
+        self.demographics_summary : pd.DataFrame
+            The demographics summary
         """
 
         #Compute the demographics of the participants
@@ -565,6 +680,17 @@ class Processing:
 
         """
         Function to compute the pain scores
+
+        Returns (Internal)
+        ------------------
+        self.pain_scores : pd.DataFrame
+            The pain scores
+        self.mean_pain : pd.DataFrame
+            The mean pain scores
+        self.std_pain : pd.DataFrame
+            The standard deviation of the pain scores
+        self.pain_summary : pd.DataFrame
+            The pain summary
         """
 
         self.pain_scores = self.data.groupby([self.group_code, 'participant_id'])[['intensity', 'unpleasant', 'interference']].first().reset_index()
@@ -579,6 +705,17 @@ class Processing:
 
         """
         Function to compute the depression scores
+
+        Returns (Internal)
+        ------------------
+        self.depression_scores : pd.DataFrame
+            The depression scores
+        self.mean_depression : pd.DataFrame
+            The mean depression scores
+        self.std_depression : pd.DataFrame
+            The standard deviation of the depression scores
+        self.depression_summary : pd.DataFrame
+            The depression summary
         """
         
         #Check if PHQ8 is in the data

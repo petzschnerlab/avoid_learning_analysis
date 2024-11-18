@@ -29,7 +29,6 @@ class Help:
             'load_stats': ['Load the statistics from the backend if pre-run.', 'bool', False],
             'hide_posthocs': ['Hide the posthocs in the report.', 'bool', False],
             'verbose': ['Print verbose output.', 'bool', False]
-
         }
 
     def print_help(self) -> None:

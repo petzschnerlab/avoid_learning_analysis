@@ -42,6 +42,18 @@ class Tests:
 
         """
         Test to plot learning accuracy for each participant
+
+        Parameters
+        ----------
+        rolling_mean : int
+            The number of trials to use for the rolling mean
+        context_type : str
+            The type of context to plot (context or symbol)
+        
+        Returns (External)
+        ------------------
+        Image: PNG
+            Plots of learning accuracy for each participant
         """
 
         #Create folder for plots if non existent

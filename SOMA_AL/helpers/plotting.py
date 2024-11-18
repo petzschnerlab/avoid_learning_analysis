@@ -139,6 +139,11 @@ class Plotting:
             The metric to plot (y)
         grouping : str
             The grouping to plot the data by
+
+        Returns (External)
+        ------------------
+        Image: PNG
+            A plot of the learning curves
         """
 
         #Set grouping parameters
@@ -201,6 +206,11 @@ class Plotting:
         ----------
         save_name : str
             The name to save the plot as
+
+        Returns (External)
+        ------------------
+        Image: PNG
+            A plot of the raincloud plots
         """
 
         #Set data specific parameters
@@ -323,6 +333,11 @@ class Plotting:
             The name to save the plot as
         metric : str
             The metric (y) to be plotted plot (choice_rate or choice_rt)
+
+        Returns (External)
+        ------------------
+        Image: PNG
+            A plot of the raincloud plots
         """
 
         #Copy choice rate data
@@ -373,6 +388,11 @@ class Plotting:
         ----------
         save_name : str
             The name to save the plot as
+
+        Returns (External)
+        ------------------
+        Image: PNG
+            A plot of the raincloud plots
         """
 
         #Organize clinical data
