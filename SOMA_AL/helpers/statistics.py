@@ -10,8 +10,16 @@ import matplotlib.pyplot as plt
 
 class Statistics:
 
+    """
+    Class to run statistical analyses
+    """
+
     #Main statistics function
-    def run_statistics(self):
+    def run_statistics(self) -> None:
+
+        """
+        Main function to run the statistical analyses
+        """
 
         #Demograhpics linear models
         self.stats_age = self.generalized_linear_model(f'age~{self.group_code}', self.demographics)
@@ -300,7 +308,11 @@ class Statistics:
         self.insert_statistics()
 
     #Helper functions
-    def insert_statistics(self):
+    def insert_statistics(self) -> None:
+
+        """
+        Insert the statistics into the summaries
+        """
 
         #Add p-values to summaries
         demographics_results = pd.DataFrame({'p-value': [' ', f'{self.get_pvalue(self.stats_age)}', ' ']}, index=self.demographics_summary.index)
@@ -315,7 +327,17 @@ class Statistics:
             depression_results = pd.DataFrame({'p-value': [f'{self.get_pvalue(self.stats_depression)}']}, index=self.depression_summary.index)
             self.depression_summary = pd.concat([self.depression_summary, depression_results], axis=1)
 
-    def get_pvalue(self, summary):
+    def get_pvalue(self, summary: dict) -> str:
+
+        """
+        Get and format the p-value from the summary
+
+        Parameters
+        ----------
+        summary : dict
+            The summary dictionary
+        """
+
         if self.hide_stats:
             return 'Hidden'
 
@@ -336,7 +358,16 @@ class Statistics:
         return planned_t
 
     #Statistical metrics and tests
-    def contrast_code(self, data):
+    def contrast_code(self, data: pd.DataFrame) -> np.array:
+
+        """
+        Contrast code, changing variable to numbers that are orthogonal to each other
+
+        Parameters
+        ----------
+        data : pd.DataFrame
+            The data to contrast code
+        """
 
         #Contrast code categorical variables
         num_categories = len(data.cat.categories)
@@ -347,7 +378,20 @@ class Statistics:
 
         return contrast_codes
     
-    def glmm_assumption_check(self, data, formula, phase='learning'):
+    def glmm_assumption_check(self, data: pd.DataFrame, formula: str, phase: str = 'learning') -> pd.DataFrame:
+
+        """
+        Check the assumptions of the generalized linear mixed effects model
+
+        Parameters
+        ----------
+        data : pd.DataFrame
+            The data to check the assumptions on
+        formula : str
+            The formula to check the assumptions on
+        phase : str
+            The phase of the experiment
+        """
 
         #Extract effects
         dependent_variable = formula.split('~')[0]
@@ -408,7 +452,20 @@ class Statistics:
             
         return assumptions_results
     
-    def ttest_assumption_check(self, group1, group2, test_type='independent'):
+    def ttest_assumption_check(self, group1: pd.Series, group2: pd.Series, test_type: str = 'independent') -> dict:
+
+        """
+        Check the assumptions of the t-test
+
+        Parameters
+        ----------
+        group1 : pd.Series
+            The first group to check the assumptions on
+        group2 : pd.Series
+            The second group to check the assumptions on
+        test_type : str
+            The type of t-test, either 'independent' or 'paired'
+        """
 
         #Test for homogeneity of variance
         levene_results = sp.stats.levene(group1, group2)
@@ -428,7 +485,20 @@ class Statistics:
 
         return assumption_results
 
-    def cohens_d(self, group1, group2, test_type='independent'):
+    def cohens_d(self, group1: pd.Series, group2: pd.Series, test_type: str = 'independent') -> float:
+
+        """
+        Calculate Cohen's d
+
+        Parameters
+        ----------
+        group1 : pd.Series
+            The first group to calculate Cohen's d on
+        group2 : pd.Series
+            The second group to calculate Cohen's d on
+        test_type : str
+            The type of t-test, either 'independent' or 'paired'
+        """
         
         #Calculating statistics
         n1, n2 = len(group1), len(group2)
@@ -453,9 +523,17 @@ class Statistics:
         return d
 
     #Statistical models
-    def linear_model_categorical(self, formula, data):
+    def linear_model_categorical(self, formula: str, data: pd.DataFrame) -> dict:
+        
         """
-        Linear model
+        Fit a linear model to categorical data and return the coefficients
+
+        Parameters
+        ----------
+        formula : str
+            The formula to fit the model on
+        data : pd.DataFrame
+            The data to fit the model on
         """        
 
         categories = data[formula.split('~')[-1]].cat.categories
@@ -466,23 +544,31 @@ class Statistics:
 
         return coeffs_dict
     
-    def linear_model_continous(self, formula, data):
+    def linear_model_continous(self, formula: str, data: pd.DataFrame) -> dict:
+        
         """
-        Linear model
+        Fit a linear model to continuous data
         """        
 
         return smf.ols(formula=formula, data=data).fit()
 
-    def generalized_linear_model(self, formula, data, path=None, filename=None, savename=None, family='gaussian'):
+    def generalized_linear_model(self, formula: str, data: pd.DataFrame, path: str = None, filename: str = None, savename: str = None, family: str = 'gaussian') -> dict:
         """
         Linear mixed effects model
 
         data: pandas DataFrame
         formula: string,
             formula structure: "y ~ x1 + x2 + x3 + (1|Group)"
+        path: string,
+            path to ...
+        filename: string,
+            filename to load statistics if load_stats=True
+        savename: string,
+            name of the file to save the results
+        family: string,
+            family of the model
         """
-
-
+        
         #Format formula
         formula = formula.replace(' ', '')
 
@@ -560,12 +646,21 @@ class Statistics:
 
         return {'metadata': metadata, 'model_summary': model_summary}
 
-    def planned_ttests(self, metric, factor, comparisons, data):
+    def planned_ttests(self, metric: str, factor: str, comparisons: list[list[str]], data: pd.DataFrame) -> dict:
             
             """
-            Planned t-tests for a referent label
-            [[no pain, acute pain], [no pain, chronic pain]]
-            
+            Perform planned t-tests on the data
+
+            Parameters
+            ----------
+            metric : str
+                The metric to perform the t-tests on
+            factor : str
+                The factor to perform the t-tests on
+            comparisons : list[list[str]]
+                The comparisons to perform the t-tests on
+            data : pd.DataFrame
+                The data to perform the t-tests on
             """          
 
             #Wrap data into a list of dataframes
@@ -575,12 +670,6 @@ class Statistics:
             #Run the t-tests
             model_summary = pd.DataFrame()
             for dataframe, comparison in zip(data, comparisons):
-
-                '''
-                        comparisons = [['chronic pain~Reward', 'no pain~high_Reward'], 
-                       ['chronic pain~Punish', 'no pain~Punish'], 
-                       ['chronic pain~Reward-Punish', 'no pain~Reward-Punish']] #TODO: HERE
-                '''
 
                 #Get data
                 if '~' in comparison[0]:
@@ -629,7 +718,20 @@ class Statistics:
 
             return {'metadata': metadata, 'model_summary': model_summary}
 
-    def post_hoc_tests(self, metric, factor, data):
+    def post_hoc_tests(self, metric: str, factor: str, data: pd.DataFrame) -> pd.DataFrame:
+
+        """
+        Perform post-hoc tests on the data
+
+        Parameters
+        ----------
+        metric : str
+            The metric to perform the post-hoc tests on
+        factor : str
+            The factor to perform the post-hoc tests on
+        data : pd.DataFrame
+            The data to perform the post-hoc tests on
+        """
         
         #Create combined factor
         if type(factor) is list:
