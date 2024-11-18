@@ -1,9 +1,3 @@
-#Load modules
-library(lme4)
-library(lmerTest)
-library(car)
-library(afex)
-
 #Function to run a mixed effects model on a dataset via R and save the results as a csv file.
 
 #Parameters
@@ -23,6 +17,12 @@ library(afex)
 #------------------
 #File: CSV
 #    A CSV file containing the results of the mixed effects model.
+
+#Load modules
+library(lme4)
+library(lmerTest)
+library(car)
+library(afex)
 
 #Parse parameters
 args = commandArgs(trailingOnly = TRUE)
