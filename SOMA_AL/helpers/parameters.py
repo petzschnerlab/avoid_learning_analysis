@@ -9,7 +9,7 @@ class Parameters:
     """
 
     #Project organization
-    def set_parameters(self, **kwargs):
+    def set_parameters(self, **kwargs: dict) -> None:
         
         """
         Assigns parameters to the SOMA pipeline class
@@ -93,7 +93,17 @@ class Parameters:
             self.group_labels_formatted = ['Healthy', 'Depressed']
 
     #Print chosen parameters
-    def announce(self, case='start'):
+    def announce(self, case: str = 'start') -> None:
+
+        """
+        Prints the parameters chosen for the SOMA pipeline
+
+        Parameters
+        ----------
+        case : str
+            The case to announce the parameters, either 'start' or 'end'. The default is 'start'.
+        """
+
         if case == 'start' and self.verbose:
             print('\n*******************************************')
             if self.author != 'SOMA_Team':
