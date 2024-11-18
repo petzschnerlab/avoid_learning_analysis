@@ -13,6 +13,11 @@ class Parameters:
         
         """
         Assigns parameters to the SOMA pipeline class
+
+        Parameters
+        ----------
+        kwargs : dict
+            The parameters to assign to the SOMA pipeline class, see help for details.
         """
 
         #Warning of unknown params
