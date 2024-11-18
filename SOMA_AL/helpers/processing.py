@@ -13,7 +13,19 @@ class Processing:
     """
 
     #Data loading and checks
-    def load_data(self, file_path, file_name):
+    def load_data(self, file_path: str, file_name: str) -> None:
+
+        """
+        Function to load the data from a csv file and store it in a pandas dataframe
+
+        Parameters:
+        -----------
+        file_path : str
+            The path to the file
+        file_name : str 
+            The name of the file
+        """
+        
         #Create variables to store the file path and file name
         self.file_path = file_path
         self.file_name = file_name if isinstance(file_name, list) else [file_name]
@@ -57,7 +69,12 @@ class Processing:
         self.data['symbol_R_value'] = self.data['symbol_R_name'].replace({'75R1': 4, '75R2': 4, '25R1': 3, '25R2': 3, '25P1': 2, '25P2': 2, '75P1': 1, '75P2': 1, 'Zero': 0})
         self.data['neutral_values'] = ((self.data['symbol_L_value'] == 3) | (self.data['symbol_L_value'] == 2)) & ((self.data['symbol_R_value'] == 3) | (self.data['symbol_R_value'] == 2))
 
-    def check_data(self):
+    def check_data(self) -> bool:
+
+        """
+        Function to check to see if depression data exists in dataframe if user is analyzing by depression
+        """
+
         if 'depression' not in self.data.columns and self.split_by_group == 'depression':
             warnings.warn('No depression scores found in the data. Skipping depression score computation.')
             return False
@@ -65,19 +82,11 @@ class Processing:
         return True
     
     #Data processing
-    def combine_columns(self, x):
-        if x['symbol_L_value'] > x['symbol_R_value']:
-            column = str(x['symbol_L_value']) + '_' + str(x['symbol_R_value'])
-        else:
-            column = str(x['symbol_R_value']) + '_' + str(x['symbol_L_value'])
+    def process_data(self) -> None:
 
-        return column
-    
-    def recode_depression(self):
-        self.data['depression'] = (self.data['PHQ8'] >= self.depression_cutoff).astype(int)
-        self.data['depression'] = self.data['depression'].replace({0: 'healthy', 1: 'depressed'})
-
-    def process_data(self):
+        """
+        Main function to process the data for analysis
+        """
         
         #Filter the learning and transfer data
         self.filter_learning_data()
@@ -102,15 +111,51 @@ class Processing:
 
         #Average the data
         self.average_data()
+    
+    def combine_columns(self, x: pd.Series) -> str:
 
-    def save_processed_data(self):
+        """
+        Function to combine the symbol_L_value and symbol_R_value columns into a single column
+
+        Parameters:
+        -----------
+        x : pd.Series
+            The row of data to manipulate
+        """
+
+        if x['symbol_L_value'] > x['symbol_R_value']:
+            column = str(x['symbol_L_value']) + '_' + str(x['symbol_R_value'])
+        else:
+            column = str(x['symbol_R_value']) + '_' + str(x['symbol_L_value'])
+
+        return column
+    
+    def recode_depression(self) -> None:
+
+        """
+        Function to recode the depression scores into a binary variable
+        """
+
+        self.data['depression'] = (self.data['PHQ8'] >= self.depression_cutoff).astype(int)
+        self.data['depression'] = self.data['depression'].replace({0: 'healthy', 1: 'depressed'})
+
+    def save_processed_data(self) -> None:
+
+        """
+        Function to save the processed data to a new file
+        """
+
         #Save the processed data to a new file
         self.data.to_csv(self.file.replace('.csv', '_processed.csv'))
         self.learning_data.to_csv(self.file.replace('.csv', '_learning_processed.csv'))
         self.transfer_data.to_csv(self.file.replace('.csv', '_transfer_processed.csv'))
 
     #Data filtering
-    def filter_learning_data(self):
+    def filter_learning_data(self) -> None:
+
+        """
+        Function to filter and manipulate the learning data
+        """
 
         #Filter data
         self.learning_data = self.data[self.data['trial_type'] == 'learning-trials'].reset_index(drop=True)
@@ -146,7 +191,11 @@ class Processing:
         #Create trial indices per participant and symbol_name #TODO: Check this
         self.learning_data['trial_number_symbol'] = self.learning_data.groupby(['participant_id', 'symbol_names']).cumcount() + 1
 
-    def filter_transfer_data(self):
+    def filter_transfer_data(self) -> None:
+
+        """
+        Function to filter and manipulate the transfer data
+        """
 
         #Filter data
         self.transfer_data = self.data[self.data['trial_type'] == 'probe'].reset_index(drop=True)
@@ -170,7 +219,17 @@ class Processing:
         self.transfer_data['paired_symbols'] = self.transfer_data.apply(self.combine_columns, axis=1)
     
     #Data exclusion
-    def exclude_low_accuracy(self, threshold=60):
+    def exclude_low_accuracy(self, threshold: int = 55) -> None:
+
+        """
+        Function to exclude participants with low accuracy.
+
+        Parameters:
+        -----------
+        threshold : int
+            The threshold for accuracy below which participants are excluded.
+        """
+
         #Compute accuracy for each participant
         accuracy = pd.DataFrame(columns=['accuracy'], index=pd.MultiIndex(levels=[[]], codes=[[]], names=['participant']))
         for participant in self.learning_data['participant_id'].unique():
@@ -190,7 +249,18 @@ class Processing:
         self.participants_excluded_accuracy = len(low_accuracy)
         self.accuracy_threshold = threshold
 
-    def exclude_low_rt(self, low_threshold=200, high_threshold=5000):
+    def exclude_low_rt(self, low_threshold: int = 200, high_threshold: int = 5000) -> None:
+
+        """
+        Function to exclude trials with low/high reaction times.
+
+        Parameters:
+        -----------
+        low_threshold : int
+            The lower threshold for reaction time below which trials are excluded.
+        high_threshold : int
+            The upper threshold for reaction time above which trials are excluded.
+        """
 
         self.learning_data['excluded_rt'] = (self.learning_data['rt'] < low_threshold) | (self.learning_data['rt'] > high_threshold)
         learning_excluded, learning_trials = self.learning_data['excluded_rt'].sum(), self.learning_data.shape[0]
@@ -204,7 +274,11 @@ class Processing:
         self.trials_excluded_rt = (learning_excluded + transfer_excluded)/(learning_trials + transfer_trials) * 100
 
     #Data collapsing and transformation
-    def average_data(self):
+    def average_data(self) -> None:
+
+        """
+        Function to average the data for each participant and symbol
+        """
 
         #Create participant average for learning data
         self.avg_learning_data = self.learning_data.groupby(['participant_id', self.group_code, 'symbol_name'])['accuracy'].mean().reset_index()
@@ -239,25 +313,82 @@ class Processing:
         self.transfer_data.to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials.csv', index=False)
         self.transfer_data_reduced.to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv', index=False)
 
-    def average_transform_data(self, data, metric, factor, transformation):
+    def average_transform_data(self, data: pd.DataFrame, metric: str, factor: str, transformation: str) -> pd.DataFrame:
+
+        """
+        Function to transform and average the data
+
+        Parameters:
+        -----------
+        data : pd.DataFrame
+            The data to transform and average
+        metric : str
+            The metric to transform and average
+        factor : str
+            The factor to average the data by
+        transformation : str
+            The transformation to apply to the metric
+        """
 
         data = self.transform_data(data, metric, transformation)
         data = self.average_byfactor(data, metric, factor)
 
         return data
     
-    def average_byfactor(self, data, metric, factor):
+    def average_byfactor(self, data: pd.DataFrame, metric: str, factor: str) -> pd.DataFrame:
+
+        """
+        Function to average the data relative to a factor
+
+        Parameters:
+        -----------
+        data : pd.DataFrame
+            The data to average
+        metric : str
+            The metric to average
+        factor : str
+            The factor to average the data by
+        """
 
         avg_factor = [factor] if type(factor) == str else factor
+
         return data.groupby(['participant_id']+avg_factor)[metric].mean().reset_index()  
     
-    def transform_data(self, data, metric, transformation):
+    def transform_data(self, data: pd.DataFrame, metric: str, transformation: str) -> pd.DataFrame:
+
+        """
+        Function to transform the data.
+
+        Parameters:
+        -----------
+        data : pd.DataFrame
+            The data to transform
+        metric : str
+            The metric to transform
+        transformation : str
+            The transformation to apply to the metric
+        """
 
         data[metric] = data[metric].transform(lambda x: eval(transformation))
 
         return data
     
-    def manipulate_data(self, data, metric, factor, transformation):
+    def manipulate_data(self, data: pd.DataFrame, metric: str, factor: str, transformation: str) -> pd.DataFrame:
+
+        """
+        Function to manipulate the data based on a transformation
+
+        Parameters:
+        -----------
+        data : pd.DataFrame
+            The data to manipulate
+        metric : str
+            The metric to manipulate
+        factor : str
+            The factor to manipulate the data by
+        transformation : str
+            The transformation to apply to the data
+        """
 
         conditions = transformation.split('-')
 
@@ -274,7 +405,11 @@ class Processing:
         return manipulated_data
     
     #Metric computations
-    def compute_accuracy(self):
+    def compute_accuracy(self) -> None:
+
+        """
+        Function to compute the accuracy of the learning and transfer data
+        """
         
         #Compute learning accuracy
         self.learning_data['larger_value'] = (self.learning_data['symbol_R_value'] > self.learning_data['symbol_L_value']).astype(int) #1 = Right has larger value, 0 = Left has larger value
@@ -284,7 +419,11 @@ class Processing:
         self.transfer_data['larger_value'] = (self.transfer_data['symbol_R_value'] > self.transfer_data['symbol_L_value']).astype(int) #1 = Right has larger value, 0 = Left has larger value
         self.transfer_data['accuracy'] = (self.transfer_data['larger_value'] == self.transfer_data['choice_made']).astype(int)*100 #100 = Correct, 0 = Incorrect
         
-    def compute_learning_averages(self):
+    def compute_learning_averages(self) -> None:
+
+        """
+        Function to compute the learning averages
+        """
         
         #Compute accuracy for each participant and symbol_name within each group
         self.learning_accuracy = self.learning_data.groupby([self.group_code, 'participant_id', 'symbol_name'])['accuracy'].mean().reset_index()
@@ -308,10 +447,15 @@ class Processing:
         self.learning_rt.set_index([self.group_code, 'participant_id', 'symbol_name'], inplace=True)
         self.learning_rt_diff.set_index([self.group_code, 'participant_id', 'symbol_name'], inplace=True)
 
-    def compute_choice_rate(self, neutral = False):
+    def compute_choice_rate(self, neutral: bool = False) -> None:
 
         '''
-        Neutral: Processing specific to the 25R and 25P symbols being compared
+        Function to compute the choice rate for each participant and symbol within each group
+
+        parameters:
+        -----------
+        neutral : bool
+            Whether to compute the choice rate for the neutral analyses
         '''
 
         data = self.transfer_data if not neutral else self.transfer_data[self.transfer_data['neutral_values']]
@@ -357,7 +501,11 @@ class Processing:
             choice_rt = choice_rt.set_index([self.group_code, 'participant_id', 'symbol'])
             self.neutral_choice_rt = choice_rt
 
-    def compute_demographics(self):
+    def compute_demographics(self) -> None:
+
+        """
+        Function to compute the demographics of the participants
+        """
 
         #Compute the demographics of the participants
         self.demographics = self.data.groupby([self.group_code,'participant_id'])[['age', 'sex']].first().reset_index()
@@ -383,7 +531,11 @@ class Processing:
         self.demographics_summary = self.demographics_summary.T
 
     #Compute pain scores
-    def compute_pain_scores(self):
+    def compute_pain_scores(self) -> None:
+
+        """
+        Function to compute the pain scores
+        """
 
         self.pain_scores = self.data.groupby([self.group_code, 'participant_id'])[['intensity', 'unpleasant', 'interference']].first().reset_index()
         self.mean_pain = self.data.groupby(self.group_code)[['intensity', 'unpleasant', 'interference']].mean()
@@ -393,7 +545,11 @@ class Processing:
         self.pain_summary = self.pain_summary.T
 
     #Compute depression scores
-    def compute_depression_scores(self):
+    def compute_depression_scores(self) -> None:
+
+        """
+        Function to compute the depression scores
+        """
         
         #Check if PHQ8 is in the data
         if 'PHQ8' in self.data.columns:
