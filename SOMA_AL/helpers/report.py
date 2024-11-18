@@ -195,6 +195,11 @@ class Report:
             The comparisons being made
         model_summary : pd.DataFrame
             The summary statistics for the comparison
+
+        Returns
+        -------
+        subsection : str
+            The subsection for the planned comparison
         """
 
         if '~' in comparison:
@@ -287,6 +292,11 @@ class Report:
         ----------
         text : str
             The text to add to the caption
+
+        Returns
+        -------
+        section_text : str
+            The section text with the figure number
         """
 
         section_text = f'**Figure {self.figure_count}.** {text}'
@@ -303,6 +313,11 @@ class Report:
         ----------
         text : str
             The text to add to the caption
+
+        Returns
+        -------
+        section_text : str
+            The section text with the table number
         """
 
         section_text = f'**Table {self.table_count}.** {text}'
@@ -321,6 +336,11 @@ class Report:
             The target to get the caption for
         target_type : str
             The type of target
+
+        Returns
+        -------
+        caption : str
+            The caption for the target
         """
         
         caption = ''
@@ -426,6 +446,23 @@ class Report:
         ----------
         data : dict
             The data to get the metadata for
+
+        Returns
+        -------
+        formula : str
+            The formula for the analysis
+        outcome : str
+            The outcome for the analysis
+        fixed_effects : list
+            The fixed effects for the analysis
+        random_effects : list
+            The random effects for the analysis
+        sample_size : int
+            The sample size for the analysis
+        df_residual : int
+            The residual degrees of freedom for the analysis
+        test : str
+            The test used for the analysis
         """
 
         formula = data['metadata']['formula']
@@ -447,6 +484,11 @@ class Report:
         ----------
         target : str
             The target to get the statistics for
+
+        Returns
+        -------
+        subsection : list
+            The subsection for the statistics
         """
 
         self.data_legend = {'learning-accuracy': self.learning_accuracy_glmm,
@@ -552,6 +594,11 @@ class Report:
         ----------
         image_name : str
             The name of the image
+
+        Returns
+        -------
+        subsection : list
+            The subsection for the image
         """
 
         subsection = [f'#### ![{image_name}](SOMA_AL/plots/{image_name}.png)\n', 
@@ -572,6 +619,11 @@ class Report:
             The name to save the table as
         max_rows : int
             The maximum number of rows to display in each subtable
+
+        Returns
+        -------
+        subsection : list
+            The subsection for the table
         """
 
         #Set title

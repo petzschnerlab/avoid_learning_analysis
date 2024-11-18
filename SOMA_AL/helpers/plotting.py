@@ -47,6 +47,13 @@ class Plotting:
             The data to be analyzed
         splitting_column : str
             The column to split the data by
+
+        Returns
+        -------
+        sample_sizes : list
+            The sample sizes for each group
+        t_scores : list
+            The t-scores for each group
         """
 
         #Reset index to allow access to all columns

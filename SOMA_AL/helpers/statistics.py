@@ -336,6 +336,11 @@ class Statistics:
         ----------
         summary : dict
             The summary dictionary
+
+        Returns
+        -------
+        str
+            The formatted p-value
         """
 
         if self.hide_stats:
@@ -349,7 +354,22 @@ class Statistics:
 
         return p_value
     
-    def get_planned_t(self, summary):
+    def get_planned_t(self, summary: dict) -> str:
+
+        """
+        Get and format the planned t-value from the summary
+
+        Parameters
+        ----------
+        summary : dict
+            The summary dictionary
+
+        Returns
+        -------
+        str
+            The formatted planned t-value
+        """
+
         if self.hide_stats:
             return 'Hidden'
 
@@ -367,6 +387,11 @@ class Statistics:
         ----------
         data : pd.DataFrame
             The data to contrast code
+
+        Returns
+        -------
+        np.array
+            The contrast coded data
         """
 
         #Contrast code categorical variables
@@ -391,6 +416,11 @@ class Statistics:
             The formula to check the assumptions on
         phase : str
             The phase of the experiment
+
+        Returns
+        -------
+        pd.DataFrame
+            The assumptions results
         """
 
         #Extract effects
@@ -465,6 +495,11 @@ class Statistics:
             The second group to check the assumptions on
         test_type : str
             The type of t-test, either 'independent' or 'paired'
+
+        Returns
+        -------
+        dict
+            The assumption results
         """
 
         #Test for homogeneity of variance
@@ -498,6 +533,11 @@ class Statistics:
             The second group to calculate Cohen's d on
         test_type : str
             The type of t-test, either 'independent' or 'paired'
+
+        Returns
+        -------
+        float
+            Cohen's d
         """
         
         #Calculating statistics
@@ -534,6 +574,11 @@ class Statistics:
             The formula to fit the model on
         data : pd.DataFrame
             The data to fit the model on
+
+        Returns
+        -------
+        dict
+            The coefficients of the model
         """        
 
         categories = data[formula.split('~')[-1]].cat.categories
@@ -544,10 +589,22 @@ class Statistics:
 
         return coeffs_dict
     
-    def linear_model_continous(self, formula: str, data: pd.DataFrame) -> dict:
+    def linear_model_continous(self, formula: str, data: pd.DataFrame) -> smf.ols:
         
         """
         Fit a linear model to continuous data
+
+        Parameters
+        ----------
+        formula : str
+            The formula to fit the model on
+        data : pd.DataFrame
+            The data to fit the model on
+
+        Returns
+        -------
+        smf.ols
+            The fitted model
         """        
 
         return smf.ols(formula=formula, data=data).fit()
@@ -567,6 +624,11 @@ class Statistics:
             name of the file to save the results
         family: string,
             family of the model
+
+        Returns
+        -------
+        dict
+            Metadata and the model summary
         """
         
         #Format formula
@@ -661,6 +723,11 @@ class Statistics:
                 The comparisons to perform the t-tests on
             data : pd.DataFrame
                 The data to perform the t-tests on
+
+            Returns
+            -------
+            dict
+                The metadata and the model summary
             """          
 
             #Wrap data into a list of dataframes
@@ -731,6 +798,11 @@ class Statistics:
             The factor to perform the post-hoc tests on
         data : pd.DataFrame
             The data to perform the post-hoc tests on
+
+        Returns
+        -------
+        pd.DataFrame
+            The post-hoc test results
         """
         
         #Create combined factor

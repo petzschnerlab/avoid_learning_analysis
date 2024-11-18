@@ -73,6 +73,11 @@ class Processing:
 
         """
         Function to check to see if depression data exists in dataframe if user is analyzing by depression
+
+        Returns
+        -------
+        bool
+            Whether the data is valid
         """
 
         if 'depression' not in self.data.columns and self.split_by_group == 'depression':
@@ -117,10 +122,15 @@ class Processing:
         """
         Function to combine the symbol_L_value and symbol_R_value columns into a single column
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         x : pd.Series
             The row of data to manipulate
+
+        Returns
+        -------
+        column : str
+            The combined column
         """
 
         if x['symbol_L_value'] > x['symbol_R_value']:
@@ -224,7 +234,7 @@ class Processing:
         """
         Function to exclude participants with low accuracy.
 
-        Parameters:
+        Parameters
         -----------
         threshold : int
             The threshold for accuracy below which participants are excluded.
@@ -318,8 +328,8 @@ class Processing:
         """
         Function to transform and average the data
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         data : pd.DataFrame
             The data to transform and average
         metric : str
@@ -328,6 +338,11 @@ class Processing:
             The factor to average the data by
         transformation : str
             The transformation to apply to the metric
+
+        Returns
+        -------
+        data : pd.DataFrame
+            The transformed and averaged data
         """
 
         data = self.transform_data(data, metric, transformation)
@@ -340,14 +355,19 @@ class Processing:
         """
         Function to average the data relative to a factor
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         data : pd.DataFrame
             The data to average
         metric : str
             The metric to average
         factor : str
             The factor to average the data by
+
+        Returns
+        -------
+        data : pd.DataFrame
+            The averaged data
         """
 
         avg_factor = [factor] if type(factor) == str else factor
@@ -359,14 +379,19 @@ class Processing:
         """
         Function to transform the data.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         data : pd.DataFrame
             The data to transform
         metric : str
             The metric to transform
         transformation : str
             The transformation to apply to the metric
+
+        Returns
+        -------
+        data : pd.DataFrame
+            The transformed data
         """
 
         data[metric] = data[metric].transform(lambda x: eval(transformation))
@@ -378,8 +403,8 @@ class Processing:
         """
         Function to manipulate the data based on a transformation
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         data : pd.DataFrame
             The data to manipulate
         metric : str
@@ -388,6 +413,11 @@ class Processing:
             The factor to manipulate the data by
         transformation : str
             The transformation to apply to the data
+
+        Returns
+        -------
+        manipulated_data : pd.DataFrame
+            The manipulated data
         """
 
         conditions = transformation.split('-')
