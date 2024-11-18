@@ -3,6 +3,7 @@ import warnings
 import numpy as np
 import pandas as pd
 import subprocess
+import statsmodels
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 import scipy as sp
@@ -691,7 +692,7 @@ class Statistics:
 
         return coeffs_dict
     
-    def linear_model_continous(self, formula: str, data: pd.DataFrame) -> smf.ols:
+    def linear_model_continous(self, formula: str, data: pd.DataFrame) -> statsmodels.regression.linear_model.RegressionResultsWrapper:
         
         """
         Fit a linear model to continuous data
