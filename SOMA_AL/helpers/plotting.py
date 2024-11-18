@@ -12,7 +12,12 @@ class Plotting:
     """
 
     #Helper functions
-    def print_plots(self):
+    def print_plots(self) -> None:
+
+        """
+        Print all plots as images
+        """
+
         self.plot_clinical_scores('demo-clinical-scores')
         self.plot_learning_curves('learning-accuracy-by-group', rolling_mean=self.rolling_mean, grouping='clinical')
         self.plot_learning_curves('learning-rt-by-group', rolling_mean=self.rolling_mean, grouping='clinical', metric='rt')
@@ -31,7 +36,18 @@ class Plotting:
         self.plot_neutral_transfer_accuracy('transfer-choice-rate-neutral')
         self.plot_neutral_transfer_accuracy('transfer-rt-neutral', metric='rt')
 
-    def compute_n_and_t(self, data, splitting_column):
+    def compute_n_and_t(self, data: pd.DataFrame, splitting_column: str) -> tuple:
+
+        """
+        Compute the sample size and t-score for each group
+
+        Parameters
+        ----------
+        data : DataFrame
+            The data to be analyzed
+        splitting_column : str
+            The column to split the data by
+        """
 
         #Reset index to allow access to all columns
         data = data.reset_index()
@@ -47,7 +63,22 @@ class Plotting:
         return sample_sizes, t_scores
 
     #Plotting functions
-    def raincloud_plot(self, data, ax, t_scores, alpha=0.25):
+    def raincloud_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.25) -> None:
+            
+            """
+            Create a raincloud plot of the data
+
+            Parameters
+            ----------
+            data : DataFrame
+                The data to be plotted
+            ax : Axes
+                The axes to plot the data on
+            t_scores : list
+                The t-scores for each group
+            alpha : float
+                The transparency of the scatter plot
+            """
             
             #Set parameters
             if data.index.nunique() == 2:
@@ -59,7 +90,6 @@ class Plotting:
 
             #Set index name
             data.index.name = 'code'
-            #Turn series into dataframe
             data = data.to_frame()
             data.columns = ['score']
 
@@ -87,7 +117,22 @@ class Plotting:
                 ax.add_patch(plt.Rectangle((factor_index+1-0.4, (mean_data.loc[factor] - CIs.loc[factor])['score']), 0.8, 2*CIs.loc[factor], fill=None, edgecolor='darkgrey'))
                 ax.hlines(mean_data.loc[factor], factor_index+1-0.4, factor_index+1+0.4, color='darkgrey')            
 
-    def plot_learning_curves(self, save_name, rolling_mean=None,  metric='accuracy', grouping = 'clinical'):
+    def plot_learning_curves(self, save_name: str, rolling_mean: int = None,  metric: str = 'accuracy', grouping: str = 'clinical') -> None:
+
+        """
+        Plot the learning curves for the accuracy or reaction time data
+
+        Parameters
+        ----------
+        save_name : str
+            The name to save the plot as
+        rolling_mean : int
+            The number of trials to average over
+        metric : str
+            The metric to plot (y)
+        grouping : str
+            The grouping to plot the data by
+        """
 
         #Set grouping parameters
         if grouping == 'clinical':
@@ -140,7 +185,16 @@ class Plotting:
         #Close figure
         plt.close()
 
-    def plot_rainclouds(self, save_name):
+    def plot_rainclouds(self, save_name: str) -> None:
+
+        """
+        Create raincloud plots of the data
+
+        Parameters
+        ----------
+        save_name : str
+            The name to save the plot as
+        """
 
         #Set data specific parameters
         match save_name:
@@ -251,7 +305,18 @@ class Plotting:
         #Close figure
         plt.close()
 
-    def plot_neutral_transfer_accuracy(self, save_name, metric='choice_rate'):
+    def plot_neutral_transfer_accuracy(self, save_name: str, metric: str = 'choice_rate') -> None:
+
+        """
+        Plot the neutral transfer accuracy data
+        
+        Parameters
+        ----------
+        save_name : str
+            The name to save the plot as
+        metric : str
+            The metric (y) to be plotted plot (choice_rate or choice_rt)
+        """
 
         #Copy choice rate data
         choice_rate = self.neutral_choice_rate if metric == 'choice_rate' else self.neutral_choice_rt
@@ -292,7 +357,16 @@ class Plotting:
         #Close figure
         plt.close()
 
-    def plot_clinical_scores(self, save_name):
+    def plot_clinical_scores(self, save_name: str) -> None:
+
+        """
+        Plot the clinical scores for the participants
+
+        Parameters
+        ----------
+        save_name : str
+            The name to save the plot as
+        """
 
         #Organize clinical data
         metrics = ['intensity', 'unpleasant', 'interference']
