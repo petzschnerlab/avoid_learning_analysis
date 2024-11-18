@@ -21,9 +21,6 @@ class SOMAPipeline(Master):
 
         '''
         Run the SOMA pipeline
-
-        Parameters
-        ----------
         
         '''
 
@@ -49,6 +46,10 @@ class SOMAPipeline(Master):
                 
 
 if __name__ == '__main__':
+
+    """
+    Run the SOMA pipeline
+    """
 
     #Meta parameters
     author = 'Chad C. Williams' 

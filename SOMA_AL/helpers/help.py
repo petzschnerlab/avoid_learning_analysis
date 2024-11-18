@@ -33,13 +33,20 @@ class Help:
         }
 
     def print_help(self):
+        
         """
         Print the help information.
         """
+
         self.print_overview()
         self.print_parameters()
 
     def print_overview(self):
+
+        """
+        Print the package overview.
+        """
+        
         overview = """The SOMA_AL package is a tool to analyze the data from the SOMA avoidance learning study.
         The package is designed to be run as a function with parameters that can be set to customize the analysis.
         The package will generate a report with the results of the analysis.
@@ -55,6 +62,7 @@ class Help:
         print(overview)
 
     def print_parameters(self):
+
         """
         Print the parameter descriptions.
         """

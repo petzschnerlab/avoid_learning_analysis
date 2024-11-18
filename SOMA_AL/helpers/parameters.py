@@ -92,7 +92,7 @@ class Parameters:
             self.group_labels = ['healthy', 'depressed']
             self.group_labels_formatted = ['Healthy', 'Depressed']
 
-    #Print parameters
+    #Print chosen parameters
     def announce(self, case='start'):
         if case == 'start' and self.verbose:
             print('\n*******************************************')
