@@ -246,7 +246,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
         - Chronic pain patients slower than both other groups
         - High reward was faster than low punish but no difference between low reward and low punish
         - There's no difference in RTs for pain groups between low reward and low punish, but there is a difference for the no pain group.
-    - **Summary:** The no pain group preferred (and were quicker to select) the low reward over the low punish conditions. In contrast, the pain group had no preference (or reaction time differences) for the low reward or low punish conditions.
+    - **Summary:** The no pain group preferred (and were quicker to select) the low reward over the low punish conditions. In contrast, the pain groups (chronic, acute) had no preference (or reaction time differences) for the low reward or low punish conditions.
 
 ## Learning Phase
 
