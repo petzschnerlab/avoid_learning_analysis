@@ -204,18 +204,17 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
     - Low Reward vs Low Punish (Palminteri et al., 2015, Gold et al., 2012)
 
 ## Computational Modelling
-### Steps:
-1. Develop the Q-learning benchmark RL model (Palminteri et al., 2015)
-2. Develop the relative RL model (Palminteri et al., 2015)
-3. Develop the relative +- RL model (Lefebvre et al., 2017)
-4. Run model simulations to validate models (fig 3A)
-5. Fit models to empirical findings (fig 3B)
-6. Replicate Figure 3
-7. Extract learning rates and run ANOVA of transfer phase choices
-    - 2x2 ANOVA: group (patient/ control) x Valence (positive/negative learning rate) + interaction
-        - Van et al: Effect of group and interaction but not valence
-7. Extract temperature and run ANOVA of transfer phase choices?
-    - They found no effect here, so is it needed? Might be a good idea since it's a different population
+### Models:
+- Develop the Q-learning benchmark RL model (Palminteri et al., 2015)
+- Develop the relative RL model (Palminteri et al., 2015)
+- Develop the relative +- RL model (Lefebvre et al., 2017)
+- Hybrid actor-critic-q-learning model (Gold et al., 2012)
+
+### Analyses
+- Run model simulations to validate models (fig 3A)
+- Fit models to empirical findings (fig 3B)
+- Extract learning rates and run statistics
+- Extract temperature and run statistics
 
 # Literature Reviews
 - *[Palminteri et al. - 2015](https://www.nature.com/articles/ncomms9096.pdf)
