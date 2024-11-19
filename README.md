@@ -1,3 +1,11 @@
+# ===SETUP=== #
+# GitHub Repo for Data Analysis
+https://github.com/petzschnerlab/SOMA_avoidance_learning
+
+# Data Location
+BM_Carney_Petzschner_Lab\SOMAStudyTracking\SOMAV1\database_exports\avoid_learn_prolific
+
+# ===METHODS=== #
 # Research Plan:
 Avoidance Learning in Chronic Pain Patients (Behavioural).
 
@@ -8,12 +16,6 @@ This project will focus on behavioural findings, which includes descriptive and 
 The overarching goal of the project is to determine whether there are differences in learning mechanisms between chronic pain patients and healthy controls. The project is modeled after Vandendriessche et al., 2023 study that investigated differences in learning between depressed individuals and healthy controls. Specifically, this study found that depressed patients had impaired reward learning in a low rewarding context in contrast to healthy controls as well as in contrast to their learning in a high rewarding context. Computational modeling revealed that this impairment is a heightened sensitivity to feedback within the low rewarding context (i.e., higher learning rates compared to control). This signifies depressed individuals have a heightened sensitivity to negative outcomes. The current project will seek to replicate the analyses conducted by this study but in the context of pain.
 
 This project will also serve as a precursor to a project incorporating EEG with the same experimental paradigm, allowing neural differences in learning to be investigated.
-
-# GitHub Repo for Data Analysis
-https://github.com/petzschnerlab/SOMA_avoidance_learning
-
-# Data Location
-BM_Carney_Petzschner_Lab\SOMAStudyTracking\SOMAV1\database_exports\avoid_learn_prolific
 
 # Research Goals
 - Determine whether acute and/or chronic pain patients have impaired learning mechanisms compared to healthy controls across rewarding and punishing contexts
@@ -226,6 +228,106 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
 - https://www.youtube.com/watch?v=etQVRd6N8dM&t=697s
 - [Lefebvre et al. - 2017](https://www.unicog.org/publications/LefebvreLebretonMeynielBourgeois-GirondePalminteri_2017_NHB_Behavioral-and-neural-characterization-of-optimistic-reinforcement-learning.pdf)
 
+# ===RESULTS=== #
+
+## General Conclusions
+
+- **Learning Phase**
+    - *Accuracy:* Reward context has greater accuracy than punish context 
+    - *Reaction Time:* 
+        - Chronic pain patients are slower than other groups
+        - Reward context is slower than Punish context
+    - **Summary:** Reward context had hugher accuracy and was slower for selection than the punish context. The chronic pain patients took longer to respond in this task than the acute and no pain groups.
+
+- **Transfer Learning**
+    - *Accuracy:* High reward was chosen over low reward across all groups
+    - *Accuracy:* Low reward was preferred over low punish only for the no pain group; the acute and chronic pain groups showed equal preference
+    - *Reaction Time:*
+        - Chronic pain patients slower than both other groups
+        - High reward was faster than low punish but no difference between low reward and low punish
+        - There's no difference in RTs for pain groups between low reward and low punish, but there is a difference for the no pain group.
+    - **Summary:** The no pain group preferred (and were quicker to select) the low reward over the low punish conditions. In contrast, the pain group had no preference (or reaction time differences) for the low reward or low punish conditions.
+
+## Learning Phase
+
+### Accuracy
+- **Group:** No effect
+- **Context effect:** Learning was faster in the reward vs punish condition
+- **Trial:** Learning increased across trials
+- **GroupxTrial:** Effect, but post-hocs show nothing interesting
+    - Chronic vs No Pain: No effects
+        - Early: No effect
+        - Mid-Early: No effect
+        - Mid-Late: No effect
+        - Late: No effect
+    - Chronic vs Acute: No effect
+        - Early: No effect
+        - Mid-Early: No effect
+        - Mid-Late: No effect
+        - Late: No effect
+    - No Pain vs Acute: No effect
+        - Early: No effect
+        - Mid-Early: No effect
+        - Mid-Late: No effect
+        - Late: No effect
+
+### Reaction Time
+- **Group:** Effect
+    - Chronic vs No Pain: Chronic Slower than No Pain
+    - Chronic vs Acute: Chronic slower than acute
+    - No pain vs Acute: No difference
+- **Context:** Effect
+    - Reward Slower than Punish Context
+
+## Transfer Phase
+
+### Choice Rate
+- **Group:** No effect
+- **Condition:**: Effect
+    - High reward > low punish
+    - Low reward > low punish
+- **GroupxCondition:**: Effect
+    - Low Reward-Low Punish:
+        - No Pain: Difference
+        - Acute: No difference
+        - Chronic: No difference
+        
+        - No Pain vs Acute: Greater difference for no pain
+        - Chronic vs No Pain: Greater difference for no pain
+        - Chronic vs Acute: No difference
+        
+        - **Conclusion**: Pain groups showed equal value to both low reward, low punish conditions, but no pain group showed preference to the reward condition.
+
+    - High Reward-Low Punish
+        - No Pain: Difference
+        - Acute Pain: Difference
+        - Chronic Pain: Difference
+
+        - No Pain vs Acute: Greater difference in no pain 
+        - Chronic vs No Pain: No difference
+        - Chronic vs Acute: No difference
+
+        - **Conclusion:** Although a difference in no pain vs acute pain, there is no real interesting patterns here.
+
+### Reaction Time
+- **Group:** Effect
+    - Chronic vs No Pain: Chronic slower than no pain
+    - Chronic vs Acute: Chronic slower than acute
+    - No pain vs Acute: No difference
+- **Context:** Effect
+    - High Reward vs Low punish: High reward faster than low punish
+    - Low Reward vs low punish: Equal
+- **GroupxContext:** Effect
+    - High Reward - Low Punish
+        - Chronic vs No Pain: No difference
+        - Chronic vs Acute: No difference
+        - No Pain vs Acute: Bigger difference in no pain than acute
+    - Low Reward - Low Punish
+        - Chronic vs No Pain: Difference in no pain, but no diff in chronic
+        - Chronic vs Acute: No difference
+        - No Pain vs Acute: Difference in no pain, but no diff in acute
+
+# ===NOTES=== #
 # Project notes
 
 ## Lack of Replication in Transfer Learning Effect
