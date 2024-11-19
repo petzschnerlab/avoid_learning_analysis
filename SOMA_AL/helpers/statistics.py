@@ -262,7 +262,7 @@ class Statistics:
         self.learning_accuracy_planned_group = self.planned_ttests('accuracy', self.group_code, comparisons, data)
         self.learning_accuracy_posthoc_group = self.post_hoc_tests('accuracy', self.group_code, data)
         
-        data = self.average_transform_data(self.learning_data, 'rt', self.group_code, '1/x')
+        data = self.average_transform_data(self.learning_data.copy(), 'rt', self.group_code, '1/x')
         self.learning_rt_planned_group = self.planned_ttests('rt', self.group_code, comparisons, data) 
         self.learning_rt_posthoc_group = self.post_hoc_tests('rt', self.group_code, data)
         
@@ -270,7 +270,7 @@ class Statistics:
         self.transfer_accuracy_planned_group = self.planned_ttests('accuracy', self.group_code, comparisons, data)
         self.transfer_accuracy_posthoc_group = self.post_hoc_tests('accuracy', self.group_code, data)
         
-        data = self.average_transform_data(self.transfer_data_reduced, 'rt', self.group_code,'1/x')
+        data = self.average_transform_data(self.transfer_data_reduced.copy(), 'rt', self.group_code,'1/x')
         self.transfer_rt_planned_group = self.planned_ttests('rt', self.group_code, comparisons, data)
         self.transfer_rt_posthoc_group = self.post_hoc_tests('rt', self.group_code, data)
         
@@ -352,7 +352,8 @@ class Statistics:
         factors = [self.group_code, 'context_val_name', 'binned_trial'] #Interaction - group|context|trial
         data = self.average_byfactor(self.learning_data, 'accuracy', factors)
         self.learning_accuracy_posthoc_group_context_trial = self.post_hoc_tests('accuracy', factors, data)
-
+        
+        factors = [self.group_code, 'context_val_name']
         data1 = self.average_byfactor(self.learning_data, 'rt', factors)
         data2 = self.manipulate_data(data1, 'rt', 'context_val_name', 'Reward-Loss Avoid')
         data = [data1, data1, data2]
