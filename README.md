@@ -237,7 +237,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
     - *Reaction Time:* 
         - Chronic pain patients are slower than other groups
         - Reward context is slower than Punish context
-    - **Summary:** Reward context had hugher accuracy and was slower for selection than the punish context. The chronic pain patients took longer to respond in this task than the acute and no pain groups.
+    - **Summary:** Reward context had higher accuracy and was slower for selection than the punish context. The chronic pain patients took longer to respond in this task than the acute and no pain groups.
 
 - **Transfer Learning**
     - *Accuracy:* High reward was chosen over low reward across all groups
