@@ -248,7 +248,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
         - High reward was faster than low punish but no difference between low reward and low punish
         - There's no difference in RTs for pain groups between low reward and low punish, but there is a difference for the no pain group.
     - **Summary:** The no pain group preferred (and were quicker to select) the low reward over the low punish conditions. In contrast, the pain groups (chronic, acute) had no preference (or reaction time differences) for the low reward versus the low punish conditions.
-        - **Conclusion**: The low reward vs low punishment condition is meant to test whether a person judges their stimuli based on objective values (i.e., the amount of money earned where low reward > low punish), contextual values (i.e., which was more rewarding in their respective contexts where low punish > low reward). As such, the no pain group judged stimuli using their objective values (low reward > low punish) but the pain groups used a mixture of the two dimensions (i.e., low reward = low punish).
+        - **Conclusion**: The low reward vs low punishment condition is meant to test whether a person judges their stimuli based on objective values (i.e., the amount of money earned where low reward > low punish) or contextual values (i.e., which was more rewarding in their respective contexts where low punish > low reward). As such, the no pain group judged stimuli using their objective values (low reward > low punish) but the pain groups used a mixture of the two dimensions (i.e., low reward = low punish).
 
 ## Learning Phase
 
