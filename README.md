@@ -238,6 +238,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
         - Chronic pain patients are slower than other groups
         - Reward context is slower than Punish context
     - **Summary:** Reward context had higher accuracy and was slower for selection than the punish context. The chronic pain patients took longer to respond in this task overall than the acute and no pain groups.
+        - **Conclusion:** People spend more time to be more accurate in rewarding contexts. Chronic pain patients take more time than other groups to reach the same accuracy.
 
 - **Transfer Learning**
     - *Accuracy:* High reward was chosen over low reward across all groups
@@ -247,6 +248,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
         - High reward was faster than low punish but no difference between low reward and low punish
         - There's no difference in RTs for pain groups between low reward and low punish, but there is a difference for the no pain group.
     - **Summary:** The no pain group preferred (and were quicker to select) the low reward over the low punish conditions. In contrast, the pain groups (chronic, acute) had no preference (or reaction time differences) for the low reward or low punish conditions.
+        - **Conclusion**: The low reward vs low punishment condition is meant to test whether a person judges their stimuli based on objective values (i.e., the amount of money earned where low reward > low punish), contextual values (i.e., which was more rewarding in their respective contexts where low punish > low reward). As such, the no pain group judged stimuli using their objective values (low reward > low punish) but the pain groups used a mixture of the two dimensions (i.e., combining low reward > low punish + low punish > low reward results in low reward = low punish).
 
 ## Learning Phase
 
