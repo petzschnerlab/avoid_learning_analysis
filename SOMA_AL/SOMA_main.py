@@ -78,6 +78,7 @@ if __name__ == '__main__':
     hide_stats = False
     hide_posthocs = False
     load_stats = True
+    load_posthocs = False
     verbose = True
 
     #Run the pipeline for each split_by_group

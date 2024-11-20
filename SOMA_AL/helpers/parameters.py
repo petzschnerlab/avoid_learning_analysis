@@ -97,6 +97,7 @@ class Parameters:
                            'hide_stats',
                            'load_stats',
                            'hide_posthocs',
+                           'load_posthocs',
                            'verbose']
         for key in kwargs:
             if key not in accepted_params:
@@ -138,6 +139,7 @@ class Parameters:
         self.hide_stats = kwargs.get('hide_stats', False)
         self.load_stats = kwargs.get('load_stats', False)
         self.hide_posthocs = kwargs.get('hide_posthocs', False)
+        self.load_posthocs = kwargs.get('load_posthocs', False)
         self.verbose = kwargs.get('verbose', False)
         
         #Format parameters

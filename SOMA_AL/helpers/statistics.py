@@ -235,7 +235,7 @@ class Statistics:
                                                savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_transfer_data_trials_reduced.csv",
                                                family='Gamma')
         
-        #Group factor planned comparisons
+        #Group factor comparisons
         '''
 
         == Pain Analyses ==
@@ -274,7 +274,7 @@ class Statistics:
         self.transfer_rt_planned_group = self.planned_ttests('rt', self.group_code, comparisons, data)
         self.transfer_rt_posthoc_group = self.post_hoc_tests('rt', self.group_code, data)
         
-        #Context factor planned comparisons
+        #Context factor comparisons
         '''
 
         == Pain and Depression Analyses ==
@@ -291,8 +291,14 @@ class Statistics:
         self.transfer_accuracy_posthoc_context = self.post_hoc_tests('choice_rate', 'symbol', self.choice_rate.reset_index())
         self.transfer_rt_planned_context = self.planned_ttests('choice_rt', 'symbol', comparisons, self.choice_rt.reset_index())
         self.transfer_rt_posthoc_context = self.post_hoc_tests('choice_rt', 'symbol', self.choice_rt.reset_index())
+
+        #Trial factor comparisons
+        data = self.average_byfactor(self.learning_data, 'accuracy', 'binned_trial')
+        self.learning_accuracy_posthoc_trials = self.post_hoc_tests('accuracy', 'binned_trial', data)
+        data = self.average_transform_data(self.learning_data.copy(), 'rt', 'binned_trial', '1/x')
+        self.learning_rt_posthoc_trials = self.post_hoc_tests('rt', 'binned_trial', data)
         
-        #Interactions planned comparisons
+        #Interactions comparisons
         '''
 
         == Pain Analyses ==
@@ -352,7 +358,7 @@ class Statistics:
         factors = [self.group_code, 'context_val_name', 'binned_trial'] #Interaction - group|context|trial
         data = self.average_byfactor(self.learning_data, 'accuracy', factors)
         self.learning_accuracy_posthoc_group_context_trial = self.post_hoc_tests('accuracy', factors, data)
-        
+
         factors = [self.group_code, 'context_val_name']
         data1 = self.average_byfactor(self.learning_data, 'rt', factors)
         data2 = self.manipulate_data(data1, 'rt', 'context_val_name', 'Reward-Loss Avoid')

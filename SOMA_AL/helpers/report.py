@@ -110,6 +110,14 @@ class Report:
             section_text.extend(self.insert_table(self.transfer_rt_posthoc_context, 'transfer_rt_context'))
             self.add_data_pdf(section_text, center=True)
 
+            section_text = []
+            section_text.append('## Post-Hoc Comparisons: Trial Comparisons')
+            section_text.append('### Learning Accuracy')
+            section_text.extend(self.insert_table(self.learning_accuracy_posthoc_trials, 'learning_accuracy_trial'))
+            section_text.append('### Learning Reaction Time')
+            section_text.extend(self.insert_table(self.learning_rt_posthoc_trials, 'learning_rt_trial'))
+            self.add_data_pdf(section_text, center=True)
+
             max_rows = 30
             section_text = []
             section_text.append('## Post-Hoc Comparisons: Interaction Comparisons')
@@ -655,11 +663,13 @@ class Report:
             n = len(table)
             subtables = [table[i:i+max_rows] for i in range(0, n, max_rows)]
             for i, subtable in enumerate(subtables):
-                self.table_to_png(subtable.set_index('factor'), save_name=f'SOMA_AL/plots/{save_name}_{i}.png')
-                subsection += [f'#### ![{save_name}_{i}](SOMA_AL/plots/{save_name}_{i}.png)\n']
+                if self.load_posthocs == False:
+                    self.table_to_png(subtable.set_index('factor'), save_name=f'SOMA_AL/plots/{self.split_by_group}_{save_name}_{i}.png')
+                subsection += [f'#### ![{save_name}_{i}](SOMA_AL/plots/{self.split_by_group}_{save_name}_{i}.png)\n']
         else: #Print full table
-            self.table_to_png(table, save_name=f'SOMA_AL/plots/{save_name}.png')
-            subsection += [f'#### ![{save_name}](SOMA_AL/plots/{save_name}.png)\n']
+            if self.load_posthocs == False:
+                self.table_to_png(table, save_name=f'SOMA_AL/plots/{self.split_by_group}_{save_name}.png')
+            subsection += [f'#### ![{save_name}](SOMA_AL/plots/{self.split_by_group}_{save_name}.png)\n']
        
         return subsection
     
