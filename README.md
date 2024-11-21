@@ -320,11 +320,13 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
 - **Model Assessment**
     - AIC, BIC, and Laplace Approximation to the model evidence (LPP)
 
-### Model Plan:
-- Develop the Q-learning benchmark RL model (Palminteri et al., 2015)
-- Develop the relative RL model (Palminteri et al., 2015)
-- Develop the relative +- RL model (Lefebvre et al., 2017)?
-- Hybrid actor-critic-q-learning model (Gold et al., 2012)
+### Models:
+- Benchmark Actor-Critic RL Model (w/ counterfactual LR?)
+- Benchmark Q-Learning RL Model (w/ counterfactual LR?)
+- Hybrid Actor-Critic/Q-Learning Model (Gold et al., 2012) (w/ counterfactual LR?)
+- Relative Model (Palminteri et al., 2015)
+- Rescorla-Wagner ± Model (Lefebvre et al., 2017)?
+- TODO: OpAL? ([Jaskir & Frank, 2022](https://elifesciences.org/articles/85107.pdf))
 
 ### Analyses
 - Run model simulations to validate models (fig 3A, Vandendriessche et al., 2023)
