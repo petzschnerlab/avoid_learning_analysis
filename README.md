@@ -242,31 +242,51 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
     - Also minimied the log of posterior probability of data | different parameters
         - TODO: Determine why that is
 
-**Geana et al., 2021**
+**Gold et al., 2012**
 - **Actor-Critic Model**
     - Value Update:
-        - $V_{s,t+1} = V_{s,t} + \alpha_{c}\delta_{t}$
+        - $V(s,t+1) = V(s,t) + \alpha_{c} \delta(t)$
     - Prediction Error:
-        - $\delta_{t} = R_{t} - V_{s,t}$
-    - Action Selection Weights:
-        - $W_{s.a.t+1} = W_{s.a.t}+\alpha_{A}\delta_{t}$
-            - Normalized each trial
-            - No actual action selection equation is provided here, but it is said it is based on these weights. Seems like these would be similar to softmax transformed values, but no mention of a temperature.
+        - $\delta(t) = R(t) - V(s,t)$
+    - Action Selection (actor) Weights:
+        - $w(s,a,t+1) = w(s,a,t) + \alpha_{a} \delta(t)$
+            - Normalized by the sum of absolute values, thus remains in [-1, 1]. Note this requires weights to be initialized at a non-zero number (here, 0.01)
+                -e.g., $w(s,a_{1},t) <- \frac{w(s,a_{1},t)}{|w(s,a_{1},t)| + w(s,a_{2},t)}
     - Action Selection:
-        - None described
+        - $P(a_{1},t) = \frac{e^{w(s,a_{1},t)/\beta}}{e^{w(s,a_{1},t)/\beta} + e^{w(s,a_{2},t)/\beta}}$
+    - Positive | Negative Weighing; TODO: Unpack this
+        - "In agreement with previous studies, we also allow positive and negative rewards to be weighed differently. Positive feedback at trial t was encoded as outcome(t) = 1-d, neutral feedback as outcome(t) = 0 and negative feedback as outcome(t) = -d. Thus the free parameter d indicates full neglect of negative outcomes if d = 0, full neglect of positive outcomes if d = 1, and equal weighing of positive and negative outcomes if d = 0.5"
 - **Q-Learning Model**
     - Value Update:
-        - $V_{a,t+1} = V_{a,t} + \alpha_{Q}\delta_{t}$
-    - Prediction Error: 
-        - $\delta_{t} = R_{t} - V_{a,t}$
+        - $V(a,t+1) = V(a,t) + \alpha_{o}\delta(t)$
+    - Prediction Error:
+        - $\delta(t) = R(t) - V(a,t)$
     - Action Selection:
-        - None described
+        - $P(a_{1},t) = \frac{e^{V(a_{1},t)/\beta}}{e^{V(a_{1},t)/\beta} + e^{V(a_{2},t)/\beta}}$
+    - Positive | Negative Weighing; TODO: Unpack this
+        - See above for quote
+- **Hybrid Actor-Critic-Q-Learning-Model**
+    - Value Update:
+        - Update w(s,a,t) as in the actor-critic model and V(a,t) as in the q-learning model
+    - Prediction Error:
+        - As per the actor-critic and q-learning models
+    - Action Selection Weights
+        - $H(s,a_{1},t) = [(1-c)w(s,a,t)+cV(a,t)$
+    - Action Selection
+        - $P(a_{1},t) = \frac{e^{H(s,a_{1},t)/\beta}}{e^{H(s,a_{1},t)/\beta} + e^{H(s,a_{2},t)/\beta}}$
+            - c = a mixing parameter that determined the influence of actor-critic vs q-learning
+
+**Geana et al., 2021**
+- **Actor-Critic Model**
+    - See Gold et al., 2012 above
+- **Q-Learning Model**
+    - See Gold et al., 2012 above
 - **Hybrid/Mixed Model**
     - A mixture between actor-critic and q-learning (Gold et al., 2012)
     - Value Updating:
         - $Q_{fin}(all) = Q_{fin}(all)(1-d) + Q_{init}(all)$
             - This is some a decaying function of q-values. Will need to look closer if this model is implemented
-    - Action Selection Weights?:
+    - Action Selection Weights:
         - $H_{s,a,t} = W_{s,a,t}(1-C) + Q_{a,t}C
             - C = a mixing factor that emphasizes actor-critic vs Q-learning. 0.5 = perfect mix of both, 1 = Q only, 0 = A-C only
     - Action Selection:
