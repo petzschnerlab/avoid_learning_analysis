@@ -242,6 +242,37 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
     - Also minimied the log of posterior probability of data | different parameters
         - TODO: Determine why that is
 
+**Geana et al., 2021**
+- **Actor-Critic Model**
+    - Value Update:
+        - $V_{s,t+1} = V_{s,t} + \alpha_{c}\delta_{t}$
+    - Prediction Error:
+        - $\delta_{t} = R_{t} - V_{s,t}$
+    - Action Selection Weights:
+        - $W_{s.a.t+1} = W_{s.a.t}+\alpha_{A}\delta_{t}$
+            - Normalized each trial
+            - No actual action selection equation is provided here, but it is said it is based on these weights. Seems like these would be similar to softmax transformed values, but no mention of a temperature.
+    - Action Selection:
+        - None described
+- **Q-Learning Model**
+    - Value Update:
+        - $V_{a,t+1} = V_{a,t} + \alpha_{Q}\delta_{t}$
+    - Prediction Error: 
+        - $\delta_{t} = R_{t} - V_{a,t}$
+    - Action Selection:
+        - None described
+- **Hybrid/Mixed Model**
+    - A mixture between actor-critic and q-learning (Gold et al., 2012)
+    - Value Updating:
+        - $Q_{fin}(all) = Q_{fin}(all)(1-d) + Q_{init}(all)$
+            - This is some a decaying function of q-values. Will need to look closer if this model is implemented
+    - Action Selection Weights?:
+        - $H_{s,a,t} = W_{s,a,t}(1-C) + Q_{a,t}C
+            - C = a mixing factor that emphasizes actor-critic vs Q-learning. 0.5 = perfect mix of both, 1 = Q only, 0 = A-C only
+    - Action Selection:
+        - $P_{a,t} = (1-\epsilon)\frac{e^{\beta H_{s,a,t}}}{\sum e^{\beta H_{s,a,t}'}} + \epsilon u_{t}$
+            - u_{t} is a uniform distribution across all actions. So, epsilon = 1 means completely random choice
+
 **Vandendriessche et al., 2023**
 - **Pos/Neg Q-Learning RL Model**
     - Different learning rates for positive and negative prediction errors
