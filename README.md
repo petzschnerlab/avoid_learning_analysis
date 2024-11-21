@@ -219,6 +219,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
         - Unchosen Action: $\delta_{u,t} = R_{u,t} - V_{t}(s,u)$
     - Action Selection:
         - Softmax: $P_{t}(s,a) = \frac{e^{V_{t}(s,a_{i})/\tau}}{\sum e^{V_{t}(s,a_{j})/\tau}}$
+            - Note: This is not the softmax equation in the paper, maybe make sure they are equal
 - ***Leading Model*: Relative Model**, a Q-learning model w/ counterfactual learning
     - Incorporates the context value, $V_{t}(s)$ into the prediction error
         - Specifically, a context value is updated that propogates into the action prediction errors
@@ -232,11 +233,24 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
     - Action Prediction Errors:
         - Chosen Action: $\delta_{c,t} = R_{c,t} - V_{t}(s) - V_{t}(s,c)$
         - Unchosen Action: $\delta_{u,t} = R_{u,t} - V_{t}(s) - V_{t}(s,u)$
+    - Action Selection:
+        - Softmax: $P_{t}(s,a) = \frac{e^{V_{t}(s,a_{i})/\tau}}{\sum e^{V_{t}(s,a_{j})/\tau}}$
+            - Note: This is not the softmax equation in the paper, maybe make sure they are equal
 - **Fitted parameters**
     - temperature ($\tau$), factual LR ($\alpha_{1}$), counterfactual LR ($\alpha_{2}$), contextual LR ($\alpha_{3}$; for Relative model)
     - Minimized negative log likelihood
     - Also minimied the log of posterior probability of data | different parameters
         - TODO: Determine why that is
+
+**Vandendriessche et al., 2023**
+- **Pos/Neg Q-Learning RL Model**
+    - Different learning rates for positive and negative prediction errors
+    - Value Update:
+        - Positive PE (r > 0): $V(s,a) = V(s,a) + \alpha_{+}(r-V(s,a))$
+        - Negative PE (r < 0): $V(s,a) = V(s,a) + \alpha_{-}(r-V(s,a))$
+        - Note, this paper is lacking a lot of description on this. For example, they say different LR based on pos/neg prediction error but notation implies different LR dependent on pos/neg reward. Also, this task does not have punish context but low reward context, so there is no negative reward? 
+    - Action Selection:
+        - Softmax: $P_{t}(s,a) = \frac{1}{1 + e(\frac{V_{t}(s,b)-V_{t}(s,a)}{\beta})}$
 
 - **Model Assessment**
     - AIC, BIC, and Laplace Approximation to the model evidence (LPP)
