@@ -206,15 +206,50 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
     - Low Reward vs Low Punish (Palminteri et al., 2015, Gold et al., 2012)
 
 ## Computational Modelling
-### Models:
+
+### Literature
+**Palminteri et al., 2015**
+- ***Benchmark Model*: Standard Q-Learning RL Model** w/ counterfactual learning (Absolute)
+    - Includes a learning rate for the chosen action and one for the unchosen action
+    - Action Value Update: 
+        - Chosen Action: $V_{t+1}(s,c) = V_{t}(s,c) + \alpha_{1}\delta_{c,t}$
+        - Unchosen Action: $V_{t+1}(s,u) = V_{t}(s,u) + \alpha_{2}\delta_{u,t}$
+    - Prediction error: 
+        - Chosen Action: $\delta_{c,t} = R_{c,t} - V_{t}(s,c)$
+        - Unchosen Action: $\delta_{u,t} = R_{u,t} - V_{t}(s,u)$
+    - Action Selection:
+        - Softmax: $P_{t}(s,a) = \frac{e^{V_{t}(s,a_{i})/\tau}}{\sum e^{V_{t}(s,a_{j})/\tau}}$
+- ***Leading Model*: Relative Model**, a Q-learning model w/ counterfactual learning
+    - Incorporates the context value, $V_{t}(s)$ into the prediction error
+        - Specifically, a context value is updated that propogates into the action prediction errors
+    - Context Value Update:
+        - [Context Value Update] $V_{t+1}(s) = V_{t}(s) + \alpha_{3}\delta_{V,t}$, where
+            - [Context Prediction Error] $\delta_{V,t} = R_{V,t} - V{t}(s)$, where
+                - [Context Reward] $R_{V,t} = \frac{(R_{c,t} + R_{u,t})}{2}$
+    - Action Value Update:
+        - Chosen Action: $V_{t+1}(s,c) = V_{t}(s,c) + \alpha_{1}\delta_{c,t}$
+        - Unchosen Action: $V_{t+1}(s,u) = V_{t}(s,u) + \alpha_{2}\delta_{u,t}$
+    - Action Prediction Errors:
+        - Chosen Action: $\delta_{c,t} = R_{c,t} - V_{t}(s) - V_{t}(s,c)$
+        - Unchosen Action: $\delta_{u,t} = R_{u,t} - V_{t}(s) - V_{t}(s,u)$
+- **Fitted parameters**
+    - temperature ($\tau$), factual LR ($\alpha_{1}$), counterfactual LR ($\alpha_{2}$), contextual LR ($\alpha_{3}$; for Relative model)
+    - Minimized negative log likelihood
+    - Also minimied the log of posterior probability of data | different parameters
+        - TODO: Determine why that is
+
+- **Model Assessment**
+    - AIC, BIC, and Laplace Approximation to the model evidence (LPP)
+
+### Model Plan:
 - Develop the Q-learning benchmark RL model (Palminteri et al., 2015)
 - Develop the relative RL model (Palminteri et al., 2015)
-- Develop the relative +- RL model (Lefebvre et al., 2017)
+- Develop the relative +- RL model (Lefebvre et al., 2017)?
 - Hybrid actor-critic-q-learning model (Gold et al., 2012)
 
 ### Analyses
-- Run model simulations to validate models (fig 3A)
-- Fit models to empirical findings (fig 3B)
+- Run model simulations to validate models (fig 3A, Vandendriessche et al., 2023)
+- Fit models to empirical findings (fig 3B, Vandendriessche et al., 2023)
 - Extract learning rates and run statistics
 - Extract temperature and run statistics
 
@@ -230,7 +265,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
 
 # ===RESULTS=== #
 
-## General Conclusions
+## General Summary
 
 - **Learning Phase**
     - *Accuracy:* Reward context has greater accuracy than punish context 
@@ -249,6 +284,8 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
         - There's no difference in RTs for pain groups between low reward and low punish, but there is a difference for the no pain group.
     - **Summary:** The no pain group preferred (and were quicker to select) the low reward over the low punish conditions. In contrast, the pain groups (chronic, acute) had no preference (or reaction time differences) for the low reward versus the low punish conditions.
         - **Conclusion**: The low reward vs low punishment condition is meant to test whether a person judges their stimuli based on objective values (i.e., the amount of money earned where low reward > low punish) or contextual values (i.e., which was more rewarding in their respective contexts where low punish > low reward). As such, the no pain group judged stimuli using their objective values (low reward > low punish) but the pain groups used a mixture of the two dimensions (i.e., low reward = low punish).
+
+- **Conclusion:** Pain patients have intact learning (as learning accuracy showed no deficit) but use different decision-making strategies. 
 
 ## Learning Phase
 
