@@ -276,6 +276,22 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
         - $P(a_{1},t) = \frac{e^{H(s,a_{1},t)/\beta}}{e^{H(s,a_{1},t)/\beta} + e^{H(s,a_{2},t)/\beta}}$
             - c = a mixing parameter that determined the influence of actor-critic vs q-learning
 
+**Lefebvre et al., 2017**
+- **Q-Learning Model**
+    - See above lit for details
+- **Rescorla-Wagner± Model**
+    - Value Update:
+        - Value Updates have different LR depending on whether a positive (better than expected) or negativ (worse than expected) PE was experienced. This allows for people to emphasize positive/negative feedback differently in learning.
+        - $\delta(t)$ > 0: 
+            - $V_{L}(t+1) = Q_{L}(t) + \alpha_{+} \delta(t)$
+        - $\delta(t)$ < 0: 
+            - $V_{L}(t+1) = Q_{L}(t) + \alpha_{-} \delta(t)$
+    - Prediction Error:
+        - $\delta(t) = R(t) - Q_{L}(t)$
+    - Action Selection:
+        - $P_{L}(t) = \frac{e^{V_{L}(t)\beta}}{e^{V_{L}(t)\beta} + e^{V_{L}(t)\beta}}$
+            - Notation is off here, but L can mean action 1 and action 2 as usual.
+        
 **Geana et al., 2021**
 - **Actor-Critic Model**
     - See Gold et al., 2012 above
@@ -297,9 +313,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
 - **Pos/Neg Q-Learning RL Model**
     - Different learning rates for positive and negative prediction errors
     - Value Update:
-        - Positive PE (r > 0): $V(s,a) = V(s,a) + \alpha_{+}(r-V(s,a))$
-        - Negative PE (r < 0): $V(s,a) = V(s,a) + \alpha_{-}(r-V(s,a))$
-        - Note, this paper is lacking a lot of description on this. For example, they say different LR based on pos/neg prediction error but notation implies different LR dependent on pos/neg reward. Also, this task does not have punish context but low reward context, so there is no negative reward? 
+        - See Lefebvre et al., 2017 above
     - Action Selection:
         - Softmax: $P_{t}(s,a) = \frac{1}{1 + e(\frac{V_{t}(s,b)-V_{t}(s,a)}{\beta})}$
 
