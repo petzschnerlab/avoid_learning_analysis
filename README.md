@@ -321,12 +321,13 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
     - AIC, BIC, and Laplace Approximation to the model evidence (LPP)
 
 ### Models:
-- Benchmark Actor-Critic RL Model (w/ counterfactual LR?)
-- Benchmark Q-Learning RL Model (w/ counterfactual LR?)
-- Hybrid Actor-Critic/Q-Learning Model (Gold et al., 2012) (w/ counterfactual LR?)
+- Benchmark Actor-Critic RL Model
+- Benchmark Q-Learning RL Model
+- Hybrid Actor-Critic/Q-Learning Model (Gold et al., 2012)
+- Hybrid+ (Geana et al., 2021)?
 - Relative Model (Palminteri et al., 2015)
-- Rescorla-Wagner ± Model (Lefebvre et al., 2017)?
-- TODO: OpAL? ([Jaskir & Frank, 2022](https://elifesciences.org/articles/85107.pdf))
+- TODO: OpAL ([Jaskir & Frank, 2022](https://elifesciences.org/articles/85107.pdf))?
+- TODO: OpAL* ([Jaskir & Frank, 2023](https://elifesciences.org/articles/85107))?
 
 ### Analyses
 - Run model simulations to validate models (fig 3A, Vandendriessche et al., 2023)
@@ -334,7 +335,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
 - Extract learning rates and run statistics
 - Extract temperature and run statistics
 
-# Literature Reviews
+# Literature
 - *[Palminteri et al. - 2015](https://www.nature.com/articles/ncomms9096.pdf)
 - *[Vandendriessche et al. - 2023](https://www.cambridge.org/core/services/aop-cambridge-core/content/view/4A99B6789148211973379AB7A8A81036/S0033291722001593a.pdf/div-class-title-contextual-influence-of-reinforcement-learning-performance-of-depression-evidence-for-a-negativity-bias-div.pdf)
 - Bavard et al. - 2018
