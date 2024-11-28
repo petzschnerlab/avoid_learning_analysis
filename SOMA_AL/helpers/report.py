@@ -664,12 +664,12 @@ class Report:
             subtables = [table[i:i+max_rows] for i in range(0, n, max_rows)]
             for i, subtable in enumerate(subtables):
                 if self.load_posthocs == False:
-                    self.table_to_png(subtable.set_index('factor'), save_name=f'SOMA_AL/plots/{self.split_by_group}_{save_name}_{i}.png')
-                subsection += [f'#### ![{save_name}_{i}](SOMA_AL/plots/{self.split_by_group}_{save_name}_{i}.png)\n']
+                    self.table_to_png(subtable.set_index('factor'), save_name=f'SOMA_AL/plots/tables/{self.split_by_group}_{save_name}_{i}.png')
+                subsection += [f'#### ![{save_name}_{i}](SOMA_AL/plots/tables/{self.split_by_group}_{save_name}_{i}.png)\n']
         else: #Print full table
             if self.load_posthocs == False:
-                self.table_to_png(table, save_name=f'SOMA_AL/plots/{self.split_by_group}_{save_name}.png')
-            subsection += [f'#### ![{save_name}](SOMA_AL/plots/{self.split_by_group}_{save_name}.png)\n']
+                self.table_to_png(table, save_name=f'SOMA_AL/plots/tables/{self.split_by_group}_{save_name}.png')
+            subsection += [f'#### ![{save_name}](SOMA_AL/plots/tables/{self.split_by_group}_{save_name}.png)\n']
        
         return subsection
     
