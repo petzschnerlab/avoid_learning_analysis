@@ -326,6 +326,7 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
 - Hybrid Actor-Critic/Q-Learning Model (Gold et al., 2012)
 - Hybrid+ (Geana et al., 2021)?
 - Relative Model (Palminteri et al., 2015)
+- TODO: OpAL ([Collins & Frank, 2014](https://psycnet.apa.org/record/2014-31650-003))
 - TODO: OpAL* ([Jaskir & Frank, 2022](https://elifesciences.org/articles/85107.pdf))?
 
 ### Analyses
