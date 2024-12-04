@@ -269,7 +269,7 @@ class Report:
         section = Section(' \n '.join(content), toc=toc)
         self.pdf.add_section(section, user_css=user_css)
 
-    def table_to_png(self, table: pd.DataFrame, save_name: str = "SOMA_AL/plots/Table.png") -> None:
+    def table_to_png(self, table: pd.DataFrame, save_name: str = "SOMA_AL/plots/tables/Table.png") -> None:
 
         """
         Converts a table to a png
@@ -533,8 +533,7 @@ class Report:
                             'learning-rt': self.learning_rt_glmm,
                             'transfer-choice-rate': self.transfer_accuracy_glmm,
                             'transfer-rt': self.transfer_rt_glmm,
-                            'demographics-and-clinical-scores': self.demo_clinical,
-                            'transfer-valence-bias': self.transfer_valence_bias}
+                            'demographics-and-clinical-scores': self.demo_clinical}
 
         data = self.data_legend[target]
         formula, outcome, fixed, random, sample_size, df_residual, test = self.get_metadata(data)
@@ -640,7 +639,7 @@ class Report:
             The subsection for the report
         """
 
-        subsection = [f'#### ![{image_name}](SOMA_AL/plots/{image_name}.png)\n', 
+        subsection = [f'#### ![{image_name}](SOMA_AL/plots/{self.split_by_group}/{image_name}.png)\n', 
                       f'{self.get_caption(image_name)}\n']
        
         return subsection

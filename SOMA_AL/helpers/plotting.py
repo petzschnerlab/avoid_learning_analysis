@@ -193,7 +193,7 @@ class Plotting:
             ax[i].legend(loc='lower right', frameon=False)
 
         #Save the plot
-        plt.savefig(f'SOMA_AL/plots/{save_name}.png')
+        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
 
         #Close figure
         plt.close()
@@ -379,7 +379,7 @@ class Plotting:
             ax.annotate('Punish', xy=(0.55, 5), xytext=(0.55, 5), rotation=90, textcoords='data', ha='center', va='center', color='darkgrey')
 
         #Save the plot
-        plt.savefig(f'SOMA_AL/plots/{save_name}.png')
+        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
 
         #Close figure
         plt.close()
@@ -432,7 +432,7 @@ class Plotting:
             ax[metric_index].set_title(metric.capitalize())
 
         #Save the plot
-        plt.savefig(f'SOMA_AL/plots/{save_name}.png')
+        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
 
         #Close figure
         plt.close()
