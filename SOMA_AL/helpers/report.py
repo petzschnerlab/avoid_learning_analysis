@@ -457,6 +457,16 @@ class Report:
                 caption = """Reaction times for cases where the low reward was compared to the low punishment symbols in the transfer trials. 
                 Boxplots show the mean and 95\% confidence intervals of the reaction times for each group."""
 
+            case 'transfer-valence-bias':
+                caption = """Valence bias for each group. Valence bias is computed as the difference in choice rate differences in each context, 
+                specifically (High Reward - Low Reward) - (Low Punish - High Punish). 
+                Positive biases indicate that there was a larger of choice rates within the reward context, 
+                and negative biases indicate that there was a larger difference in choice rates within the punishment context.
+                Boxplots show the mean and 95\% confidence intervals of the bias for each group.
+                Half-violin plots show the distribution of biases across participants within each group.
+                Scatter points show the bias for each participant within each group.
+                """ 
+
         #Return caption
         if target_type == 'figure':
             caption = self.add_figure_caption(caption)
@@ -523,7 +533,8 @@ class Report:
                             'learning-rt': self.learning_rt_glmm,
                             'transfer-choice-rate': self.transfer_accuracy_glmm,
                             'transfer-rt': self.transfer_rt_glmm,
-                            'demographics-and-clinical-scores': self.demo_clinical}
+                            'demographics-and-clinical-scores': self.demo_clinical,
+                            'transfer-valence-bias': self.transfer_valence_bias}
 
         data = self.data_legend[target]
         formula, outcome, fixed, random, sample_size, df_residual, test = self.get_metadata(data)

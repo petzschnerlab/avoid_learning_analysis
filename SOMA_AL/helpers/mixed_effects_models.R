@@ -38,7 +38,9 @@ setwd(working_directory)
 
 #Load csv file
 data = read.csv(filename, header = TRUE)
-data$accuracy[data$accuracy == 100] = 1
+if ('accuracy' %in% colnames(data)){
+  data$accuracy[data$accuracy == 100] = 1
+}
 
 #Run the model
 if (family == 'None' | family == 'gaussian'){

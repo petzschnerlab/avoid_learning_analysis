@@ -33,6 +33,7 @@ class Plotting:
         self.plot_rainclouds('learning-rt-context-diff')
         self.plot_rainclouds('transfer-choice-rate')
         self.plot_rainclouds('transfer-rt')
+        self.plot_rainclouds('transfer-valence-bias')
         self.plot_neutral_transfer_accuracy('transfer-choice-rate-neutral')
         self.plot_neutral_transfer_accuracy('transfer-rt-neutral', metric='rt')
 
@@ -245,11 +246,15 @@ class Plotting:
                 data = data.set_index([self.group_code, 'participant_id', 'symbol'])
                 metric_label = 'choice_rt'
                 y_label = 'Reaction Time (ms)'
+            case 'transfer-valence-bias':
+                data = self.valence_bias
+                metric_label = 'valence_bias'
+                y_label = 'Accuracy Bias (%)'
 
         if 'context' in save_name:
             data = data.reset_index().set_index(['symbol_name', self.group_code, 'participant_id'])
 
-        if 'diff' in save_name or 'context' in save_name:
+        if 'diff' in save_name or 'context' in save_name or 'valence-bias' in save_name:
             condition_name = self.group_code
             condition_values = self.group_labels
             x_values = np.arange(1, len(self.group_labels)+1).tolist()
@@ -265,7 +270,7 @@ class Plotting:
             x_values = [1, 2, 3, 4, 5]
             x_labels = ['High\nReward', 'Low\nReward', 'Low\nPunish', 'High\nPunish', 'Novel']
 
-        if 'diff' in save_name:
+        if 'diff' in save_name or 'valence-bias' in save_name:
             plot_labels = ['']
         elif 'context' in save_name:
             plot_labels = ['Reward', 'Punish']
@@ -273,7 +278,7 @@ class Plotting:
             plot_labels = self.group_labels
         
         #Create a bar plot of the choice rate for each symbol
-        if 'diff' in save_name:
+        if 'diff' in save_name or 'valence-bias' in save_name:
             num_subplots = 1
         elif 'context' in save_name:
             num_subplots = 2
@@ -296,13 +301,13 @@ class Plotting:
             group_data = group_data.set_index(condition_name)[metric_label].astype(float)
 
             #Create plot
-            if 'diff' not in save_name:
+            if 'diff' not in save_name and 'valence-bias' not in save_name:
                 self.raincloud_plot(data=group_data, ax=ax[group_index], t_scores=t_scores)
             else:
                 self.raincloud_plot(data=group_data, ax=ax, t_scores=t_scores)
 
             #Create horizontal line for the mean the same width
-            if 'diff' not in save_name:
+            if 'diff' not in save_name and 'valence-bias' not in save_name:
                 ax[group_index].set_xticks(x_values, x_labels)
                 ax[group_index].set_xlabel('')
                 ax[group_index].set_ylabel(y_label)
@@ -317,7 +322,7 @@ class Plotting:
                 ax.axhline(y=0, color='darkgrey', linestyle='--')
 
         #Save the plot
-        plt.savefig(f'SOMA_AL/plots/{save_name}.png')
+        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
 
         #Close figure
         plt.close()

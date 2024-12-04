@@ -119,6 +119,7 @@ class Processing:
         self.compute_learning_averages()
         self.compute_choice_rate()
         self.compute_choice_rate(neutral=True)
+        self.compute_valence_bias()
 
         #Compute demographics and scores
         self.compute_demographics()
@@ -558,6 +559,37 @@ class Processing:
         self.learning_rt.set_index([self.group_code, 'participant_id', 'symbol_name'], inplace=True)
         self.learning_rt_diff.set_index([self.group_code, 'participant_id', 'symbol_name'], inplace=True)
 
+    def compute_valence_bias(self) -> None:
+
+        """
+        Function to compute the valence bias
+
+        Returns (Internal)
+        ------------------
+        self.valence_bias : pd.DataFrame
+            The valence bias
+        """
+
+        #Compute valence bias
+        choice_rate = self.choice_rate.reset_index()
+        HR = choice_rate[choice_rate['symbol']=='High Reward']['choice_rate'].reset_index(drop=True)
+        LR = choice_rate[choice_rate['symbol']=='Low Reward']['choice_rate'].reset_index(drop=True)
+        LP = choice_rate[choice_rate['symbol']=='Low Punish']['choice_rate'].reset_index(drop=True)
+        HP = choice_rate[choice_rate['symbol']=='High Punish']['choice_rate'].reset_index(drop=True)
+
+        HRLR = HR - LR
+        LPHP = LP - HP
+        valence_bias = HRLR - LPHP
+
+        #Create new valence bias dataframe
+        self.valence_bias = choice_rate[choice_rate['symbol']=='High Reward'][[self.group_code, 'participant_id']].reset_index(drop=True)
+        self.valence_bias['symbol'] = 'bias'
+        self.valence_bias['valence_bias'] = pd.Series(valence_bias, dtype='float64')
+        self.valence_bias = self.valence_bias.set_index([self.group_code, 'participant_id', 'symbol'])
+
+        #Save to csv
+        self.valence_bias.reset_index().to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_transfer_valence_bias.csv', index=False)
+
     def compute_choice_rate(self, neutral: bool = False) -> None:
 
         '''
@@ -599,7 +631,6 @@ class Processing:
                     #Insert symbol_choice_rate into a new dataframe with index levels [group, participant, symbol]
                     choice_rate.loc[(group, participant, symbol), 'choice_rate'] = symbol_choice_rate
                     choice_rt.loc[(group, participant, symbol), 'choice_rt'] = participant_data[participant_data['symbol_chosen'] == symbol]['rt'].mean()
-
 
         if not neutral:
             choice_rate = choice_rate.reset_index()

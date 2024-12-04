@@ -235,6 +235,22 @@ class Statistics:
                                                savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_transfer_data_trials_reduced.csv",
                                                family='Gamma')
         
+        #Transfer valence bias
+        formula = f'valence_bias~1+{self.group_code}'
+        if self.covariate is not None:
+            formula = f'valence_bias~1+{self.group_code}+{self.covariate}'
+
+        assumption_data = self.valence_bias.reset_index()
+        assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
+        self.transfer_valence_bias_glmm_assumptions = self.glmm_assumption_check(assumption_data, formula, phase='transfer')
+
+        self.transfer_valence_bias_glmm = self.generalized_linear_model(formula, 
+                                        self.valence_bias.reset_index(),
+                                        path=self.repo_directory,
+                                        filename=f"SOMA_AL/stats/{self.split_by_group}_stats_transfer_valence_bias.csv",
+                                        savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_transfer_valence_bias.csv",
+                                        family='gaussian')
+
         #Group factor comparisons
         '''
 
@@ -297,6 +313,15 @@ class Statistics:
         self.learning_accuracy_posthoc_trials = self.post_hoc_tests('accuracy', 'binned_trial', data)
         data = self.average_transform_data(self.learning_data.copy(), 'rt', 'binned_trial', '1/x')
         self.learning_rt_posthoc_trials = self.post_hoc_tests('rt', 'binned_trial', data)
+
+        #Valence bias comparisons
+
+        '''
+        
+        == Pain & Depression Analyses ==
+        There are no planned comparisons for valence bias
+        '''
+        self.transfer_accuracy_posthoc_bias = self.post_hoc_tests('valence_bias', self.group_code, self.valence_bias.reset_index())
         
         #Interactions comparisons
         '''
