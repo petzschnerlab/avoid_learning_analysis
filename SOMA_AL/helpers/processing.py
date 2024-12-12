@@ -111,8 +111,13 @@ class Processing:
         #Compute accuracy
         self.compute_accuracy()
 
-        #Exclude participants with low accuracy and trials with low reaction times
+        #Exclude participants with low accuracy
         self.exclude_low_accuracy(self.accuracy_exclusion_threshold)
+
+        #Save processed data for RL modelling
+        #self.save_processed_data()
+
+        #Exclude trials with low/high reaction times
         self.exclude_low_rt(self.RT_low_threshold, self.RT_high_threshold)
 
         #Compute metrics
@@ -180,9 +185,8 @@ class Processing:
         """
 
         #Save the processed data to a new file
-        self.data.to_csv(self.file.replace('.csv', '_processed.csv'))
-        self.learning_data.to_csv(self.file.replace('.csv', '_learning_processed.csv'))
-        self.transfer_data.to_csv(self.file.replace('.csv', '_transfer_processed.csv'))
+        self.learning_data.to_csv(os.path.join('SOMA_AL','data',f'{self.split_by_group}_learning_processed.csv'), index=False)
+        self.transfer_data.to_csv(os.path.join('SOMA_AL','data',f'{self.split_by_group}_transfer_processed.csv'), index=False)
 
     #Data filtering
     def filter_learning_data(self) -> None:
@@ -643,6 +647,10 @@ class Processing:
 
             self.choice_rate = choice_rate
             self.choice_rt = choice_rt
+
+            self.choice_rate.reset_index().to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_choice_rates.csv', index=False)
+            self.choice_rt.reset_index().to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_choice_rt.csv', index=False)
+
         else:
             choice_rate = choice_rate.reset_index()
             choice_rate = choice_rate[choice_rate['symbol'] == 3] #Choose rewarding 

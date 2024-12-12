@@ -200,7 +200,8 @@ class Statistics:
                                                savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_learning_data_trials.csv",
                                                family='Gamma')
         
-        #Transfer choice rate
+        #Transfer choice rate #Trial-level where accuracy equals expected value that's largest
+        ''' This is removed because planned comparisons focus on comparing the replacement analyses below
         formula = f'accuracy~1+{self.group_code}*paired_symbols+(1|participant_id)'
         if self.covariate is not None:
             formula = f'accuracy~1+{self.group_code}*paired_symbols+{self.covariate}+(1|participant_id)'
@@ -217,8 +218,27 @@ class Statistics:
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv",
                                                savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_transfer_data_trials_reduced.csv",
                                                family='binomial')
+        '''
+
+        #Transfer choice rate using averaged data
+        self.load_stats = False #TODO: REMOVE THIS
+
+        formula = f'choice_rate~1+{self.group_code}*symbol+(1|participant_id)'
+        assumption_data = self.choice_rate.reset_index()
+        assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
+        assumption_data['symbol'] = pd.Categorical(assumption_data['symbol'], ['High Reward', 'Low Reward', 'Low Punish', 'High Punish', 'Novel'])
+        assumption_data['choice_rate'] = assumption_data['choice_rate'].astype(float)
+        self.transfer_accuracy_glmm_assumptions = self.glmm_assumption_check(assumption_data, formula, phase='transfer')        
+        
+        self.transfer_accuracy_glmm = self.generalized_linear_model(formula, 
+                                               self.choice_rate.reset_index(),
+                                               path=self.repo_directory,
+                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_choice_rates.csv",
+                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rates.csv",
+                                               family='gaussian')
 
         #Transfer RT
+        ''' This is removed because planned comparisons focus on comparing the replacement analyses below
         formula = f'rt~1+{self.group_code}*paired_symbols+(1|participant_id)'
         if self.covariate is not None:
             formula = f'rt~1+{self.group_code}*paired_symbols+{self.covariate}+(1|participant_id)'
@@ -234,7 +254,25 @@ class Statistics:
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv",
                                                savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_transfer_data_trials_reduced.csv",
                                                family='Gamma')
+        '''
+
+        #Transfer choice rate using averaged data
+        formula = f'choice_rt~1+{self.group_code}*symbol+(1|participant_id)'
+        assumption_data = self.choice_rt.reset_index()
+        assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
+        assumption_data['symbol'] = pd.Categorical(assumption_data['symbol'], ['High Reward', 'Low Reward', 'Low Punish', 'High Punish', 'Novel'])
+        assumption_data['choice_rt'] = assumption_data['choice_rt'].astype(float)
+        self.transfer_rt_glmm_assumptions = self.glmm_assumption_check(assumption_data, formula, phase='transfer')        
         
+        self.transfer_rt_glmm = self.generalized_linear_model(formula, 
+                                               self.choice_rt.reset_index(),
+                                               path=self.repo_directory,
+                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_choice_rt.csv",
+                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rt.csv",
+                                               family='Gamma')
+        
+        self.load_stats = True #TODO: REMOVE THIS
+
         #Transfer valence bias
         formula = f'valence_bias~1+{self.group_code}'
         if self.covariate is not None:
@@ -249,7 +287,7 @@ class Statistics:
                                         path=self.repo_directory,
                                         filename=f"SOMA_AL/stats/{self.split_by_group}_stats_transfer_valence_bias.csv",
                                         savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_transfer_valence_bias.csv",
-                                        family='gaussian')
+                                        family='Gaussian')
 
         #Group factor comparisons
         '''
@@ -799,7 +837,7 @@ class Statistics:
                                     formula,
                                     family])
             model_summary = pd.read_csv(savename.replace('.csv', f'_{outcome}_results.csv'))
-            if family == 'gaussian':
+            if False: #family == 'gaussian': #TODO: I am overhauling guassian..
                 model_summary = model_summary[['Unnamed: 0', 'NumDF', 'F value', 'Pr(>F)']]
             else: 
                 model_summary = model_summary[['Unnamed: 0', 'Chi Df', 'Chisq', 'Pr(>Chisq)']]
