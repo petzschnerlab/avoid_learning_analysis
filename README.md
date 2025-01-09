@@ -320,7 +320,30 @@ Focus is on accuracy rates, not reaction times as the previous literature found 
 - **Model Assessment**
     - AIC, BIC, and Laplace Approximation to the model evidence (LPP)
 
-### Models:
+### Model Fitting
+Section to describe how the literature fit their parameters.
+
+**Geana et al., 2021**
+- Fit using standard maximum likelihood, run N=5 times per participant
+- Fit on both phases of the task
+- Used AIC metrics for model assessment
+
+**Gold et al., 2012**
+- Fit using standard maximum likelihood procedure
+- Fit on both phases of the task
+- Used mean pseudo-r-squared and AIC metrics for model assessment
+
+**Palminteri et al., 2015**
+- Fit using minimum negative-log-likelihood
+- Does not specify the phases that the models were fit on
+- Used AIC and BIC metrics for model assessment
+
+**Vandendriessche et al., 2023**
+- Fit using log model evidence maximization
+- Fit the transfer phase only (this is odd because they are fitting learning rates)
+- Does not specify the model assessment metric used
+
+### Models
 - Benchmark Actor-Critic RL Model
 - Benchmark Q-Learning RL Model
 - Hybrid Actor-Critic/Q-Learning Model (Gold et al., 2012)
