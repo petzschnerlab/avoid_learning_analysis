@@ -221,8 +221,6 @@ class Statistics:
         '''
 
         #Transfer choice rate using averaged data
-        self.load_stats = False #TODO: REMOVE THIS
-
         formula = f'choice_rate~1+{self.group_code}*symbol+(1|participant_id)'
         assumption_data = self.choice_rate.reset_index()
         assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
@@ -271,8 +269,6 @@ class Statistics:
                                                savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rt.csv",
                                                family='Gamma')
         
-        self.load_stats = True #TODO: REMOVE THIS
-
         #Transfer valence bias
         formula = f'valence_bias~1+{self.group_code}'
         if self.covariate is not None:
@@ -837,6 +833,7 @@ class Statistics:
                                     formula,
                                     family])
             model_summary = pd.read_csv(savename.replace('.csv', f'_{outcome}_results.csv'))
+            df_residual = None
             if False: #family == 'gaussian': #TODO: I am overhauling guassian..
                 model_summary = model_summary[['Unnamed: 0', 'NumDF', 'F value', 'Pr(>F)']]
             else: 
@@ -866,7 +863,7 @@ class Statistics:
         fixed_effects = list(dict.fromkeys(fixed_effects))
         fixed_effects.sort(key=lambda x: x.count('*'))
 
-        test = 'F' if family == 'gaussian' else 'Chisq'
+        test = 'F' if len(random_effect) ==0 else 'Chisq'
         
         metadata = {'path': path, 
                     'filename': filename, 
@@ -876,7 +873,7 @@ class Statistics:
                     'fixed_effects': fixed_effects,
                     'random_effects': random_effect,
                     'sample_size': data['participant_id'].nunique(),
-                    'df_residual': df_residual if not random_effect else None,
+                    'df_residual': df_residual,
                     'test': test}
 
         return {'metadata': metadata, 'model_summary': model_summary}
