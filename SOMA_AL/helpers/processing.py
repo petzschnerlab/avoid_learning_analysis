@@ -115,7 +115,7 @@ class Processing:
         self.exclude_low_accuracy(self.accuracy_exclusion_threshold)
 
         #Save processed data for RL modelling
-        #self.save_processed_data()
+        self.save_processed_data()
 
         #Exclude trials with low/high reaction times
         self.exclude_low_rt(self.RT_low_threshold, self.RT_high_threshold)
