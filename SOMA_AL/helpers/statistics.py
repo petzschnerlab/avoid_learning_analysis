@@ -841,7 +841,9 @@ class Statistics:
             if False: #family == 'gaussian': #TODO: I am overhauling guassian..
                 model_summary = model_summary[['Unnamed: 0', 'NumDF', 'F value', 'Pr(>F)']]
             else: 
-                model_summary = model_summary[['Unnamed: 0', 'Chi Df', 'Chisq', 'Pr(>Chisq)']]
+                #check if it contains Chi Df
+                df_label = 'Chi Df' if 'Chi Df' in model_summary.columns else 'Df'
+                model_summary = model_summary[['Unnamed: 0', df_label, 'Chisq', 'Pr(>Chisq)']]
             model_summary.columns = ['factor', 'df', 'test_value', 'p_value']
         else:
             if random_effect:
@@ -857,6 +859,9 @@ class Statistics:
             df_residual = model_results.df_resid
             model_summary = model_summary.reset_index()[['index', 'df', 'F', 'PR(>F)']][:-1]
             model_summary.columns = ['factor', 'df', 'test_value', 'p_value']
+
+        #Remove the intercept
+        model_summary = model_summary[model_summary['factor'] != '(Intercept)']
 
         #Collect metadata
         fixed_effects = fixed_formula.split('~')[1].split('(')[0].split('+')

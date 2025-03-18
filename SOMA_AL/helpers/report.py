@@ -888,13 +888,13 @@ class Report:
         processing = Processing()
 
         ## Learning accuracy
-        self.model_accuracy.to_csv(f'SOMA_AL/stats/model_behaviours_{self.split_by_group}_stats_learning_data_trials.csv', index=False)
+        self.model_accuracy.to_csv(f'SOMA_AL/modelling/model_behaviours_{self.split_by_group}_stats_learning_data_trials.csv', index=False)
         formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)'
         self.model_accuracy_glmm = statistics.generalized_linear_model(formula, 
                                                self.model_accuracy,
                                                path=self.repo_directory,
-                                               filename=f"SOMA_AL/stats/model_behaviours_{self.split_by_group}_stats_learning_data_trials.csv",
-                                               savename=f"SOMA_AL/stats/model_behaviours_{self.split_by_group_id}_stats_learning_data_trials.csv",
+                                               filename=f"SOMA_AL/modelling/model_behaviours_{self.split_by_group}_stats_learning_data_trials.csv",
+                                               savename=f"SOMA_AL/modelling/model_behaviours_{self.split_by_group_id}_stats_learning_data_trials.csv",
                                                family='binomial')
         
         comparisons = [['chronic pain', 'no pain'], ['chronic pain', 'acute pain']]
@@ -902,13 +902,13 @@ class Report:
         self.model_accuracy_planned_group = statistics.planned_ttests('accuracy', self.group_code, comparisons, data)
 
         ## Choice rate
-        self.model_choice_rate.to_csv(f'SOMA_AL/stats/model_behaviours_{self.split_by_group}_stats_transfer_data.csv', index=False)
+        self.model_choice_rate.to_csv(f'SOMA_AL/modelling/model_behaviours_{self.split_by_group}_stats_transfer_data.csv', index=False)
         formula = f'choice_rate~1+{self.group_code}*symbol+(1|participant_id)'
         self.model_choice_rate_glmm = statistics.generalized_linear_model(formula, 
                                         self.model_choice_rate,
                                         path=self.repo_directory,
-                                        filename=f"SOMA_AL/stats/model_behaviours_{self.split_by_group}_stats_transfer_data.csv",
-                                        savename=f"SOMA_AL/stats/model_behaviours_{self.split_by_group_id}_stats_transfer_data.csv",
+                                        filename=f"SOMA_AL/modelling/model_behaviours_{self.split_by_group}_stats_transfer_data.csv",
+                                        savename=f"SOMA_AL/modelling/model_behaviours_{self.split_by_group_id}_stats_transfer_data.csv",
                                         family='gaussian')
         
         comparisons = [['High Reward', 'Low Punish'], ['Low Reward', 'Low Punish']]

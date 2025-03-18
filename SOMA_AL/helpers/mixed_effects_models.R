@@ -43,9 +43,9 @@ if ('accuracy' %in% colnames(data)){
 }
 
 #Run the model
-if (family == 'None' | family == 'guassian'){
+if (family == 'None' | family == 'gaussian'){
   model = lmer(formula, data=data, REML=FALSE)
-  results = Anova(model, type = 3, test.statistic="Wald")
+  results = Anova(model, type = 3, test.statistic="Chisq")
 } else {
   results = afex::mixed(formula, data=data, family=family, method='LRT')$anova_table
 }
