@@ -41,7 +41,7 @@ class SOMAPipeline(Master):
             self.process_data()
             self.run_tests()
             self.run_statistics()
-            self.build_report()
+            self.build_report(self.rscripts_path, self.load_stats)
             self.announce(case='end')
                 
 
@@ -76,13 +76,13 @@ if __name__ == '__main__':
 
     #Run parameters
     hide_stats = False
-    hide_posthocs = False
+    hide_posthocs = True
     load_stats = True
     load_posthocs = False
     verbose = True
 
     #Run the pipeline for each split_by_group
-    for split_by_group in ['pain', 'depression']:#, 'pain-depression', 'pain-co-depression']:
+    for split_by_group in ['pain']:#, 'pain-depression', 'pain-co-depression']:
 
         covariate = None
         split_by_group_id = split_by_group
@@ -124,7 +124,7 @@ if __name__ == '__main__':
                   'hide_posthocs': hide_posthocs,
                   'load_stats': load_stats,
                   'verbose': verbose}
-        
+    
         #Run the pipeline
         SOMA_pipeline = SOMAPipeline()
         SOMA_pipeline.run(**kwargs)

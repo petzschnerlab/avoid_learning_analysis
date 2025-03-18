@@ -3,7 +3,10 @@ import os
 import warnings
 import pandas as pd
 import dataframe_image as dfi
+import numpy as np
 from markdown_pdf import MarkdownPdf, Section
+from helpers.statistics import Statistics
+from helpers.processing import Processing
 
 class Report:
 
@@ -12,7 +15,7 @@ class Report:
     """
 
     #Report builders
-    def build_report(self) -> None:
+    def build_report(self, rscripts_path=None, load_stats=False) -> None:
 
         """
         Builds and prints the SOMA report
@@ -25,6 +28,8 @@ class Report:
 
         #Initiate processes
         self.print_plots()
+        self.load_modelling_results(rscripts_path, load_stats)
+
         self.pdf = MarkdownPdf(toc_level=3)
 
         #Add metadata
@@ -45,7 +50,6 @@ class Report:
         section_text.append(f'### Learning Accuracy')
         section_text.extend(self.insert_image('learning-accuracy-by-group'))
         section_text.extend(self.insert_image('learning-accuracy'))
-
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
@@ -79,6 +83,61 @@ class Report:
 
         section_text = []
         section_text.extend(self.get_statistics('transfer-rt'))
+        self.add_data_pdf(section_text, center=True)
+
+        #Modelling Results
+        section_text = []
+        section_text.append('## Modelling Evaluations')
+        section_text.append('### Model Fits')
+        section_text.extend(self.insert_table(self.model_AIC, 'model-AIC'))
+        section_text.extend(self.insert_table(self.model_BIC, 'model-BIC'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
+        section_text.append('### Number of Runs')
+        filename = 'SOMA_AL/modelling/fit-by-runs.png'
+        section_text.extend(self.insert_image('fit-by-runs', filename))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
+        section_text.append('### Parameter Recovery')
+        for model_name in self.model_names:
+            filename = f'SOMA_AL/modelling/correlations/{model_name}_correlation_plot.png'
+            section_text.extend(self.insert_image(f'{model_name}-correlation-plot', filename))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
+        section_text.append('### Model Recovery')
+        filename = f'SOMA_AL/modelling/model_recovery.png'
+        section_text.extend(self.insert_image('model-recovery', filename))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
+        best_model_name = self.best_model.split("+")[0].replace('Hybrid2','Hybrid 2').title()
+        section_text.append(f'## Modelling Results: {best_model_name}')
+        section_text.append(f'### Model Fit')
+        filename = f'SOMA_AL/modelling/model_behaviours/{self.best_model}_model_behaviours.png'
+        section_text.extend(self.insert_image('model-behaviour', filename))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
+        section_text.append(f'### Model Accuracy')
+        section_text.extend(self.get_statistics('model-behaviour-accuracy'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
+        section_text.append(f'### Model Choice Rate')
+        section_text.extend(self.get_statistics('model-behaviour-choice-rate'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
+        section_text.append('### Model Parameters')
+        filename = f'SOMA_AL/modelling/parameter_fits/{self.best_model}-model-fits.png'
+        section_text.extend(self.insert_image('model-parameters', filename))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
+        section_text.extend(self.get_statistics('model-parameters'))
         self.add_data_pdf(section_text, center=True)
 
         #Post-hocs
@@ -238,7 +297,7 @@ class Report:
             d = 'hidden'
 
         subsection = f"\n\n&nbsp;&nbsp;&nbsp;&nbsp;**{comparison.title()}**"
-        t_type = '<sub>Welch</sub>' if model_summary['homogeneity_assumption'][0] == 'violated' else ''
+        t_type = '<sub>Welch</sub>' if model_summary['homogeneity_assumption'].values[0] == 'violated' else ''
         subsection += f"\n\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*t{t_type}*(*{df}*) = {test_value}, *p* {p}{significance}, *d* = {d}."
 
         return subsection
@@ -467,6 +526,12 @@ class Report:
                 Scatter points show the bias for each participant within each group.
                 """ 
 
+            case 'model-AIC':
+                caption = """AIC values for each model fit to the data for each group and across groups."""
+
+            case 'model-BIC':
+                caption = """BIC values for each model fit to the data for each group and across groups."""
+
         #Return caption
         if target_type == 'figure':
             caption = self.add_figure_caption(caption)
@@ -533,7 +598,10 @@ class Report:
                             'learning-rt': self.learning_rt_glmm,
                             'transfer-choice-rate': self.transfer_accuracy_glmm,
                             'transfer-rt': self.transfer_rt_glmm,
-                            'demographics-and-clinical-scores': self.demo_clinical}
+                            'demographics-and-clinical-scores': self.demo_clinical,
+                            'model-behaviour-accuracy': self.model_accuracy_glmm,
+                            'model-behaviour-choice-rate': self.model_choice_rate_glmm,
+                            'model-parameters': self.model_parameters_glmm}
 
         data = self.data_legend[target]
         formula, outcome, fixed, random, sample_size, df_residual, test = self.get_metadata(data)
@@ -555,7 +623,12 @@ class Report:
                                         'transfer-choice-rate-by-interaction': self.transfer_accuracy_planned_interaction,
                                         'transfer-rt-by-interaction': self.transfer_rt_planned_interaction,
 
-                                        'demographics-and-clinical-scores': self.demo_clinical_planned}
+                                        'demographics-and-clinical-scores': self.demo_clinical_planned,
+                                        
+                                        'model-behaviour-accuracy-by-group': self.model_accuracy_planned_group,
+                                        'model-behaviour-choice-rate-by-group': self.model_choice_rate_planned_group,
+                                        
+                                        'model-parameters-by-group': self.model_parameters_planned_group}
         else:
             self.data_planned_legend = {'transfer-choice-rate-by-context': self.transfer_accuracy_planned_context,
                                         'transfer-rt-by-context': self.transfer_rt_planned_context,
@@ -603,7 +676,7 @@ class Report:
                 planned_target = ''
             elif ':' in factor:
                 planned_target = f'{target}-by-interaction'
-            elif 'group' in factor:
+            elif 'group' in factor or target == 'model-parameters':
                 planned_target = f'{target}-by-group'
             else:
                 planned_target = f'{target}-by-context'
@@ -623,7 +696,7 @@ class Report:
         return [subsection]
     
     #Content builders
-    def insert_image(self, image_name: str) -> list[str]:
+    def insert_image(self, image_name: str, filename = None) -> list[str]:
 
         """
         Inserts an image for the report
@@ -639,7 +712,8 @@ class Report:
             The subsection for the report
         """
 
-        subsection = [f'#### ![{image_name}](SOMA_AL/plots/{self.split_by_group}/{image_name}.png)\n', 
+        filename = f'SOMA_AL/plots/{self.split_by_group}/{image_name}.png' if filename is None else filename
+        subsection = [f'#### ![{image_name}]({filename})\n', 
                       f'{self.get_caption(image_name)}\n']
        
         return subsection
@@ -774,3 +848,103 @@ class Report:
                                            blank_row, 
                                            depression_title, 
                                            self.depression_summary], axis=0)
+            
+    def load_modelling_results(self, rscripts_path=None, load_stats=False):
+
+        #Assign attributes
+        self.rscripts_path = rscripts_path
+
+        #Model Fits
+        self.model_AIC = pd.read_csv('SOMA_AL/modelling/group_AIC.csv')
+        self.model_BIC = pd.read_csv('SOMA_AL/modelling/group_BIC.csv')
+        self.model_AIC.set_index('Unnamed: 0', inplace=True)
+        self.model_BIC.set_index('Unnamed: 0', inplace=True)
+        best_model_AIC = self.model_AIC['best_model'].values[-1]
+        best_model_BIC = self.model_BIC['best_model'].values[-1]
+        self.best_model = best_model_BIC
+        self.model_names = list(self.model_AIC.columns[:-1])
+        
+        #Load model simulation data
+        self.model_accuracy = pd.read_csv(f'SOMA_AL/modelling/modelsimulation_accuracy_data.csv')
+        self.model_choice_rate = pd.read_csv(f'SOMA_AL/modelling/modelsimulation_choice_data.csv')
+
+        self.model_accuracy.rename(columns={'context': 'symbol_name', 'run': 'participant_id', 'group': self.group_code}, inplace=True)
+        self.model_choice_rate.rename(columns={'group': self.group_code}, inplace=True)
+        self.model_accuracy['symbol_name'].replace({'Loss Avoid': 'Punish'}, inplace=True)
+
+        self.model_accuracy = self.model_accuracy[self.model_accuracy['model'] == self.best_model]
+        self.model_choice_rate = self.model_choice_rate[self.model_choice_rate['model'] == self.best_model]
+
+        self.model_accuracy['binned_trial'] = np.ceil(self.model_accuracy['trial_total'] / 6).astype(int)
+        self.model_accuracy['binned_trial'].replace({1: 'Early', 2: 'Mid-Early', 3: 'Mid-Late', 4: 'Late'}, inplace=True)
+        self.model_choice_rate['participant_id'] = np.arange(1, len(self.model_choice_rate) + 1)
+            
+        self.model_choice_rate = self.model_choice_rate.melt(id_vars=[self.group_code, 'participant_id'], value_vars=['A', 'B', 'E', 'F', 'N'], var_name='symbol_name', value_name='choice_rate')
+        self.model_choice_rate.rename(columns={'symbol_name': 'symbol'}, inplace=True)
+        self.model_choice_rate['symbol'].replace({'A': 'High Reward', 'B': 'Low Reward', 'E': 'Low Punish', 'F': 'High Punish', 'N': 'Novel'}, inplace=True)
+
+        #Run model simulation statistics
+        statistics = Statistics(rscripts_path, load_stats)
+        processing = Processing()
+
+        ## Learning accuracy
+        self.model_accuracy.to_csv(f'SOMA_AL/stats/model_behaviours_{self.split_by_group}_stats_learning_data_trials.csv', index=False)
+        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)'
+        self.model_accuracy_glmm = statistics.generalized_linear_model(formula, 
+                                               self.model_accuracy,
+                                               path=self.repo_directory,
+                                               filename=f"SOMA_AL/stats/model_behaviours_{self.split_by_group}_stats_learning_data_trials.csv",
+                                               savename=f"SOMA_AL/stats/model_behaviours_{self.split_by_group_id}_stats_learning_data_trials.csv",
+                                               family='binomial')
+        
+        comparisons = [['chronic pain', 'no pain'], ['chronic pain', 'acute pain']]
+        data = processing.average_byfactor(self.model_accuracy, 'accuracy', self.group_code)
+        self.model_accuracy_planned_group = statistics.planned_ttests('accuracy', self.group_code, comparisons, data)
+
+        ## Choice rate
+        self.model_choice_rate.to_csv(f'SOMA_AL/stats/model_behaviours_{self.split_by_group}_stats_transfer_data.csv', index=False)
+        formula = f'choice_rate~1+{self.group_code}*symbol+(1|participant_id)'
+        self.model_choice_rate_glmm = statistics.generalized_linear_model(formula, 
+                                        self.model_choice_rate,
+                                        path=self.repo_directory,
+                                        filename=f"SOMA_AL/stats/model_behaviours_{self.split_by_group}_stats_transfer_data.csv",
+                                        savename=f"SOMA_AL/stats/model_behaviours_{self.split_by_group_id}_stats_transfer_data.csv",
+                                        family='gaussian')
+        
+        comparisons = [['High Reward', 'Low Punish'], ['Low Reward', 'Low Punish']]
+        self.model_choice_rate_planned_group = statistics.planned_ttests('choice_rate', 'symbol', comparisons, self.model_choice_rate)
+
+        #Model Results (parameter statistics)
+        self.model_parameters_glmm_summary = pd.read_csv(f'SOMA_AL/modelling/{self.split_by_group}_fits_linear_results.csv')
+        self.model_parameters_glmm_summary = self.model_parameters_glmm_summary[self.model_parameters_glmm_summary['model']==self.best_model]
+        self.model_parameters_glmm_summary.rename(columns={'parameter': 'factor', 'df_model': 'df', 'F': 'test_value'}, inplace=True)
+
+        parameter_metadata = {
+            'formula': 'prameter~group_code',
+            'fixed_effects': ['group_code'],
+            'random_effects': '',
+            'outcome': 'parameter',
+            'sample_size': self.model_accuracy_glmm['metadata']['sample_size'],
+            'test': 'F',
+            'df_residual': int(self.model_parameters_glmm_summary['df_res'].values[0])
+        }
+        self.model_parameters_glmm = {'metadata': parameter_metadata,
+                                      'model_summary': self.model_parameters_glmm_summary}
+        
+        self.model_parameters_planned_group_summary = pd.read_csv(f'SOMA_AL/modelling/{self.split_by_group}_fits_ttest_results.csv')
+        self.model_parameters_planned_group_summary = self.model_parameters_planned_group_summary[self.model_parameters_planned_group_summary['model']==self.best_model]
+        self.model_parameters_planned_group_summary.rename(columns={'parameter': 'factor'}, inplace=True)
+
+        comparisons = self.model_parameters_planned_group_summary['comparison'].unique()
+        comparisons = [comparison.split(' vs ') for comparison in comparisons]
+        parameter_metadata = {
+            'metric': 'prameter',
+            'factor': ['group_code'],
+            'comparisons': comparisons,
+            'test': 't'
+        }
+        self.model_parameters_planned_group = {'metadata': parameter_metadata,
+                                               'model_summary': self.model_parameters_planned_group_summary}
+
+
+

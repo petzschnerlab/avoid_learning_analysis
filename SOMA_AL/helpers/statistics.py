@@ -15,6 +15,10 @@ class Statistics:
     Class to run statistical analyses
     """
 
+    def __init__(self, rscripts_path=None, load_stats=False):
+        self.rscripts_path = rscripts_path
+        self.load_stats = load_stats
+
     #Main statistics function
     def run_statistics(self) -> None:
 
