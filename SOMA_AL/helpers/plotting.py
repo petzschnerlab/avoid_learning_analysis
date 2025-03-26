@@ -436,4 +436,29 @@ class Plotting:
 
         #Close figure
         plt.close()
-        
+            
+    def plot_model_parameters_by_pain(self, fit_data: pd.DataFrame, parameter_names: list, pain_names: list) -> None:
+        fig, axes = plt.subplots(nrows=len(parameter_names), ncols=len(pain_names), figsize=(len(pain_names)*3, len(parameter_names)*3))
+
+        for i, parameter in enumerate(parameter_names):
+            for j, pain_metric in enumerate(pain_names):
+                correlation_data = fit_data[[parameter, pain_metric]]
+                x_min, x_max = correlation_data[pain_metric].min(), correlation_data[pain_metric].max()
+                y_min, y_max = correlation_data[parameter].min(), correlation_data[parameter].max()
+                r, p = stats.pearsonr(correlation_data[parameter], correlation_data[pain_metric])
+                axes[i,j].scatter(correlation_data[pain_metric], correlation_data[parameter], alpha=0.3)
+                #Set titles only on top row
+                if i == 0:
+                    axes[i,j].set_title(pain_metric.title(), fontsize=10)
+                if j == 0:
+                    axes[i,j].set_ylabel(parameter.title(), fontsize=10)
+                
+                axes[i,j].set_xlabel('')
+                axes[i,j].plot([x_min, x_max], [x_min*r, x_max*r], color='grey', linestyle='--')
+                axes[i,j].set_xlim(x_min, x_max)
+                axes[i,j].set_ylim(y_min, y_max)
+                axes[i,j].tick_params(axis='both', which='major', labelsize=8)
+                axes[i,j].tick_params(axis='both', which='minor', labelsize=6)
+
+        plt.savefig(f'SOMA_AL/plots/model_parameter_by_pain.png', dpi=300, bbox_inches='tight')
+        plt.close(fig)
