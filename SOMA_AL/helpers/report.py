@@ -107,6 +107,11 @@ class Report(ReportFunctions):
         section_text = []
         best_model_name = self.best_model.split("+")[0].replace('Hybrid2','Hybrid 2').title()
         section_text.append(f'## Modelling Results: {best_model_name}')
+        model_introduction = f"""The {best_model_name} model was selected as the best fitting model based on the BIC values.
+        This model was able to accurately recover the parameters of the simulated data and was able to recover the model structure from the simulated data.
+        The model was able to accurately predict the learning and transfer behaviours of the participants in the study.
+        Thus, the following will only describe the results of the {best_model_name} model."""
+        section_text.append(model_introduction)
         section_text.append(f'### Model Fit')
         filename = f'SOMA_AL/modelling/model_behaviours/{self.best_model}_model_behaviours.png'
         section_text.extend(self.insert_image('model-behaviour', filename))
@@ -140,17 +145,8 @@ class Report(ReportFunctions):
 
         section_text = []
         section_text.extend(self.insert_table(self.model_parameters_pain['model_summary'], 'model-parameters-correlation-table'))
-        self.add_data_pdf(section_text, center=True)
-
-        section_text = []
         section_text.extend(self.insert_table(self.model_parameters_pain['group_summary']['no pain'], 'model-parameters-correlation-table-no'))
-        self.add_data_pdf(section_text, center=True)
-
-        section_text = []
         section_text.extend(self.insert_table(self.model_parameters_pain['group_summary']['acute pain'], 'model-parameters-correlation-table-acute'))
-        self.add_data_pdf(section_text, center=True)
-
-        section_text = []
         section_text.extend(self.insert_table(self.model_parameters_pain['group_summary']['chronic pain'], 'model-parameters-correlation-table-chronic'))
         self.add_data_pdf(section_text, center=True)
         
@@ -243,5 +239,15 @@ class Report(ReportFunctions):
             section_text.extend(self.insert_table(self.transfer_rt_posthoc_interaction, 'transfer_rt_interaction', max_rows))
             self.add_data_pdf(section_text, center=True)
 
+            section_text = []
+            section_text.append('## Post-Hoc Comparisons: Model Parameters')
+            model_posthocs = self.model_parameters_posthoc_group[self.model_parameters_posthoc_group['model'] == self.best_model]
+            for parameter in model_posthocs['parameter'].unique():
+                section_text.append(f'### {parameter.replace("_"," ").replace("lr","learning rate").title()}')
+                parameter_results = model_posthocs[model_posthocs['parameter'] == parameter][['factor', 'meandiff', 'p-adj', 'reject']]
+                parameter_results.set_index('factor', inplace=True)
+                section_text.extend(self.insert_table(parameter_results, f'{parameter}-model-parameter-posthoc'))
+            self.add_data_pdf(section_text, center=True)
+            
         #Save to pdf
         self.save_report()

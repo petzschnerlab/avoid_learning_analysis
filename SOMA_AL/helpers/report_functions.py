@@ -389,6 +389,10 @@ class ReportFunctions:
             The dashed line represents the ideal 1:1 relationship.
             Correlational strengths are represented by the Pearson's r value, and presented in the title of each subplot.
             """
+        
+        if 'model-parameter-posthoc' in target:
+            #Table of posthocs across groups for the given parameter
+            caption = f"""Tukey Post-Hoc results for the {target.split('-')[0].title()} parameter across groups."""
 
         #Return caption
         if target_type == 'figure':
@@ -804,7 +808,7 @@ class ReportFunctions:
         
         comparisons = [['High Reward', 'Low Punish'], ['Low Reward', 'Low Punish']]
         self.model_transfer_choice_rate_planned_context = statistics.planned_ttests('choice_rate', 'symbol', comparisons, self.model_choice_rate)
-        
+
         comparisons = [['no pain~High Reward-Low Punish', 'acute pain~High Reward-Low Punish'],
                        ['no pain~High Reward-Low Punish', 'chronic pain~High Reward-Low Punish'],
                        ['acute pain~High Reward-Low Punish', 'chronic pain~High Reward-Low Punish'],
@@ -819,6 +823,8 @@ class ReportFunctions:
         data2 = self.manipulate_data(data, 'choice_rate', 'symbol', 'Low Reward-Low Punish')
         data = [data1, data1, data1, data2, data2, data2] if self.split_by_group == 'pain' else [data1, data2]
         self.model_transfer_accuracy_planned_interaction = self.planned_ttests('choice_rate', factors, comparisons, data)
+
+        #post-hoc comparisons
 
         #Model Results (parameter statistics)
         self.model_parameters_glmm_summary = pd.read_csv(f'SOMA_AL/modelling/{self.split_by_group}_fits_linear_results.csv')
@@ -851,6 +857,8 @@ class ReportFunctions:
         }
         self.model_parameters_planned_group = {'metadata': parameter_metadata,
                                                'model_summary': self.model_parameters_planned_group_summary}
+        
+        self.model_parameters_posthoc_group = pd.read_csv(f'SOMA_AL/modelling/{self.split_by_group}_fits_posthoc_results.csv')
 
         #Parameter Correlations
         pain_scores = self.pain_scores
