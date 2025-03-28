@@ -110,6 +110,7 @@ class Processing:
 
         #Compute accuracy
         self.compute_accuracy()
+        self.compute_choice_rate() #Just for accuracy exclusion
 
         #Exclude participants with low accuracy
         self.exclude_low_accuracy(self.accuracy_exclusion_threshold)
@@ -300,14 +301,29 @@ class Processing:
 
         #Find participants with accuracy less than 60%
         low_accuracy = accuracy[accuracy['accuracy'] < threshold].reset_index()
+        excluded_participants_learning = low_accuracy['participant']
+
+        choice_rate = self.choice_rate.reset_index()
+        choice_rate = choice_rate[(choice_rate['symbol'] == 'High Reward') | (choice_rate['symbol'] == 'High Punish')]
+        reduced_choice_rate = pd.DataFrame(columns=['participant_id', 'High Reward', 'High Punish'])
+        for participant in choice_rate['participant_id'].unique():
+            participant_choice_rate = choice_rate[choice_rate['participant_id'] == participant]
+            participant_choice_rate = participant_choice_rate.pivot(index='participant_id', columns='symbol', values='choice_rate').reset_index()
+            participant_choice_rate['High Punish'] = 100-participant_choice_rate['High Punish']
+            reduced_choice_rate = pd.concat((reduced_choice_rate, participant_choice_rate))
+        #Find whether any High Reward or High Punish is < threshold
+        low_choice_rate = reduced_choice_rate[(reduced_choice_rate['High Reward'] < threshold) | (reduced_choice_rate['High Punish'] < threshold)]
+        excluded_participants_transfer = low_choice_rate['participant_id']
+
+        excluded_participants = pd.concat([excluded_participants_learning, excluded_participants_transfer]).drop_duplicates()
 
         #Remove participants with accuracy less than 60%
-        self.data = self.data[~self.data['participant_id'].isin(low_accuracy['participant'])]
-        self.learning_data = self.learning_data[~self.learning_data['participant_id'].isin(low_accuracy['participant'])]
-        self.transfer_data = self.transfer_data[~self.transfer_data['participant_id'].isin(low_accuracy['participant'])]
+        self.data = self.data[~self.data['participant_id'].isin(excluded_participants)]
+        self.learning_data = self.learning_data[~self.learning_data['participant_id'].isin(excluded_participants)]
+        self.transfer_data = self.transfer_data[~self.transfer_data['participant_id'].isin(excluded_participants)]
 
         #Track number of participants excluded
-        self.participants_excluded_accuracy = len(low_accuracy)
+        self.participants_excluded_accuracy = len(excluded_participants)
         self.accuracy_threshold = threshold
 
     def exclude_low_rt(self, low_threshold: int = 200, high_threshold: int = 5000) -> None:

@@ -142,6 +142,18 @@ class Report(ReportFunctions):
         section_text.extend(self.insert_table(self.model_parameters_pain['model_summary'], 'model-parameters-correlation-table'))
         self.add_data_pdf(section_text, center=True)
 
+        section_text = []
+        section_text.extend(self.insert_table(self.model_parameters_pain['group_summary']['no pain'], 'model-parameters-correlation-table-no'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
+        section_text.extend(self.insert_table(self.model_parameters_pain['group_summary']['acute pain'], 'model-parameters-correlation-table-acute'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
+        section_text.extend(self.insert_table(self.model_parameters_pain['group_summary']['chronic pain'], 'model-parameters-correlation-table-chronic'))
+        self.add_data_pdf(section_text, center=True)
+        
         #Post-hocs
         if self.hide_posthocs == False:
             section_text = []

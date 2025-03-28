@@ -439,26 +439,42 @@ class Plotting:
             
     def plot_model_parameters_by_pain(self, fit_data: pd.DataFrame, parameter_names: list, pain_names: list) -> None:
         fig, axes = plt.subplots(nrows=len(parameter_names), ncols=len(pain_names), figsize=(len(pain_names)*3, len(parameter_names)*3))
-
+        colours = ['#B2DF8A', '#FB9A99', '#FFD92F']
         for i, parameter in enumerate(parameter_names):
             for j, pain_metric in enumerate(pain_names):
-                correlation_data = fit_data[[parameter, pain_metric]]
-                x_min, x_max = correlation_data[pain_metric].min(), correlation_data[pain_metric].max()
-                y_min, y_max = correlation_data[parameter].min(), correlation_data[parameter].max()
-                r, p = stats.pearsonr(correlation_data[parameter], correlation_data[pain_metric])
-                axes[i,j].scatter(correlation_data[pain_metric], correlation_data[parameter], alpha=0.3)
+                rs = []
+                ps = []
+                ns = []
+                for gi, group in enumerate(['no pain', 'chronic pain', 'acute pain']):
+                    group_data = fit_data[fit_data['pain_group'] == group]
+                    correlation_data = group_data[[parameter, pain_metric]]
+                    x_min, x_max = correlation_data[pain_metric].min(), correlation_data[pain_metric].max()
+                    y_min, y_max = correlation_data[parameter].min(), correlation_data[parameter].max()
+                    r, p = stats.pearsonr(correlation_data[parameter], correlation_data[pain_metric])
+                    rs.append(r)
+                    ps.append(p)
+                    ns.append(len(correlation_data))
+                    axes[i,j].scatter(correlation_data[pain_metric], correlation_data[parameter], alpha=0.3, color=colours[gi], s=10, label=group)
+                    slope, intercept, _, _, _ = stats.linregress(correlation_data[pain_metric], correlation_data[parameter])
+                    axes[i,j].plot(correlation_data[pain_metric], slope*correlation_data[pain_metric] + intercept, color=colours[gi], linewidth=1.5, label=None)
+
                 #Set titles only on top row
                 if i == 0:
                     axes[i,j].set_title(pain_metric.title(), fontsize=10)
                 if j == 0:
-                    axes[i,j].set_ylabel(parameter.title(), fontsize=10)
+                    y_label = parameter.replace('_', ' ').replace('lr', 'learning rate').title()
+                    axes[i,j].set_ylabel(y_label, fontsize=10)
                 
                 axes[i,j].set_xlabel('')
-                axes[i,j].plot([x_min, x_max], [x_min*r, x_max*r], color='grey', linestyle='--')
+                x_min, x_max = fit_data[pain_metric].min(), fit_data[pain_metric].max()
+                y_min, y_max = np.log(fit_data[parameter]+1.01).min(), np.log(fit_data[parameter]+1).max()
                 axes[i,j].set_xlim(x_min, x_max)
                 axes[i,j].set_ylim(y_min, y_max)
                 axes[i,j].tick_params(axis='both', which='major', labelsize=8)
                 axes[i,j].tick_params(axis='both', which='minor', labelsize=6)
+                #Add legend above the last column in the first row
+                if j == len(pain_names) - 1 and i == 0:
+                    axes[i,j].legend(['No Pain', 'Chronic Pain', 'Acute Pain'], loc='upper left', fontsize=8, frameon=False, bbox_to_anchor=(1.05, 1))
 
         plt.savefig(f'SOMA_AL/plots/model_parameter_by_pain.png', dpi=300, bbox_inches='tight')
         plt.close(fig)

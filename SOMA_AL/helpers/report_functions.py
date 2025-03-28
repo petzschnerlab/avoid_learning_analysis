@@ -5,6 +5,7 @@ import dataframe_image as dfi
 import numpy as np
 import pickle
 import scipy.stats as stats
+import copy
 
 from markdown_pdf import Section
 from helpers.statistics import Statistics
@@ -365,7 +366,21 @@ class ReportFunctions:
             
             case 'model-parameters-correlation-table':
                 caption = f"""Correlation table between the best model's, {self.best_model_label}, parameters and pain scores. 
-                Each cell represents the Pearson's r value (p-value) for the correlation between the parameter and pain score for each group.
+                Each cell represents the Pearson's r value (p-value) for the correlation between the parameter and pain score for all groups.
+                """
+            case 'model-parameters-correlation-table-no':
+                caption = f"""Correlation table between the best model's, {self.best_model_label}, parameters and pain scores for the no pain group. 
+                Each cell represents the Pearson's r value (p-value) for the correlation between the parameter and pain score.
+                """
+
+            case 'model-parameters-correlation-table-acute':
+                caption = f"""Correlation table between the best model's, {self.best_model_label}, parameters and pain scores for the acute pain group.
+                Each cell represents the Pearson's r value (p-value) for the correlation between the parameter and pain score.
+                """
+
+            case 'model-parameters-correlation-table-chronic':
+                caption = f"""Correlation table between the best model's, {self.best_model_label}, parameters and pain scores for the chronic pain group.
+                Each cell represents the Pearson's r value (p-value) for the correlation between the parameter and pain score.
                 """
             
         if 'correlation-plot' in target:
@@ -444,7 +459,8 @@ class ReportFunctions:
                             'demographics-and-clinical-scores': self.demo_clinical,
                             'learning-model-behaviour-accuracy': self.model_learning_accuracy_glmm,
                             'transfer-model-behaviour-choice-rate': self.model_transfer_choice_rate_glmm,
-                            'model-parameters': self.model_parameters_glmm}
+                            'model-parameters': self.model_parameters_glmm
+                            }
 
         data = self.data_legend[target]
         formula, outcome, fixed, random, sample_size, df_residual, test = self.get_metadata(data)
@@ -475,7 +491,8 @@ class ReportFunctions:
                                         'transfer-model-behaviour-choice-rate-by-context': self.model_transfer_choice_rate_planned_context,
                                         'transfer-model-behaviour-choice-rate-by-interaction': self.model_transfer_accuracy_planned_interaction,
                                         
-                                        'model-parameters-by-group': self.model_parameters_planned_group}
+                                        'model-parameters-by-group': self.model_parameters_planned_group
+                                        }
         else:
             self.data_planned_legend = {'transfer-choice-rate-by-context': self.transfer_accuracy_planned_context,
                                         'transfer-rt-by-context': self.transfer_rt_planned_context,
@@ -855,6 +872,18 @@ class ReportFunctions:
                 p = str(f'{np.round(p, 4):.4f}').replace('0.','.') if p > 0.0001 else '> .0001'
                 correlation_matrix.loc[parameter, pain_metric] = f'{r} ({p})'
 
+        #Create new correlation matrices like above, but for each pain group
+        group_correlation_matrix = {group: pd.DataFrame(index=parameter_names, columns=pain_names) for group in ['no pain', 'acute pain', 'chronic pain']}
+        for pain_group in ['no pain', 'acute pain', 'chronic pain']:
+            group_fit_data = fit_data[fit_data['pain_group'] == pain_group]
+            for parameter in parameter_names:
+                for pain_metric in pain_names:
+                    correlation_data = group_fit_data[[parameter, pain_metric]]
+                    r, p = stats.pearsonr(correlation_data[parameter], correlation_data[pain_metric])
+                    r = str(f'{np.round(r, 2):.2f}').replace('0.','.') 
+                    p = str(f'{np.round(p, 4):.4f}').replace('0.','.') if p > 0.0001 else '> .0001'
+                    group_correlation_matrix[pain_group].loc[parameter, pain_metric] = f'{r} ({p})'
+
         metadata = {'formula': 'parameter~pain_score',
                     'fixed_effects': pain_names.tolist(),
                     'random_effects': '',
@@ -862,7 +891,7 @@ class ReportFunctions:
                     'sample_size': fit_data['participant_id'].nunique(),
                     'test': 'r',
                     'df_residual': fit_data.shape[0] - 2}
-        self.model_parameters_pain = {'metadata': metadata, 'model_summary': correlation_matrix}
+        self.model_parameters_pain = {'metadata': metadata, 'model_summary': correlation_matrix, 'group_summary': group_correlation_matrix}
         
         #Plot the correlations
         plotting.plot_model_parameters_by_pain(fit_data, parameter_names, pain_names)
