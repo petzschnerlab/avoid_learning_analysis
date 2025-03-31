@@ -363,6 +363,21 @@ class ReportFunctions:
                 caption = f"""Correlations between the best model's, {self.best_model_label}, parameters and pain scores. 
                 Scatter points show the parameter fits for each participant within each group, grey dashed lines represent the best fit line for each group.
                 """
+                
+            case 'parameter-correlation-no-pain':
+                caption = f"""Correlations between the best model's, {self.best_model_label}, parameters and pain scores for the No Pain group. 
+                Scatter points show the parameter fits for each participant within each group, grey dashed lines represent the best fit line for each group.
+                """
+
+            case 'parameter-correlation-acute-pain':
+                caption = f"""Correlations between the best model's, {self.best_model_label}, parameters and pain scores for the Acute Pain group. 
+                Scatter points show the parameter fits for each participant within each group, grey dashed lines represent the best fit line for each group.
+                """
+
+            case 'parameter-correlation-chronic-pain':
+                caption = f"""Correlations between the best model's, {self.best_model_label}, parameters and pain scores for the Chronic Pain group. 
+                Scatter points show the parameter fits for each participant within each group, grey dashed lines represent the best fit line for each group.
+                """
             
             case 'model-parameters-correlation-table':
                 caption = f"""Correlation table between the best model's, {self.best_model_label}, parameters and pain scores. 
@@ -902,4 +917,4 @@ class ReportFunctions:
         self.model_parameters_pain = {'metadata': metadata, 'model_summary': correlation_matrix, 'group_summary': group_correlation_matrix}
         
         #Plot the correlations
-        plotting.plot_model_parameters_by_pain(fit_data, parameter_names, pain_names)
+        plotting.plot_model_parameters_by_pain_split(fit_data, parameter_names, pain_names)

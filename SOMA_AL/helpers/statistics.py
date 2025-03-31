@@ -624,6 +624,7 @@ class Statistics:
             plt.title(f'{dependent_variable}~{fixed_effect}'.title())
             plt.axhline(y=0, color='black', linestyle='--')
             plt.savefig(f"{self.repo_directory}/SOMA_AL/stats/assumptions/{self.split_by_group_id}_assumption_{phase}_{dependent_variable.replace('_','')}_{fixed_effect.replace('_','')}_residuals.png")
+            plt.savefig(f"{self.repo_directory}/SOMA_AL/stats/assumptions/{self.split_by_group_id}_assumption_{phase}_{dependent_variable.replace('_','')}_{fixed_effect.replace('_','')}_residuals.svg")
             plt.close()
 
             #Run linearity test

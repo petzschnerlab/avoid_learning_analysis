@@ -194,6 +194,7 @@ class Plotting:
 
         #Save the plot
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
+        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
 
         #Close figure
         plt.close()
@@ -323,6 +324,7 @@ class Plotting:
 
         #Save the plot
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
+        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
 
         #Close figure
         plt.close()
@@ -380,6 +382,7 @@ class Plotting:
 
         #Save the plot
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
+        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
 
         #Close figure
         plt.close()
@@ -433,6 +436,7 @@ class Plotting:
 
         #Save the plot
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
+        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
 
         #Close figure
         plt.close()
@@ -477,4 +481,50 @@ class Plotting:
                     axes[i,j].legend(['No Pain', 'Chronic Pain', 'Acute Pain'], loc='upper left', fontsize=8, frameon=False, bbox_to_anchor=(1.05, 1))
 
         plt.savefig(f'SOMA_AL/plots/model_parameter_by_pain.png', dpi=300, bbox_inches='tight')
+        plt.savefig(f'SOMA_AL/plots/model_parameter_by_pain.svg', format='svg', bbox_inches='tight')
+
+        #Close figure
         plt.close(fig)
+
+    def plot_model_parameters_by_pain_split(self, fit_data: pd.DataFrame, parameter_names: list, pain_names: list):
+        colours = {'no pain': '#B2DF8A', 'chronic pain': '#FB9A99', 'acute pain': '#FFD92F'}
+        
+        for group in ['no pain', 'chronic pain', 'acute pain']:
+            fig, axes = plt.subplots(nrows=len(parameter_names), ncols=len(pain_names), 
+                                    figsize=(len(pain_names)*3, len(parameter_names)*3))
+            
+            for i, parameter in enumerate(parameter_names):
+                for j, pain_metric in enumerate(pain_names):
+                    group_data = fit_data[fit_data['pain_group'] == group]
+                    correlation_data = group_data[[parameter, pain_metric]].dropna()
+                    
+                    x_min, x_max = correlation_data[pain_metric].min(), correlation_data[pain_metric].max()
+                    y_min, y_max = correlation_data[parameter].min(), correlation_data[parameter].max()
+                    
+                    r, p = stats.pearsonr(correlation_data[parameter], correlation_data[pain_metric])
+                    
+                    axes[i, j].scatter(correlation_data[pain_metric], correlation_data[parameter], 
+                                    alpha=0.3, color=colours[group], s=10)
+                    
+                    slope, intercept, _, _, _ = stats.linregress(correlation_data[pain_metric], 
+                                                                correlation_data[parameter])
+                    axes[i, j].plot(correlation_data[pain_metric], 
+                                    slope * correlation_data[pain_metric] + intercept, 
+                                    color=colours[group], linewidth=1.5)
+                    
+                    if i == 0:
+                        axes[i, j].set_title(pain_metric.title(), fontsize=10)
+                    if j == 0:
+                        y_label = parameter.replace('_', ' ').replace('lr', 'learning rate').title().replace('Learning', '\nLearning')
+                        axes[i, j].set_ylabel(y_label, fontsize=10)
+                    
+                    axes[i, j].set_xlim(x_min, x_max)
+                    axes[i, j].set_ylim(y_min, y_max)
+                    axes[i, j].tick_params(axis='both', which='major', labelsize=8)
+                    axes[i, j].tick_params(axis='both', which='minor', labelsize=6)
+            
+            plt.savefig(f'SOMA_AL/plots/model_parameter_by_pain_{group.replace(" ", "_")}.png', dpi=300, bbox_inches='tight')
+            plt.savefig(f'SOMA_AL/plots/model_parameter_by_pain_{group.replace(" ", "_")}.svg', format='svg', bbox_inches='tight')
+
+            #Close figure
+            plt.close(fig)

@@ -136,12 +136,13 @@ class Report(ReportFunctions):
         section_text = []
         section_text.extend(self.get_statistics('model-parameters'))
         self.add_data_pdf(section_text, center=True)
-
-        section_text = []
-        section_text.append('### Model Parameter Correlations with Pain')
-        filename = f'SOMA_AL/plots/model_parameter_by_pain.png'
-        section_text.extend(self.insert_image('parameter-correlation', filename))
-        self.add_data_pdf(section_text, center=True)
+       
+        for group in self.group_labels:
+            section_text = []
+            section_text.append(f'### Model Parameter Correlations with Pain for {group.title()} Group')
+            filename = f'SOMA_AL/plots/model_parameter_by_pain_{group.replace(" ","_")}.png'
+            section_text.extend(self.insert_image(f'parameter-correlation-{group.replace(" ","-")}', filename))
+            self.add_data_pdf(section_text, center=True)
 
         section_text = []
         section_text.extend(self.insert_table(self.model_parameters_pain['model_summary'], 'model-parameters-correlation-table'))
