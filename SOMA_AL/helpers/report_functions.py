@@ -322,6 +322,14 @@ class ReportFunctions:
                 Lower values indicate better model fit. The final column highlights the best-performing model for each group.
                 """
 
+            case 'model-AIC-percentages':
+                caption = """Percentage of times a model was selected as the best model via Akaike Information Criterion (AIC) metrics across all participants within and across each group.
+                """
+
+            case 'model-BIC-percentages':
+                caption = """Percentage of times a model was selected as the best model via Bayesian Information Criterion (BIC) metrics across all participants within and across each group.
+                """
+
             case 'fit-by-runs':
                 caption = f"""Negative log-likelihood (NLL) as a factor of the number of runs for each model. 
                 For each run, the starting parameters are randomly determined. 
@@ -745,20 +753,35 @@ class ReportFunctions:
         #Model Fits
         self.model_AIC = pd.read_csv('SOMA_AL/modelling/group_AIC.csv')
         self.model_BIC = pd.read_csv('SOMA_AL/modelling/group_BIC.csv')
+        self.model_AIC_percentages = pd.read_csv('SOMA_AL/modelling/group_AIC_percentages.csv')
+        self.model_BIC_percentages = pd.read_csv('SOMA_AL/modelling/group_BIC_percentages.csv')
+
         self.model_AIC.set_index('Unnamed: 0', inplace=True)
         self.model_BIC.set_index('Unnamed: 0', inplace=True)
+        self.model_AIC_percentages.set_index('group', inplace=True)
+        self.model_BIC_percentages.set_index('group', inplace=True)
+
         self.model_AIC.index.name = None
         self.model_BIC.index.name = None
+        self.model_AIC_percentages.index.name = None
+        self.model_BIC_percentages.index.name = None
+
         self.model_AIC = self.model_AIC.iloc[:,:-1].round().astype(int)
         self.model_BIC = self.model_BIC.iloc[:,:-1].round().astype(int)
+        self.model_AIC_percentages = self.model_AIC_percentages.round(0).astype(int)
+        self.model_BIC_percentages = self.model_BIC_percentages.round(0).astype(int)
+
         self.model_AIC['best_model'] = self.model_AIC.idxmin(axis=1)
         self.model_BIC['best_model'] = self.model_BIC.idxmin(axis=1)
         best_model_BIC = self.model_BIC['best_model'].values[-1]
         self.best_model = best_model_BIC
         self.best_model_label = best_model_BIC.split('+')[0].replace('Hybrid2', 'Hybrid 2').replace('ActorCritic', 'Actor Critic').replace('QLearning', 'Q Learning').replace('best_model', 'Best Model')
+        
         self.model_names = list(self.model_AIC.columns[:-1])
         self.model_AIC.columns = [col.split('+')[0].replace('Hybrid2', 'Hybrid 2').replace('ActorCritic', 'Actor Critic').replace('QLearning', 'Q Learning').replace('best_model', 'Best Model') for col in self.model_AIC.columns]
         self.model_BIC.columns = [col.split('+')[0].replace('Hybrid2', 'Hybrid 2').replace('ActorCritic', 'Actor Critic').replace('QLearning', 'Q Learning').replace('best_model', 'Best Model') for col in self.model_BIC.columns]
+        self.model_AIC_percentages.columns = [col.split('+')[0].replace('Hybrid2', 'Hybrid 2').replace('ActorCritic', 'Actor Critic').replace('QLearning', 'Q Learning').replace('best_model', 'Best Model') for col in self.model_AIC_percentages.columns]
+        self.model_BIC_percentages.columns = [col.split('+')[0].replace('Hybrid2', 'Hybrid 2').replace('ActorCritic', 'Actor Critic').replace('QLearning', 'Q Learning').replace('best_model', 'Best Model') for col in self.model_BIC_percentages.columns]
 
         #Load model simulation data
         self.model_accuracy = pd.read_csv(f'SOMA_AL/modelling/modelsimulation_accuracy_data.csv')

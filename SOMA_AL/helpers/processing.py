@@ -637,6 +637,7 @@ class Processing:
         #Compute choice rates for each participant and symbol within each group
         choice_rate = pd.DataFrame(columns=['choice_rate'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=[self.group_code, 'participant_id', 'symbol']))
         choice_rt = pd.DataFrame(columns=['choice_rt'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=[self.group_code, 'participant_id', 'symbol']))
+        choice_rate_context = pd.DataFrame(columns=['choice_rate'], index=pd.MultiIndex(levels=[[], [], [], []], codes=[[], [], [], []], names=[self.group_code, 'participant_id', 'symbol', 'context_val']))
 
         for group in self.group_labels:
             group_data = data[data[self.group_code] == group]
@@ -652,19 +653,39 @@ class Processing:
                     choice_rate.loc[(group, participant, symbol), 'choice_rate'] = symbol_choice_rate
                     choice_rt.loc[(group, participant, symbol), 'choice_rt'] = participant_data[participant_data['symbol_chosen'] == symbol]['rt'].mean()
 
+        for group in self.group_labels:
+            group_data = data[data[self.group_code] == group]
+            for participant in group_data['participant_id'].unique():
+                participant_data = group_data[group_data['participant_id'] == participant]
+                symbols = [0, 1, 2, 3, 4] if not neutral else [2, 3]
+                participant_data['context_val'] = participant_data['context_val'].replace({1: 'Reward', -1: 'Punish', 0: 'Neutral'})
+                for context in participant_data['context_val'].unique():
+                    context_data = participant_data[participant_data['context_val'] == context]
+                    for symbol in symbols:
+                        symbol_chosen = context_data[context_data['symbol_chosen'] == symbol].shape[0]
+                        symbol_ignored = context_data[context_data['symbol_ignored'] == symbol].shape[0]
+                        symbol_choice_rate = symbol_chosen / (symbol_chosen + symbol_ignored) * 100
+                        choice_rate_context.loc[(group, participant, symbol, context), 'choice_rate'] = symbol_choice_rate
+
         if not neutral:
             choice_rate = choice_rate.reset_index()
             choice_rate['symbol'] = choice_rate['symbol'].replace({0: 'Novel', 1: 'High Punish', 2: 'Low Punish', 3: 'Low Reward', 4: 'High Reward'})
             choice_rate = choice_rate.set_index([self.group_code, 'participant_id', 'symbol'])
+
+            choice_rate_context = choice_rate_context.reset_index()
+            choice_rate_context['symbol'] = choice_rate_context['symbol'].replace({0: 'Novel', 1: 'High Punish', 2: 'Low Punish', 3: 'Low Reward', 4: 'High Reward'})
+            choice_rate_context = choice_rate_context.set_index([self.group_code, 'participant_id', 'symbol', 'context_val'])
 
             choice_rt = choice_rt.reset_index()
             choice_rt['symbol'] = choice_rt['symbol'].replace({0: 'Novel', 1: 'High Punish', 2: 'Low Punish', 3: 'Low Reward', 4: 'High Reward'})
             choice_rt = choice_rt.set_index([self.group_code, 'participant_id', 'symbol'])
 
             self.choice_rate = choice_rate
+            self.choice_rate_context = choice_rate_context
             self.choice_rt = choice_rt
 
             self.choice_rate.reset_index().to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_choice_rates.csv', index=False)
+            self.choice_rate_context.reset_index().to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_choice_rates_context.csv', index=False)
             self.choice_rt.reset_index().to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_choice_rt.csv', index=False)
 
         else:

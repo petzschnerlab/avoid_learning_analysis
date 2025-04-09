@@ -83,6 +83,8 @@ class Report(ReportFunctions):
         section_text.append('### Model Fits')
         section_text.extend(self.insert_table(self.model_AIC, 'model-AIC'))
         section_text.extend(self.insert_table(self.model_BIC, 'model-BIC'))
+        section_text.extend(self.insert_table(self.model_AIC_percentages, 'model-AIC-percentages'))
+        section_text.extend(self.insert_table(self.model_BIC_percentages, 'model-BIC-percentages'))
         self.add_data_pdf(section_text, center=True)
 
         section_text = []

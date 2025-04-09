@@ -238,7 +238,30 @@ class Statistics:
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_choice_rates.csv",
                                                savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rates.csv",
                                                family='gaussian')
+        
+        formula = f'choice_rate~1+{self.group_code}*symbol+context_val+(1|participant_id)'
+        assumption_data = self.choice_rate_context.reset_index()
+        assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
+        assumption_data['symbol'] = pd.Categorical(assumption_data['symbol'], ['High Reward', 'Low Reward', 'Low Punish', 'High Punish', 'Novel'])
+        assumption_data['context_val'] = pd.Categorical(assumption_data['context_val'], ['Reward','Punish','Neutral'])
+        assumption_data['choice_rate'] = assumption_data['choice_rate'].astype(float)
+        self.transfer_accuracy_glmm_assumptions_context = self.glmm_assumption_check(assumption_data, formula, phase='transfer')
 
+        self.transfer_accuracy_glmm_context = self.generalized_linear_model(formula, 
+                                               self.choice_rate_context.reset_index(),
+                                               path=self.repo_directory,
+                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_choice_rates_context.csv",
+                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rates_context.csv",
+                                               family='gaussian')
+
+        formula = f'choice_rate~1+{self.group_code}*symbol*context_val+(1|participant_id)'
+        self.transfer_accuracy_glmm_context_interaction = self.generalized_linear_model(formula, 
+                                              self.choice_rate_context.reset_index(),
+                                              path=self.repo_directory,
+                                              filename=f"SOMA_AL/stats/{self.split_by_group}_stats_choice_rates_context.csv",
+                                              savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rates_context.csv", #Note, this will override the previous file made above
+                                              family='gaussian')
+        
         #Transfer RT
         ''' This is removed because planned comparisons focus on comparing the replacement analyses below
         formula = f'rt~1+{self.group_code}*paired_symbols+(1|participant_id)'
