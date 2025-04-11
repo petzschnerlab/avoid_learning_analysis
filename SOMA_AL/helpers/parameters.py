@@ -71,6 +71,8 @@ class Parameters:
             Whether to load the statistics from the backend.
         self.hide_posthocs : bool
             Whether to hide the posthocs in the report.
+        self.load_models : bool
+            Whether to load the models from the backend.
         self.verbose : bool
             Whether to print verbose output.
         """
@@ -98,6 +100,7 @@ class Parameters:
                            'load_stats',
                            'hide_posthocs',
                            'load_posthocs',
+                           'load_models',
                            'verbose']
         for key in kwargs:
             if key not in accepted_params:
@@ -140,6 +143,7 @@ class Parameters:
         self.load_stats = kwargs.get('load_stats', False)
         self.hide_posthocs = kwargs.get('hide_posthocs', False)
         self.load_posthocs = kwargs.get('load_posthocs', False)
+        self.load_models = kwargs.get('load_models', True)
         self.verbose = kwargs.get('verbose', False)
         
         #Format parameters

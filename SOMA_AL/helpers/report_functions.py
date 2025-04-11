@@ -484,10 +484,14 @@ class ReportFunctions:
                             'transfer-choice-rate': self.transfer_accuracy_glmm,
                             'transfer-rt': self.transfer_rt_glmm,
                             'demographics-and-clinical-scores': self.demo_clinical,
-                            'learning-model-behaviour-accuracy': self.model_learning_accuracy_glmm,
-                            'transfer-model-behaviour-choice-rate': self.model_transfer_choice_rate_glmm,
-                            'model-parameters': self.model_parameters_glmm
                             }
+        
+        if self.load_models:
+            self.model_legend = {'learning-model-behaviour-accuracy': self.model_learning_accuracy_glmm,
+                                 'transfer-model-behaviour-choice-rate': self.learning_accuracy_glmm,
+                                'model-parameters': self.learning_accuracy_glmm
+            }
+            self.data_legend.update(self.model_legend)
 
         data = self.data_legend[target]
         formula, outcome, fixed, random, sample_size, df_residual, test = self.get_metadata(data)
@@ -511,15 +515,17 @@ class ReportFunctions:
                                         'transfer-rt-by-interaction': self.transfer_rt_planned_interaction,
 
                                         'demographics-and-clinical-scores': self.demo_clinical_planned,
-                                        
-                                        'learning-model-behaviour-accuracy-by-group': self.model_learning_accuracy_planned_group,
-                                        'learning-model-behaviour-accuracy-by-interaction': self.model_learning_accuracy_planned_interaction,
-                                        'transfer-model-behaviour-choice-rate-by-group': self.model_transfer_choice_rate_planned_group,
-                                        'transfer-model-behaviour-choice-rate-by-context': self.model_transfer_choice_rate_planned_context,
-                                        'transfer-model-behaviour-choice-rate-by-interaction': self.model_transfer_accuracy_planned_interaction,
-                                        
-                                        'model-parameters-by-group': self.model_parameters_planned_group
                                         }
+            
+            if self.load_models:
+                self.model_planned_legend = {'learning-model-behaviour-accuracy-by-group': self.model_learning_accuracy_planned_group,
+                                            'learning-model-behaviour-accuracy-by-interaction': self.model_learning_accuracy_planned_interaction,
+                                            'transfer-model-behaviour-choice-rate-by-group': self.model_transfer_choice_rate_planned_group,
+                                            'transfer-model-behaviour-choice-rate-by-context': self.model_transfer_choice_rate_planned_context,
+                                            'transfer-model-behaviour-choice-rate-by-interaction': self.model_transfer_accuracy_planned_interaction,
+                                            'model-parameters-by-group': self.model_parameters_planned_group}
+                self.data_planned_legend.update(self.model_planned_legend)
+                
         else:
             self.data_planned_legend = {'transfer-choice-rate-by-context': self.transfer_accuracy_planned_context,
                                         'transfer-rt-by-context': self.transfer_rt_planned_context,
@@ -711,6 +717,7 @@ class ReportFunctions:
                         f'**Columns:** {self.data.shape[1]}\n',
                         f'**Number of Groups:** {len(self.group_labels)}\n',
                         f'**Number of Original Participants:** {self.participants_original}\n',
+                        f'**Number of Participants Excluded (Pain Threshold): {self.excluded_pain}**\n',
                         f'**Number of Participants Excluded (Accuracy Threshold: {self.accuracy_threshold}%):** {self.participants_excluded_accuracy}\n',
                         f'**Number of Participants Remaining:** {self.learning_data["participant_id"].nunique()}\n',
                         f'**Percentage of Trials Excluded (RT Threshold: < {self.RT_low_threshold}ms or > {self.RT_high_threshold}ms):** {self.trials_excluded_rt.round(2)}%\n']

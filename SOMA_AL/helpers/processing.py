@@ -172,6 +172,57 @@ class Processing:
         self.data['depression'] = (self.data['PHQ8'] >= self.depression_cutoff).astype(int)
         self.data['depression'] = self.data['depression'].replace({0: 'healthy', 1: 'depressed'})
 
+    def recode_pain(self) -> None:
+
+        
+        """
+        Function to recode the pain scores into a binary variable
+
+        Returns (Internal)
+        ------------------
+        self.data : pd.DataFrame
+            The data with the pain scores recoded
+        """
+
+        #Create new group codes based on composite_pain scores
+        self.data['composite_pain'] = self.data.apply(lambda x: np.mean((x['intensity'], x['unpleasant'], x['interference'])), axis=1)
+        self.data['group_code'] = self.data.apply(lambda x: 'no pain' if x['composite_pain'] < 20 else ('acute pain' if (x['composite_pain'] >= 20) & (x['composite_pain'] <= 50) else 'chronic pain'), axis=1)
+
+    def exclude_pain(self, threshold: int = 20) -> None:
+        
+        """
+        Function to recode the pain scores into a binary variable
+
+        Parameters
+        ----------
+        threshold : int
+            The threshold for dissociating pain groups
+
+        Returns (Internal)
+        ------------------
+        self.data : pd.DataFrame
+            The data with the depression scores recoded
+        """
+        
+        #Determine number of participants
+        num_participants = self.data['participant_id'].nunique()
+
+        #Remove the participants who are in the transition group (duration = 3 – 6 months)
+        nontransition_index = self.data['duration'] == '3 – 6 months'
+        self.data.loc[nontransition_index, self.group_code] = 'acute pain'
+
+        #Create composite score
+        self.data['composite_pain'] = self.data.apply(lambda x: np.mean((x['intensity'], x['unpleasant'], x['interference'])), axis=1)
+
+        #Find row indexes of participants in no pain (column 'group_code') where their average_pain scores are less than the threshold
+        no_pain_participants = (self.data[self.group_code] == 'no pain') & (self.data['composite_pain'] < threshold)
+        acute_pain_participants = (self.data[self.group_code] == 'acute pain') & (self.data['composite_pain'] >= threshold)
+        chronic_pain_participants = (self.data[self.group_code] == 'chronic pain') & (self.data['composite_pain'] >= threshold)
+        kept_participants = no_pain_participants | acute_pain_participants | chronic_pain_participants
+
+        self.data = self.data[kept_participants].reset_index(drop=True)
+        self.excluded_pain = num_participants - self.data['participant_id'].nunique()
+
     def save_processed_data(self) -> None:
 
         """
