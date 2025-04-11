@@ -37,11 +37,14 @@ class SOMAPipeline(Master):
         self.load_data(file_path = self.file_path, file_name = self.file_name)
         if 'depression' in self.split_by_group_id:
             self.recode_depression()
+        if 'pain' in self.split_by_group_id:
+            self.exclude_pain(threshold=20)
+            #self.recode_pain()
         if self.check_data():
             self.process_data()
             self.run_tests()
             self.run_statistics()
-            self.build_report(self.rscripts_path, self.load_stats)
+            self.build_report(self.rscripts_path, self.load_stats, self.load_models)
             self.announce(case='end')
                 
 
@@ -76,9 +79,10 @@ if __name__ == '__main__':
 
     #Run parameters
     hide_stats = False
-    hide_posthocs = True
+    hide_posthocs = False
     load_stats = True
     load_posthocs = False
+    load_models = True
     verbose = True
 
     #Run the pipeline for each split_by_group
@@ -123,6 +127,7 @@ if __name__ == '__main__':
                   'hide_stats': hide_stats,
                   'hide_posthocs': hide_posthocs,
                   'load_stats': load_stats,
+                  'load_models': load_models,
                   'verbose': verbose}
     
         #Run the pipeline
