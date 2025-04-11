@@ -108,6 +108,9 @@ class Processing:
         self.filter_learning_data()
         self.filter_transfer_data()
 
+        #Split transfer trials
+        #self.split_transfer_trials('late')
+
         #Compute accuracy
         self.compute_accuracy()
         self.compute_choice_rate() #Just for accuracy exclusion
@@ -318,6 +321,19 @@ class Processing:
 
         self.transfer_data['paired_symbols'] = self.transfer_data.apply(self.combine_columns, axis=1)
     
+    def split_transfer_trials(self, stage='early') -> None:
+        #Only keep half of the trials per participant
+        participant_dfs = []
+        for participant in self.transfer_data['participant_id'].unique():
+            participant_data = self.transfer_data[self.transfer_data['participant_id'] == participant]
+            split_line = participant_data.shape[0] // 2
+            if stage == 'early':
+                selected_data = participant_data.iloc[:split_line, :].reset_index(drop=True)
+            else:
+                selected_data = participant_data.iloc[split_line:, :].reset_index(drop=True)
+            participant_dfs.append(selected_data)
+        self.transfer_data = pd.concat(participant_dfs, axis=0).reset_index(drop=True)
+                
     #Data exclusion
     def exclude_low_accuracy(self, threshold: int = 55) -> None:
 
