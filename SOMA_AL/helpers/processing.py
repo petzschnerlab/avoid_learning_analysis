@@ -318,6 +318,10 @@ class Processing:
 
         self.transfer_data['paired_symbols'] = self.transfer_data.apply(self.combine_columns, axis=1)
     
+        self.transfer_data = self.transfer_data[self.transfer_data['context_val'] == -1]
+        #self.transfer_data = self.transfer_data[self.transfer_data['context_val'] == 1]
+        #self.transfer_data = self.transfer_data[self.transfer_data['context_val'] == 0]
+        
     #Data exclusion
     def exclude_low_accuracy(self, threshold: int = 55) -> None:
 
