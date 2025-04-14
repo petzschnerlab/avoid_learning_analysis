@@ -94,9 +94,10 @@ class Plotting:
             elif data.index.nunique() == 3:
                 colors = ['#B2DF8A', '#FFD92F', '#FB9A99']
             else:
-                colors = ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C', '#D3D3D3']
+                colors = ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C']
 
             #Set index name
+            #data = data.reset_index(drop=True)
             data.index.name = 'code'
             data = data.to_frame()
             data.columns = ['score']
@@ -267,9 +268,9 @@ class Plotting:
             x_labels = ['Reward', 'Punish']
         else:
             condition_name = 'symbol'
-            condition_values = [4, 3, 2, 1, 0]
-            x_values = [1, 2, 3, 4, 5]
-            x_labels = ['High\nReward', 'Low\nReward', 'Low\nPunish', 'High\nPunish', 'Novel']
+            condition_values = [4, 3, 2, 1]
+            x_values = [1, 2, 3, 4]
+            x_labels = ['High\nReward', 'Low\nReward', 'Low\nPunish', 'High\nPunish']
 
         if 'diff' in save_name or 'valence-bias' in save_name:
             plot_labels = ['']

@@ -64,6 +64,9 @@ class Processing:
             self.data = pd.read_csv(self.file)
             file_name = file_name.split('\\')[-1]
 
+        #Remove any rows with symbol_L_value or symbol_R_value equal to 0
+        self.data = self.data[(self.data['symbol_L_name'] != 'Zero') & (self.data['symbol_R_name'] != 'Zero')]
+
         #Modify unnamed column
         self.data = self.data.drop(columns = ['Unnamed: 0'])
         
@@ -694,7 +697,7 @@ class Processing:
             group_data = data[data[self.group_code] == group]
             for participant in group_data['participant_id'].unique():
                 participant_data = group_data[group_data['participant_id'] == participant]
-                symbols = [0, 1, 2, 3, 4] if not neutral else [2, 3]
+                symbols = [1, 2, 3, 4] if not neutral else [2, 3]
                 for symbol in symbols:
                     symbol_chosen = participant_data[participant_data['symbol_chosen'] == symbol].shape[0]
                     symbol_ignored = participant_data[participant_data['symbol_ignored'] == symbol].shape[0]
@@ -708,7 +711,7 @@ class Processing:
             group_data = data[data[self.group_code] == group]
             for participant in group_data['participant_id'].unique():
                 participant_data = group_data[group_data['participant_id'] == participant]
-                symbols = [0, 1, 2, 3, 4] if not neutral else [2, 3]
+                symbols = [1, 2, 3, 4] if not neutral else [2, 3]
                 participant_data['context_val'] = participant_data['context_val'].replace({1: 'Reward', -1: 'Punish', 0: 'Neutral'})
                 for context in participant_data['context_val'].unique():
                     context_data = participant_data[participant_data['context_val'] == context]
