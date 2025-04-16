@@ -301,6 +301,12 @@ class Processing:
         self.transfer_data = self.data[self.data['trial_type'] == 'probe'].reset_index(drop=True)
         self.transfer_data = self.transfer_data[self.transfer_data['symbol_L_value'] != self.transfer_data['symbol_R_value']] #Remove trials where the same valued symbol was presented together
 
+        #Keep context data
+        if self.context is not None:
+            context_coding = {'reward': 1, 'punish': -1, 'neutral': 0}
+            context_id = context_coding[self.context]
+            self.transfer_data = self.transfer_data[self.transfer_data['context_val'] == context_id].reset_index(drop=True)
+
         #Determine which symbol_n_value was chosen using the choice_made column where 1 = Right, 0 = Left in the transfer data
         self.transfer_data['symbol_chosen'] = self.transfer_data['symbol_L_value'] #Default to chose left
         self.transfer_data.loc[self.transfer_data['choice_made'] == 1, 'symbol_chosen'] = self.transfer_data['symbol_R_value'] #Switch to chose right if appropriate
@@ -317,10 +323,6 @@ class Processing:
         self.transfer_data.loc[moderate, 'context'] = 'moderate'
 
         self.transfer_data['paired_symbols'] = self.transfer_data.apply(self.combine_columns, axis=1)
-    
-        self.transfer_data = self.transfer_data[self.transfer_data['context_val'] == -1]
-        #self.transfer_data = self.transfer_data[self.transfer_data['context_val'] == 1]
-        #self.transfer_data = self.transfer_data[self.transfer_data['context_val'] == 0]
         
     #Data exclusion
     def exclude_low_accuracy(self, threshold: int = 55) -> None:

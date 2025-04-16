@@ -82,7 +82,7 @@ if __name__ == '__main__':
     hide_posthocs = False
     load_stats = True
     load_posthocs = False
-    load_models = True
+    load_models = False
     verbose = True
 
     #Run the pipeline for each split_by_group
@@ -131,8 +131,11 @@ if __name__ == '__main__':
                   'verbose': verbose}
     
         #Run the pipeline
-        SOMA_pipeline = SOMAPipeline()
-        SOMA_pipeline.run(**kwargs)
+        for context in ['reward','punish','neutral']:
+            kwargs['context'] = context
+            kwargs['print_filename'] = f'SOMA_AL/reports/[{context}] SOMA_report.pdf'
+            SOMA_pipeline = SOMAPipeline()
+            SOMA_pipeline.run(**kwargs)
 
     #Debug stop
     print()

@@ -73,6 +73,8 @@ class Parameters:
             Whether to hide the posthocs in the report.
         self.load_models : bool
             Whether to load the models from the backend.
+        self.context : str
+            The context to use in the report.
         self.verbose : bool
             Whether to print verbose output.
         """
@@ -101,6 +103,7 @@ class Parameters:
                            'hide_posthocs',
                            'load_posthocs',
                            'load_models',
+                           'context',
                            'verbose']
         for key in kwargs:
             if key not in accepted_params:
@@ -144,6 +147,7 @@ class Parameters:
         self.hide_posthocs = kwargs.get('hide_posthocs', False)
         self.load_posthocs = kwargs.get('load_posthocs', False)
         self.load_models = kwargs.get('load_models', True)
+        self.context = kwargs.get('context', None)
         self.verbose = kwargs.get('verbose', False)
         
         #Format parameters
