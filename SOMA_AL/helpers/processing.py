@@ -301,6 +301,12 @@ class Processing:
         self.transfer_data = self.data[self.data['trial_type'] == 'probe'].reset_index(drop=True)
         self.transfer_data = self.transfer_data[self.transfer_data['symbol_L_value'] != self.transfer_data['symbol_R_value']] #Remove trials where the same valued symbol was presented together
 
+        #remove trials where the same valued symbol was presented together
+        learned_pairs = [['75R1', '25R1'], ['75R2', '25R2'], ['75P1', '25P1'], ['75P2', '25P2']] #List of learned pairs
+        for pair in learned_pairs:
+            self.transfer_data = self.transfer_data[~((self.transfer_data['symbol_L_name'] == pair[0]) & (self.transfer_data['symbol_R_name'] == pair[1]))]
+            self.transfer_data = self.transfer_data[~((self.transfer_data['symbol_L_name'] == pair[1]) & (self.transfer_data['symbol_R_name'] == pair[0]))]
+
         #Determine which symbol_n_value was chosen using the choice_made column where 1 = Right, 0 = Left in the transfer data
         self.transfer_data['symbol_chosen'] = self.transfer_data['symbol_L_value'] #Default to chose left
         self.transfer_data.loc[self.transfer_data['choice_made'] == 1, 'symbol_chosen'] = self.transfer_data['symbol_R_value'] #Switch to chose right if appropriate
