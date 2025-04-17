@@ -70,6 +70,12 @@ class Report(ReportFunctions):
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
+        section_text.append('### Selected Choice Rates')
+        section_text.append('The selected choice rates are the percentages of trials the target symbol (row) was chosen in comparison to each other symbol (x-values).')
+        section_text.extend(self.insert_image('selected_select-choice-rate'))
+        self.add_data_pdf(section_text, center=True)
+
+        section_text = []
         section_text.append('### Transfer Reaction Time')   
         section_text.extend(self.insert_image('transfer-rt'))
         self.add_data_pdf(section_text, center=True)

@@ -32,6 +32,7 @@ class Plotting:
         self.plot_rainclouds('learning-rt-diff')
         self.plot_rainclouds('learning-rt-context-diff')
         self.plot_rainclouds('transfer-choice-rate')
+        self.plot_select_rainclouds('select-choice-rate')
         self.plot_rainclouds('transfer-rt')
         self.plot_rainclouds('transfer-valence-bias')
         self.plot_neutral_transfer_accuracy('transfer-choice-rate-neutral')
@@ -71,7 +72,7 @@ class Plotting:
         return sample_sizes, t_scores
 
     #Plotting functions
-    def raincloud_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.25) -> None:
+    def raincloud_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.25, colors = None, ) -> None:
             
             """
             Create a raincloud plot of the data
@@ -89,12 +90,13 @@ class Plotting:
             """
             
             #Set parameters
-            if data.index.nunique() == 2:
-                colors = ['#B2DF8A', '#FB9A99']
-            elif data.index.nunique() == 3:
-                colors = ['#B2DF8A', '#FFD92F', '#FB9A99']
-            else:
-                colors = ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C', '#D3D3D3']
+            if colors is None:
+                if data.index.nunique() == 2:
+                    colors = ['#B2DF8A', '#FB9A99']
+                elif data.index.nunique() == 3:
+                    colors = ['#B2DF8A', '#FFD92F', '#FB9A99']
+                else:
+                    colors = ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C', '#D3D3D3']
 
             #Set index name
             data.index.name = 'code'
@@ -118,7 +120,9 @@ class Plotting:
             
             #Compute the mean and 95% CIs for the choice rate for each symbol
             mean_data = data.groupby('code').mean()
-            CIs = data.groupby('code').sem()['score'] * t_scores
+            CIs = data.groupby('code').sem()['score'] 
+            CIs = CIs.dropna()
+            CIs = CIs * t_scores
 
             #Draw rectangle for each symbol that rerpesents the top and bottom of the 95% CI that has no fill and a black outline
             for factor_index, factor in enumerate(data.index.unique()):
@@ -255,6 +259,15 @@ class Plotting:
         if 'context' in save_name:
             data = data.reset_index().set_index(['symbol_name', self.group_code, 'participant_id'])
 
+        if 'select-choice-rate-' in save_name:
+            symbol = save_name.split('-')[-1]
+            data = self.select_choice_rate[symbol]
+            data = data.reset_index()
+            data['symbol'] = data['symbol'].replace({'Novel': 0, 'High Reward': 4, 'Low Reward': 3, 'Low Punish': 2, 'High Punish': 1})
+            data = data.set_index([self.group_code, 'participant_id', 'symbol'])
+            metric_label = 'choice_rate'
+            y_label = 'Choice Rate (%)'
+
         if 'diff' in save_name or 'context' in save_name or 'valence-bias' in save_name:
             condition_name = self.group_code
             condition_values = self.group_labels
@@ -325,6 +338,76 @@ class Plotting:
         #Save the plot
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
+
+        #Close figure
+        plt.close()
+
+    def plot_select_rainclouds(self, save_name: str) -> None:
+        """
+        Create raincloud plots of the data
+
+        Parameters
+        ----------
+        save_name : str
+            The name to save the plot as
+
+        Returns (External)
+        ------------------
+        Image: PNG
+            A plot of the raincloud plots
+        """
+
+        #Set data specific parameters
+        colors = ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C', '#D3D3D3']
+        metric_label = 'choice_rate'
+        y_label = 'Choice Rate (%)'
+        condition_name = 'symbol'
+        condition_values = [4, 3, 2, 1, 0]
+        x_values = [1, 2, 3, 4, 5]
+        x_ids = ['High Reward', 'Low Reward', 'Low Punish', 'High Punish', 'Novel']
+        x_labels = ['High\nReward', 'Low\nReward', 'Low\nPunish', 'High\nPunish', 'Novel']
+        plot_labels = self.group_labels
+        
+        #Create a bar plot of the choice rate for each symbol
+        fig, ax = plt.subplots(5, 3, figsize=(15, 20))
+        fig.subplots_adjust(hspace=0.35)
+        for symbol_index, symbol in enumerate(['High Reward', 'Low Reward', 'Low Punish', 'High Punish', 'Novel']):
+            data = self.select_choice_rate[symbol]
+            data = data.reset_index()
+            data['symbol'] = data['symbol'].replace({'Novel': 0, 'High Reward': 4, 'Low Reward': 3, 'Low Punish': 2, 'High Punish': 1})
+            data = data.set_index([self.group_code, 'participant_id', 'symbol'])
+            symbol_x_ids = [x_id for x_id in x_ids if x_id != symbol]
+            symbol_x_labels = [x_label for x_label in x_labels if x_label.replace('\n',' ') != symbol]
+            symbol_colours = [colors[x_ids.index(x_id)] for x_id in symbol_x_ids]
+            
+            for group_index, group in enumerate(plot_labels):
+                group_data = data.loc[group].reset_index()
+                group_data[condition_name] = pd.Categorical(group_data[condition_name], condition_values)
+                group_data = group_data.sort_values(condition_name)
+
+                #Compute t-statistic
+                _, t_scores = self.compute_n_and_t(group_data, condition_name)
+
+                #Get descriptive statistics for the group
+                group_data = group_data.set_index(condition_name)[metric_label].astype(float)
+
+                #Create plot
+                self.raincloud_plot(data=group_data, ax=ax[symbol_index, group_index], t_scores=t_scores, colors=symbol_colours)                    
+
+                #Create horizontal line for the mean the same width
+                ax[symbol_index, group_index].set_xticks([1,2,3,4], symbol_x_labels)
+                ax[symbol_index, group_index].set_xlabel('')
+                ax[symbol_index, group_index].axhline(y=50, color='darkgrey', linestyle='--', alpha=0.5)
+                if group_index == 0:
+                    ax[symbol_index, group_index].set_ylabel(f'{symbol.title()}\n{y_label}')
+                if '(%)' in y_label:
+                    ax[symbol_index, group_index].set_ylim(-4, 104)
+                if symbol_index == 0:
+                    ax[symbol_index, group_index].set_title(group.capitalize())
+
+        #Save the plot
+        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/selected_{save_name}.png')
+        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/selected_{save_name}.svg', format='svg')
 
         #Close figure
         plt.close()

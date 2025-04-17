@@ -124,6 +124,7 @@ class Processing:
         #Compute metrics
         self.compute_learning_averages()
         self.compute_choice_rate()
+        self.compute_select_choice_rate()
         self.compute_choice_rate(neutral=True)
         self.compute_valence_bias()
 
@@ -749,6 +750,43 @@ class Processing:
             choice_rt = choice_rt[choice_rt['symbol'] == 3] #Choose rewarding
             choice_rt = choice_rt.set_index([self.group_code, 'participant_id', 'symbol'])
             self.neutral_choice_rt = choice_rt
+
+    def compute_select_choice_rate(self) -> None:
+
+        symbols = [0, 1, 2, 3, 4]
+        symbol_names = ['Novel', 'High Punish', 'Low Punish', 'Low Reward', 'High Reward']
+        data = self.transfer_data
+
+        #Compute choice rates for each participant and symbol within each group
+        select_choice_rate = {s: pd.DataFrame(columns=['choice_rate'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=[self.group_code, 'participant_id', 'symbol'])) for s in symbol_names}
+        select_choice_rt = {s: pd.DataFrame(columns=['choice_rt'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=[self.group_code, 'participant_id', 'symbol'])) for s in symbol_names}
+
+        for group in self.group_labels:
+            group_data = data[data[self.group_code] == group]
+            for participant in group_data['participant_id'].unique():
+                participant_data = group_data[group_data['participant_id'] == participant]
+                for symbol in symbols:
+                    for reference_symbol in symbols:
+                        if symbol != reference_symbol:
+                            symbol_chosen = participant_data[(participant_data['symbol_chosen'] == symbol) & (participant_data['symbol_ignored'] == reference_symbol)].shape[0]
+                            symbol_ignored = participant_data[(participant_data['symbol_ignored'] == symbol) & (participant_data['symbol_chosen'] == reference_symbol)].shape[0]
+                            symbol_choice_rate = symbol_chosen / (symbol_chosen + symbol_ignored) * 100
+
+                            #Insert symbol_choice_rate into a new dataframe with index levels [group, participant, symbol]
+                            select_choice_rate[symbol_names[symbol]].loc[(group, participant, reference_symbol), 'choice_rate'] = symbol_choice_rate
+                            select_choice_rt[symbol_names[symbol]].loc[(group, participant, reference_symbol), 'choice_rt'] = participant_data[(participant_data['symbol_chosen'] == symbol) & (participant_data['symbol_ignored'] == reference_symbol)]['rt'].mean()
+
+        for s in symbol_names:
+            select_choice_rate[s] = select_choice_rate[s].reset_index()
+            select_choice_rate[s]['symbol'] = select_choice_rate[s]['symbol'].replace({0: 'Novel', 1: 'High Punish', 2: 'Low Punish', 3: 'Low Reward', 4: 'High Reward'})
+            select_choice_rate[s] = select_choice_rate[s].set_index([self.group_code, 'participant_id', 'symbol'])
+
+            select_choice_rt[s] = select_choice_rt[s].reset_index()
+            select_choice_rt[s]['symbol'] = select_choice_rt[s]['symbol'].replace({0: 'Novel', 1: 'High Punish', 2: 'Low Punish', 3: 'Low Reward', 4: 'High Reward'})
+            select_choice_rt[s] = select_choice_rt[s].set_index([self.group_code, 'participant_id', 'symbol'])
+
+        self.select_choice_rate = select_choice_rate
+        self.select_choice_rt = select_choice_rt
 
     def compute_demographics(self) -> None:
 
