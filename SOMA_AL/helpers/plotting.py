@@ -2,7 +2,6 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib
 from scipy import stats
 
 class Plotting:
@@ -11,6 +10,12 @@ class Plotting:
     Class to hold plotting functions for the SOMA project
     """
 
+    def __init__(self):
+        self.colors = {'group': ['#B2DF8A', '#FFD92F', '#FB9A99'],
+                       'condition': ['#095086', '#9BD2F2', '#ECA6A6', '#B00000', '#D3D3D3'],
+                       'condition_2': ['#9BD2F2', '#ECA6A6'],
+                       'condition_3': ['#9BD2F2', '#FFD92F', '#ECA6A6'],}
+                                      
     #Helper functions
     def print_plots(self) -> None:
 
@@ -18,25 +23,25 @@ class Plotting:
         Print all plots as images
         """
 
-        self.plot_clinical_scores('demo-clinical-scores')
-        self.plot_learning_curves('learning-accuracy-by-group', rolling_mean=self.rolling_mean, grouping='clinical')
-        self.plot_learning_curves('learning-rt-by-group', rolling_mean=self.rolling_mean, grouping='clinical', metric='rt')
-        self.plot_learning_curves('learning-accuracy-by-context', rolling_mean=self.rolling_mean, grouping='context')
-        self.plot_learning_curves('learning-rt-by-context', rolling_mean=self.rolling_mean, grouping='context', metric='rt')
-        self.plot_rainclouds('learning-accuracy')
-        self.plot_rainclouds('learning-accuracy-context')
-        self.plot_rainclouds('learning-accuracy-diff')
-        self.plot_rainclouds('learning-accuracy-context-diff')
-        self.plot_rainclouds('learning-rt')
-        self.plot_rainclouds('learning-rt-context')
-        self.plot_rainclouds('learning-rt-diff')
-        self.plot_rainclouds('learning-rt-context-diff')
-        self.plot_rainclouds('transfer-choice-rate')
-        self.plot_select_rainclouds('select-choice-rate')
-        self.plot_rainclouds('transfer-rt')
-        self.plot_rainclouds('transfer-valence-bias')
-        self.plot_neutral_transfer_accuracy('transfer-choice-rate-neutral')
-        self.plot_neutral_transfer_accuracy('transfer-rt-neutral', metric='rt')
+        self.plot_clinical_scores('demo-clinical-scores', colors=self.colors['group'])
+        self.plot_learning_curves('learning-accuracy-by-group', rolling_mean=self.rolling_mean, grouping='clinical', colors=self.colors['condition_2'])
+        self.plot_learning_curves('learning-rt-by-group', rolling_mean=self.rolling_mean, grouping='clinical', metric='rt', colors=self.colors['condition_2'])
+        self.plot_learning_curves('learning-accuracy-by-context', rolling_mean=self.rolling_mean, grouping='context', colors=self.colors['group'])
+        self.plot_learning_curves('learning-rt-by-context', rolling_mean=self.rolling_mean, grouping='context', metric='rt', colors=self.colors['group'])
+        self.plot_rainclouds('learning-accuracy', colors=self.colors['condition_2'])
+        self.plot_rainclouds('learning-accuracy-context', colors=self.colors['group'])
+        self.plot_rainclouds('learning-accuracy-diff', colors=self.colors['group'])
+        self.plot_rainclouds('learning-accuracy-context-diff', colors=self.colors['group'])
+        self.plot_rainclouds('learning-rt', colors=self.colors['condition_2'])
+        self.plot_rainclouds('learning-rt-context', colors=self.colors['group'])
+        self.plot_rainclouds('learning-rt-diff', colors=self.colors['group'])
+        self.plot_rainclouds('learning-rt-context-diff', colors=self.colors['group'])
+        self.plot_rainclouds('transfer-choice-rate', colors=self.colors['condition'])
+        self.plot_select_rainclouds('select-choice-rate', colors=self.colors['condition'])
+        self.plot_rainclouds('transfer-rt', colors=self.colors['condition'])
+        self.plot_rainclouds('transfer-valence-bias', colors=self.colors['group'])
+        self.plot_neutral_transfer_accuracy('transfer-choice-rate-neutral', colors=self.colors['group'])
+        self.plot_neutral_transfer_accuracy('transfer-rt-neutral', metric='rt', colors=self.colors['group'])
 
     def compute_n_and_t(self, data: pd.DataFrame, splitting_column: str) -> tuple:
 
@@ -72,7 +77,7 @@ class Plotting:
         return sample_sizes, t_scores
 
     #Plotting functions
-    def raincloud_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.25, colors = None, ) -> None:
+    def raincloud_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.25, colors: list = []) -> None:
             
             """
             Create a raincloud plot of the data
@@ -88,15 +93,6 @@ class Plotting:
             alpha : float
                 The transparency of the scatter plot
             """
-            
-            #Set parameters
-            if colors is None:
-                if data.index.nunique() == 2:
-                    colors = ['#B2DF8A', '#FB9A99']
-                elif data.index.nunique() == 3:
-                    colors = ['#B2DF8A', '#FFD92F', '#FB9A99']
-                else:
-                    colors = ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C', '#D3D3D3']
 
             #Set index name
             data.index.name = 'code'
@@ -129,7 +125,7 @@ class Plotting:
                 ax.add_patch(plt.Rectangle((factor_index+1-0.4, (mean_data.loc[factor] - CIs.loc[factor])['score']), 0.8, 2*CIs.loc[factor], fill=None, edgecolor='darkgrey'))
                 ax.hlines(mean_data.loc[factor], factor_index+1-0.4, factor_index+1+0.4, color='darkgrey')            
 
-    def plot_learning_curves(self, save_name: str, rolling_mean: int = None,  metric: str = 'accuracy', grouping: str = 'clinical') -> None:
+    def plot_learning_curves(self, save_name: str, rolling_mean: int = None,  metric: str = 'accuracy', grouping: str = 'clinical', colors: list = []) -> None:
 
         """
         Plot the learning curves for the accuracy or reaction time data
@@ -179,15 +175,14 @@ class Plotting:
 
             #Determine information of interest
             trial_index_name = 'trial_number'
-            color = ['#B2DF8A', '#FB9A99'] if len(contexts) == 2 else ['#B2DF8A', '#FFD92F', '#FB9A99']
             for context_index, context in enumerate(contexts):
                 context_data = group_data[group_data[contexts_code] == context]
                 mean_accuracy = context_data.groupby(trial_index_name)[metric].mean()
                 CIs = context_data.groupby(trial_index_name)[metric].sem()*t_score
                 if rolling_mean is not None:
                     mean_accuracy = mean_accuracy.rolling(rolling_mean, min_periods=1, center=True).mean()
-                ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.2, color=color[context_index], edgecolor='none')
-                ax[i].plot(mean_accuracy, color=color[context_index], label=context.title())
+                ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.2, color=colors[context_index], edgecolor='none')
+                ax[i].plot(mean_accuracy, color=colors[context_index], label=context.title())
 
             if metric == 'accuracy':
                 ax[i].set_ylim(40, 100)
@@ -203,7 +198,7 @@ class Plotting:
         #Close figure
         plt.close()
 
-    def plot_rainclouds(self, save_name: str) -> None:
+    def plot_rainclouds(self, save_name: str, colors: list) -> None:
 
         """
         Create raincloud plots of the data
@@ -316,9 +311,9 @@ class Plotting:
 
             #Create plot
             if 'diff' not in save_name and 'valence-bias' not in save_name:
-                self.raincloud_plot(data=group_data, ax=ax[group_index], t_scores=t_scores)
+                self.raincloud_plot(data=group_data, ax=ax[group_index], t_scores=t_scores, colors=colors)
             else:
-                self.raincloud_plot(data=group_data, ax=ax, t_scores=t_scores)
+                self.raincloud_plot(data=group_data, ax=ax, t_scores=t_scores, colors=colors)
 
             #Create horizontal line for the mean the same width
             if 'diff' not in save_name and 'valence-bias' not in save_name:
@@ -342,7 +337,7 @@ class Plotting:
         #Close figure
         plt.close()
 
-    def plot_select_rainclouds(self, save_name: str) -> None:
+    def plot_select_rainclouds(self, save_name: str, colors: list) -> None:
         """
         Create raincloud plots of the data
 
@@ -358,12 +353,10 @@ class Plotting:
         """
 
         #Set data specific parameters
-        colors = ['#33A02C', '#B2DF8A', '#FB9A99', '#E31A1C', '#D3D3D3']
         metric_label = 'choice_rate'
         y_label = 'Choice Rate (%)'
         condition_name = 'symbol'
         condition_values = [4, 3, 2, 1, 0]
-        x_values = [1, 2, 3, 4, 5]
         x_ids = ['High Reward', 'Low Reward', 'Low Punish', 'High Punish', 'Novel']
         x_labels = ['High\nReward', 'Low\nReward', 'Low\nPunish', 'High\nPunish', 'Novel']
         plot_labels = self.group_labels
@@ -412,7 +405,7 @@ class Plotting:
         #Close figure
         plt.close()
 
-    def plot_neutral_transfer_accuracy(self, save_name: str, metric: str = 'choice_rate') -> None:
+    def plot_neutral_transfer_accuracy(self, save_name: str, metric: str = 'choice_rate', colors: list = []) -> None:
 
         """
         Plot the neutral transfer accuracy data
@@ -447,7 +440,7 @@ class Plotting:
         choice_rate = choice_rate.set_index(self.group_code)[metric_label].astype(float)
 
         #Create plot
-        self.raincloud_plot(data=choice_rate, ax=ax, t_scores=t_scores)
+        self.raincloud_plot(data=choice_rate, ax=ax, t_scores=t_scores, colors=colors)
 
         #Create horizontal line for the mean the same width
         x_indexes = [1, 2, 3] if self.split_by_group == 'pain' else [1, 2]
@@ -470,7 +463,7 @@ class Plotting:
         #Close figure
         plt.close()
 
-    def plot_clinical_scores(self, save_name: str) -> None:
+    def plot_clinical_scores(self, save_name: str, colors: list) -> None:
 
         """
         Plot the clinical scores for the participants
@@ -507,7 +500,7 @@ class Plotting:
             _, t_scores = self.compute_n_and_t(metric_scores, self.group_code)
 
             #Create plot
-            self.raincloud_plot(data=metric_scores, ax=ax[metric_index], t_scores=t_scores, alpha=0.5)
+            self.raincloud_plot(data=metric_scores, ax=ax[metric_index], t_scores=t_scores, alpha=0.5, colors=colors)
 
             #Create horizontal line for the mean the same width
             num_groups = 3 if self.split_by_group == 'pain' else 2
