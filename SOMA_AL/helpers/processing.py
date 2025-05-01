@@ -114,6 +114,7 @@ class Processing:
 
         #Exclude participants with low accuracy
         self.exclude_low_accuracy(self.accuracy_exclusion_threshold)
+        self.remove_participants()
 
         #Save processed data for RL modelling
         self.save_processed_data()
@@ -205,24 +206,22 @@ class Processing:
             The data with the depression scores recoded
         """
         
-        #Determine number of participants
-        num_participants = self.data['participant_id'].nunique()
-
-        #Remove the participants who are in the transition group (duration = 3 – 6 months)
-        nontransition_index = self.data['duration'] == '3 – 6 months'
-        self.data.loc[nontransition_index, self.group_code] = 'acute pain'
+        #Recode the participants who are in the transition group (duration = 3 – 6 months)
+        transition_index = self.data['duration'] == '3 – 6 months'
+        self.data.loc[transition_index, self.group_code] = 'acute pain'
 
         #Create composite score
         self.data['composite_pain'] = self.data.apply(lambda x: np.mean((x['intensity'], x['unpleasant'], x['interference'])), axis=1)
 
         #Find row indexes of participants in no pain (column 'group_code') where their average_pain scores are less than the threshold
-        no_pain_participants = (self.data[self.group_code] == 'no pain') & (self.data['composite_pain'] < threshold)
+        no_pain_participants = (self.data[self.group_code] == 'no pain') & (self.data['composite_pain'] < threshold)        
         acute_pain_participants = (self.data[self.group_code] == 'acute pain') & (self.data['composite_pain'] >= threshold)
         chronic_pain_participants = (self.data[self.group_code] == 'chronic pain') & (self.data['composite_pain'] >= threshold)
         kept_participants = no_pain_participants | acute_pain_participants | chronic_pain_participants
+        removed_participants = ~kept_participants
 
-        self.data = self.data[kept_participants].reset_index(drop=True)
-        self.excluded_pain = num_participants - self.data['participant_id'].nunique()
+        #Store the data for the participants who were removed
+        self.pain_excluded_participants = self.data[removed_participants]['participant_id'].unique()
 
     def save_processed_data(self) -> None:
 
@@ -320,7 +319,7 @@ class Processing:
         self.transfer_data['paired_symbols'] = self.transfer_data.apply(self.combine_columns, axis=1)
     
     #Data exclusion
-    def exclude_low_accuracy(self, threshold: int = 55) -> None:
+    def exclude_low_accuracy(self, threshold: int = 55, exclude: str = 'learning') -> None:
 
         """
         Function to exclude participants with low accuracy.
@@ -329,6 +328,8 @@ class Processing:
         -----------
         threshold : int
             The threshold for accuracy below which participants are excluded.
+        exclude : str
+            The type of data to exclude participants from. Options are 'learning' or 'all'.
 
         Returns (Internal)
         ------------------
@@ -344,39 +345,54 @@ class Processing:
             The threshold for accuracy below which participants are excluded
         """
 
-        #Compute accuracy for each participant
-        accuracy = pd.DataFrame(columns=['accuracy'], index=pd.MultiIndex(levels=[[]], codes=[[]], names=['participant']))
-        for participant in self.learning_data['participant_id'].unique():
-            participant_data = self.learning_data[self.learning_data['participant_id'] == participant]
-            accuracy_rate = participant_data['accuracy'].mean()
-            accuracy.loc[participant, 'accuracy'] = accuracy_rate
-
-        #Find participants with accuracy less than 60%
-        low_accuracy = accuracy[accuracy['accuracy'] < threshold].reset_index()
-        excluded_participants_learning = low_accuracy['participant']
-
-        choice_rate = self.choice_rate.reset_index()
-        choice_rate = choice_rate[(choice_rate['symbol'] == 'High Reward') | (choice_rate['symbol'] == 'High Punish')]
-        reduced_choice_rate = pd.DataFrame(columns=['participant_id', 'High Reward', 'High Punish'])
-        for participant in choice_rate['participant_id'].unique():
-            participant_choice_rate = choice_rate[choice_rate['participant_id'] == participant]
-            participant_choice_rate = participant_choice_rate.pivot(index='participant_id', columns='symbol', values='choice_rate').reset_index()
-            participant_choice_rate['High Punish'] = 100-participant_choice_rate['High Punish']
-            reduced_choice_rate = pd.concat((reduced_choice_rate, participant_choice_rate))
-        #Find whether any High Reward or High Punish is < threshold
-        low_choice_rate = reduced_choice_rate[(reduced_choice_rate['High Reward'] < threshold) | (reduced_choice_rate['High Punish'] < threshold)]
-        excluded_participants_transfer = low_choice_rate['participant_id']
-
-        excluded_participants = pd.concat([excluded_participants_learning, excluded_participants_transfer]).drop_duplicates()
-
-        #Remove participants with accuracy less than 60%
-        self.data = self.data[~self.data['participant_id'].isin(excluded_participants)]
-        self.learning_data = self.learning_data[~self.learning_data['participant_id'].isin(excluded_participants)]
-        self.transfer_data = self.transfer_data[~self.transfer_data['participant_id'].isin(excluded_participants)]
-
-        #Track number of participants excluded
-        self.participants_excluded_accuracy = len(excluded_participants)
+        #Track threshold
         self.accuracy_threshold = threshold
+
+        #Compute accuracy for each participant
+        filtered_data = self.learning_data[self.learning_data['trial_number_symbol'] > 18]
+        accuracy = (filtered_data.groupby('participant_id')['accuracy'].mean().to_frame(name='accuracy'))
+
+        #Find participants with accuracy less than threshold
+        low_accuracy = accuracy[accuracy['accuracy'] < threshold].reset_index()
+        excluded_participants_learning = low_accuracy['participant_id']
+
+        if exclude != 'learning':
+            choice_rate = self.choice_rate.reset_index()
+            choice_rate = choice_rate[(choice_rate['symbol'] == 'High Reward') | (choice_rate['symbol'] == 'High Punish')]
+            reduced_choice_rate = pd.DataFrame(columns=['participant_id', 'High Reward', 'High Punish'])
+            for participant in choice_rate['participant_id'].unique():
+                participant_choice_rate = choice_rate[choice_rate['participant_id'] == participant]
+                participant_choice_rate = participant_choice_rate.pivot(index='participant_id', columns='symbol', values='choice_rate').reset_index()
+                participant_choice_rate['High Punish'] = 100-participant_choice_rate['High Punish']
+                reduced_choice_rate = pd.concat((reduced_choice_rate, participant_choice_rate))
+            #Find whether any High Reward or High Punish is < threshold
+            low_choice_rate = reduced_choice_rate[(reduced_choice_rate['High Reward'] < threshold) | (reduced_choice_rate['High Punish'] < threshold)]
+            excluded_participants_transfer = low_choice_rate['participant_id']
+
+            excluded_participants = pd.concat([excluded_participants_learning, excluded_participants_transfer]).drop_duplicates()
+        else:
+            excluded_participants = excluded_participants_learning
+
+        #Remove participants with accuracy less than threshold
+        self.accuracy_excluded_participant = excluded_participants.unique()
+
+    def remove_participants(self) -> None:
+        
+        #Determine number of participants excluded
+        self.number_participants = self.data['participant_id'].nunique()
+        self.number_pain_excluded = len(self.pain_excluded_participants) - len(np.intersect1d(self.pain_excluded_participants, self.accuracy_excluded_participant))
+        self.number_accuracy_excluded = len(self.accuracy_excluded_participant)
+        self.number_participants_excluded = self.number_pain_excluded + self.number_accuracy_excluded
+        self.number_participants_kept = self.number_participants - self.number_participants_excluded
+
+        #Combine dataframes
+        participants_to_remove = np.concatenate((self.pain_excluded_participants, self.accuracy_excluded_participant))
+        participants_to_remove = np.unique(participants_to_remove)
+
+        #Remove participants from the data
+        self.data = self.data[~self.data['participant_id'].isin(participants_to_remove)]
+        self.learning_data = self.learning_data[~self.learning_data['participant_id'].isin(participants_to_remove)]
+        self.transfer_data = self.transfer_data[~self.transfer_data['participant_id'].isin(participants_to_remove)]
 
     def exclude_low_rt(self, low_threshold: int = 200, high_threshold: int = 5000) -> None:
 

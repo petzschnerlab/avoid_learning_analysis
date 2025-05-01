@@ -717,8 +717,8 @@ class ReportFunctions:
                         f'**Columns:** {self.data.shape[1]}\n',
                         f'**Number of Groups:** {len(self.group_labels)}\n',
                         f'**Number of Original Participants:** {self.participants_original}\n',
-                        f'**Number of Participants Excluded (Pain Threshold): {self.excluded_pain}**\n',
-                        f'**Number of Participants Excluded (Accuracy Threshold: {self.accuracy_threshold}%):** {self.participants_excluded_accuracy}\n',
+                        f'**Number of Participants Excluded (Pain Threshold): {self.number_pain_excluded}**\n',
+                        f'**Number of Participants Excluded (Accuracy Threshold: {self.accuracy_threshold}%):** {self.number_accuracy_excluded}\n',
                         f'**Number of Participants Remaining:** {self.learning_data["participant_id"].nunique()}\n',
                         f'**Percentage of Trials Excluded (RT Threshold: < {self.RT_low_threshold}ms or > {self.RT_high_threshold}ms):** {self.trials_excluded_rt.round(2)}%\n']
         self.add_data_pdf(section_text)
