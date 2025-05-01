@@ -15,7 +15,7 @@ class SOMAPipeline(Master):
     """
 
     def __init__(self):
-        super().__init__()     
+        super().__init__()
 
     def run(self, **kwargs):
 
@@ -39,7 +39,6 @@ class SOMAPipeline(Master):
             self.recode_depression()
         if 'pain' in self.split_by_group_id:
             self.exclude_pain(threshold=20)
-            #self.recode_pain()
         if self.check_data():
             self.process_data()
             self.run_tests()
@@ -65,7 +64,7 @@ if __name__ == '__main__':
     depression_cutoff = 10
 
     #Exclusion parameters
-    accuracy_exclusion_threshold = 55
+    accuracy_exclusion_threshold = 70
     RT_low_threshold = 200
     RT_high_threshold = 5000
 
@@ -81,7 +80,7 @@ if __name__ == '__main__':
     hide_stats = False
     hide_posthocs = False
     load_stats = True
-    load_posthocs = False
+    load_posthocs = True
     load_models = True
     verbose = True
 
