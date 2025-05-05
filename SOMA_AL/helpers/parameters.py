@@ -122,12 +122,12 @@ class Parameters:
         #Unpack parameters
         self.kwargs = kwargs
         self.help = kwargs.get('help', False)
-        self.author = kwargs.get('author', 'SOMA_Team')
+        self.author = kwargs.get('author', 'PEAC_Team')
         self.rscripts_path = kwargs.get('rscripts_path', None)
         self.file_path = kwargs.get('file_path', None)
         self.file_name = kwargs.get('file_name', None)
         self.dataset = kwargs.get('dataset', '')
-        self.print_filename = kwargs.get('print_filename', r'SOMA_AL/reports/SOMA_report.pdf')
+        self.print_filename = kwargs.get('print_filename', r'SOMA_AL/reports/PEAC_report.pdf')
         self.split_by_group = kwargs.get('split_by_group', 'pain')
         self.split_by_group_id = kwargs.get('split_by_group_id', self.split_by_group)
         self.covariate = kwargs.get('covariate', None)

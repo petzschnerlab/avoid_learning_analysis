@@ -726,7 +726,7 @@ class Processing:
             for participant in group_data['participant_id'].unique():
                 participant_data = group_data[group_data['participant_id'] == participant]
                 symbols = [0, 1, 2, 3, 4] if not neutral else [2, 3]
-                participant_data['context_val'] = participant_data['context_val'].replace({1: 'Reward', -1: 'Punish', 0: 'Neutral'})
+                participant_data.loc[:, 'context_val'] = participant_data['context_val'].replace({1: 'Reward',-1: 'Punish',0: 'Neutral'})
                 for context in participant_data['context_val'].unique():
                     context_data = participant_data[participant_data['context_val'] == context]
                     for symbol in symbols:

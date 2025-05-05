@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import stats
+import matplotlib.pyplot as plt
+from PIL import Image
 
 class Plotting:
 
@@ -13,8 +15,7 @@ class Plotting:
     def __init__(self):
         self.colors = {'group': ['#B2DF8A', '#FFD92F', '#FB9A99'],
                        'condition': ['#095086', '#9BD2F2', '#ECA6A6', '#B00000', '#D3D3D3'],
-                       'condition_2': ['#9BD2F2', '#ECA6A6'],
-                       'condition_3': ['#9BD2F2', '#FFD92F', '#ECA6A6'],}
+                       'condition_2': ['#9BD2F2', '#ECA6A6']}
                                       
     #Helper functions
     def print_plots(self) -> None:
@@ -23,23 +24,31 @@ class Plotting:
         Print all plots as images
         """
 
+        #Main figures
         self.plot_clinical_scores('demo-clinical-scores', colors=self.colors['group'])
         self.plot_learning_curves('learning-accuracy-by-group', rolling_mean=self.rolling_mean, grouping='clinical', colors=self.colors['condition_2'])
         self.plot_learning_curves('learning-rt-by-group', rolling_mean=self.rolling_mean, grouping='clinical', metric='rt', colors=self.colors['condition_2'])
+        self.plot_transfer_data('transfer-choice-rate', colors=self.colors['condition'], plot_type='bar', group_labels=False)
+        self.plot_transfer_data('transfer-rt', colors=self.colors['condition'], plot_type='bar', group_labels=False)
+        self.plot_combined_learning_and_transfer('empirical-performance', 'learning-accuracy-by-group', 'transfer-choice-rate')
+        self.plot_combined_learning_and_transfer('empirical-rt', 'learning-rt-by-group', 'transfer-rt')
+
+        #Other figures
         self.plot_learning_curves('learning-accuracy-by-context', rolling_mean=self.rolling_mean, grouping='context', colors=self.colors['group'])
         self.plot_learning_curves('learning-rt-by-context', rolling_mean=self.rolling_mean, grouping='context', metric='rt', colors=self.colors['group'])
-        self.plot_rainclouds('learning-accuracy', colors=self.colors['condition_2'])
-        self.plot_rainclouds('learning-accuracy-context', colors=self.colors['group'])
-        self.plot_rainclouds('learning-accuracy-diff', colors=self.colors['group'])
-        self.plot_rainclouds('learning-accuracy-context-diff', colors=self.colors['group'])
-        self.plot_rainclouds('learning-rt', colors=self.colors['condition_2'])
-        self.plot_rainclouds('learning-rt-context', colors=self.colors['group'])
-        self.plot_rainclouds('learning-rt-diff', colors=self.colors['group'])
-        self.plot_rainclouds('learning-rt-context-diff', colors=self.colors['group'])
-        self.plot_rainclouds('transfer-choice-rate', colors=self.colors['condition'])
-        self.plot_select_rainclouds('select-choice-rate', colors=self.colors['condition'])
-        self.plot_rainclouds('transfer-rt', colors=self.colors['condition'])
-        self.plot_rainclouds('transfer-valence-bias', colors=self.colors['group'])
+        self.plot_transfer_data('learning-accuracy', colors=self.colors['condition_2'])
+        self.plot_transfer_data('learning-accuracy-context', colors=self.colors['group'])
+        self.plot_transfer_data('learning-accuracy-diff', colors=self.colors['group'])
+        self.plot_transfer_data('learning-accuracy-context-diff', colors=self.colors['group'])
+        self.plot_transfer_data('learning-rt', colors=self.colors['condition_2'])
+        self.plot_transfer_data('learning-rt-context', colors=self.colors['group'])
+        self.plot_transfer_data('learning-rt-diff', colors=self.colors['group'])
+        self.plot_transfer_data('learning-rt-context-diff', colors=self.colors['group'])
+        self.plot_transfer_data('transfer-choice-rate', colors=self.colors['condition'])
+        self.plot_transfer_data('transfer-rt', colors=self.colors['condition'])
+        self.plot_transfer_data('transfer-valence-bias', colors=self.colors['group'])
+        self.plot_select_transfer('select-choice-rate', colors=self.colors['condition'], plot_type='bar')
+        self.plot_select_transfer('select-choice-rate', colors=self.colors['condition'])
         self.plot_neutral_transfer_accuracy('transfer-choice-rate-neutral', colors=self.colors['group'])
         self.plot_neutral_transfer_accuracy('transfer-rt-neutral', metric='rt', colors=self.colors['group'])
 
@@ -123,7 +132,73 @@ class Plotting:
             #Draw rectangle for each symbol that rerpesents the top and bottom of the 95% CI that has no fill and a black outline
             for factor_index, factor in enumerate(data.index.unique()):
                 ax.add_patch(plt.Rectangle((factor_index+1-0.4, (mean_data.loc[factor] - CIs.loc[factor])['score']), 0.8, 2*CIs.loc[factor], fill=None, edgecolor='darkgrey'))
-                ax.hlines(mean_data.loc[factor], factor_index+1-0.4, factor_index+1+0.4, color='darkgrey')            
+                ax.hlines(mean_data.loc[factor], factor_index+1-0.4, factor_index+1+0.4, color='darkgrey')      
+
+    def bar_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.25, colors: list = []) -> None:
+            
+            """
+            Create a raincloud plot of the data
+
+            Parameters
+            ----------
+            data : DataFrame
+                The data to be plotted
+            ax : Axes
+                The axes to plot the data on
+            t_scores : list
+                The t-scores for each group
+            alpha : float
+                The transparency of the scatter plot
+            """
+
+            #Set index name
+            data.index.name = 'code'
+            data = data.to_frame()
+            data.columns = ['score']
+            
+            #Compute the mean and 95% CIs for the choice rate for each symbol
+            mean_data = data.groupby('code').mean()
+            mean_data = mean_data.dropna()
+            CIs = data.groupby('code').sem()['score'] 
+            CIs = CIs.dropna()
+            CIs = CIs * t_scores
+
+            #Add barplot with CIs
+            ax.bar(np.arange(1,len(mean_data['score'])+1), mean_data['score'], yerr=CIs, color=colors, alpha=alpha, capsize=5, ecolor='dimgrey')                        
+
+    def plot_combined_learning_and_transfer(self, save_name: str, learning_name: str, transfer_name: str, image_height: int = 1000) -> None:
+        """
+        Combine separately saved learning and transfer plots into a single stacked image.
+
+        Parameters
+        ----------
+        save_name : str
+            The filename (no extension) to save the combined image as.
+        learning_args : dict
+            Arguments to pass to plot_learning_curves (must include 'save_name').
+        transfer_args : dict
+            Arguments to pass to plot_transfer_data (must include 'save_name').
+        image_height : int
+            Desired height (in pixels) of each subplot image.
+        """
+
+        path = f'SOMA_AL/plots/{self.split_by_group}'
+        learning_path = f'{path}/{learning_name}.png'
+        transfer_path = f'{path}/{transfer_name}.png'
+
+        # Open the images and resize to have the same width
+        learning_img = Image.open(learning_path)
+        transfer_img = Image.open(transfer_path)
+
+        # Resize images to have the same width (whichever is smaller)
+        width = min(learning_img.width, transfer_img.width)
+        combined_img = Image.new('RGB', (width, learning_img.height*2))
+        combined_img.paste(learning_img, (0, 0))
+        combined_img.paste(transfer_img, (0, learning_img.height))
+
+        # Save combined image
+        combined_path = f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png'
+        combined_img.save(combined_path)
 
     def plot_learning_curves(self, save_name: str, rolling_mean: int = None,  metric: str = 'accuracy', grouping: str = 'clinical', colors: list = []) -> None:
 
@@ -182,7 +257,7 @@ class Plotting:
                 if rolling_mean is not None:
                     mean_accuracy = mean_accuracy.rolling(rolling_mean, min_periods=1, center=True).mean()
                 ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.2, color=colors[context_index], edgecolor='none')
-                ax[i].plot(mean_accuracy, color=colors[context_index], label=context.title())
+                ax[i].plot(mean_accuracy, color=colors[context_index], label=context.title(), linewidth=3)
 
             if metric == 'accuracy':
                 ax[i].set_ylim(40, 100)
@@ -198,7 +273,7 @@ class Plotting:
         #Close figure
         plt.close()
 
-    def plot_rainclouds(self, save_name: str, colors: list) -> None:
+    def plot_transfer_data(self, save_name: str, colors: list, plot_type: str = 'raincloud', group_labels: bool = True) -> None:
 
         """
         Create raincloud plots of the data
@@ -310,10 +385,18 @@ class Plotting:
             group_data = group_data.set_index(condition_name)[metric_label].astype(float)
 
             #Create plot
-            if 'diff' not in save_name and 'valence-bias' not in save_name:
-                self.raincloud_plot(data=group_data, ax=ax[group_index], t_scores=t_scores, colors=colors)
+            if plot_type == 'raincloud':
+                if 'diff' not in save_name and 'valence-bias' not in save_name:
+                    self.raincloud_plot(data=group_data, ax=ax[group_index], t_scores=t_scores, colors=colors)
+                else:
+                    self.raincloud_plot(data=group_data, ax=ax, t_scores=t_scores, colors=colors)
+            elif plot_type == 'bar':
+                if 'diff' not in save_name and 'valence-bias' not in save_name:
+                    self.bar_plot(data=group_data, ax=ax[group_index], t_scores=t_scores, colors=colors)
+                else:
+                    self.bar_plot(data=group_data, ax=ax, t_scores=t_scores, colors=colors)      
             else:
-                self.raincloud_plot(data=group_data, ax=ax, t_scores=t_scores, colors=colors)
+                raise ValueError(f'Plot type {plot_type} not recognized.')          
 
             #Create horizontal line for the mean the same width
             if 'diff' not in save_name and 'valence-bias' not in save_name:
@@ -321,8 +404,12 @@ class Plotting:
                 ax[group_index].set_xlabel('')
                 ax[group_index].set_ylabel(y_label)
                 if '(%)' in y_label:
-                    ax[group_index].set_ylim(-4, 104)
-                ax[group_index].set_title(group.capitalize())
+                    ylim = [-4, 104] if plot_type == 'raincloud' else [0, 100]
+                    ax[group_index].set_ylim(ylim)
+                if group_labels:
+                    ax[group_index].set_title(group.capitalize())
+                else:
+                    ax[group_index].set_title('')
             else:
                 ax.set_xticks(x_values, x_labels)
                 ax.set_xlabel('')
@@ -331,13 +418,14 @@ class Plotting:
                 ax.axhline(y=0, color='darkgrey', linestyle='--')
 
         #Save the plot
+        save_name = f'{save_name}_supplemental' if plot_type == 'raincloud' else save_name
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
 
         #Close figure
         plt.close()
 
-    def plot_select_rainclouds(self, save_name: str, colors: list) -> None:
+    def plot_select_transfer(self, save_name: str, colors: list, plot_type: str = 'raincloud') -> None:
         """
         Create raincloud plots of the data
 
@@ -385,7 +473,12 @@ class Plotting:
                 group_data = group_data.set_index(condition_name)[metric_label].astype(float)
 
                 #Create plot
-                self.raincloud_plot(data=group_data, ax=ax[symbol_index, group_index], t_scores=t_scores, colors=symbol_colours)                    
+                if plot_type == 'raincloud':
+                    self.raincloud_plot(data=group_data, ax=ax[symbol_index, group_index], t_scores=t_scores, colors=symbol_colours)        
+                elif plot_type == 'bar':
+                    self.bar_plot(data=group_data, ax=ax[symbol_index, group_index], t_scores=t_scores, colors=symbol_colours)
+                else:
+                    raise ValueError(f'Plot type {plot_type} not recognized.')            
 
                 #Create horizontal line for the mean the same width
                 ax[symbol_index, group_index].set_xticks([1,2,3,4], symbol_x_labels)
@@ -399,6 +492,7 @@ class Plotting:
                     ax[symbol_index, group_index].set_title(group.capitalize())
 
         #Save the plot
+        save_name = f'{save_name}_supplemental' if plot_type == 'raincloud' else save_name
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/selected_{save_name}.png')
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/selected_{save_name}.svg', format='svg')
 

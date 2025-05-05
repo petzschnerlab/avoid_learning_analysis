@@ -39,45 +39,27 @@ class Report(ReportFunctions):
         
         #Results
         section_text = []
-        section_text.append(f'## Results')
-        section_text.append(f'### Learning Accuracy')
-        section_text.extend(self.insert_image('learning-accuracy-by-group'))
-        section_text.extend(self.insert_image('learning-accuracy'))
+        section_text.append(f'## Empirical Results: Accuracy and Choice Rates')
+        section_text.extend(self.insert_image('empirical-performance'))
         self.add_data_pdf(section_text, center=True)
-
+        
         section_text = []
+        section_text.append('### Learning Accuracy Statistics')
         section_text.extend(self.get_statistics('learning-accuracy'))
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
-        section_text.append('### Learning Reaction Time')
-        section_text.extend(self.insert_image('learning-rt-by-group'))
-        section_text.extend(self.insert_image('learning-rt'))
-
-        self.add_data_pdf(section_text, center=True)
-
-        section_text = []
-        section_text.extend(self.get_statistics('learning-rt'))
-        self.add_data_pdf(section_text, center=True)
-
-        section_text = []
-        section_text.append('### Choice Rate')
-        section_text.extend(self.insert_image('transfer-choice-rate'))
-        self.add_data_pdf(section_text, center=True)
-
-        section_text = []
+        section_text.append('### Transfer Choice Rate Statistics')
         section_text.extend(self.get_statistics('transfer-choice-rate'))
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
-        section_text.append('### Selected Choice Rates')
-        section_text.append('The selected choice rates are the percentages of trials the target symbol (row) was chosen in comparison to each other symbol (x-values).')
-        section_text.extend(self.insert_image('selected_select-choice-rate'))
+        section_text.append(f'## Empirical Results: Reaction Times')
+        section_text.extend(self.insert_image('empirical-rt'))
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
-        section_text.append('### Transfer Reaction Time')   
-        section_text.extend(self.insert_image('transfer-rt'))
+        section_text.extend(self.get_statistics('learning-rt'))
         self.add_data_pdf(section_text, center=True)
 
         section_text = []
@@ -87,7 +69,7 @@ class Report(ReportFunctions):
         #Modelling Results
         if load_models:
             section_text = []
-            section_text.append('## Modelling Evaluations')
+            section_text.append('## Modelling Results')
             section_text.append('### Model Fits')
             section_text.extend(self.insert_table(self.model_AIC, 'model-AIC'))
             section_text.extend(self.insert_table(self.model_BIC, 'model-BIC'))
