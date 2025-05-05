@@ -965,3 +965,4 @@ class ReportFunctions:
         
         #Plot the correlations
         plotting.plot_model_parameters_by_pain_split(fit_data, parameter_names, pain_names)
+        plotting.plot_model_fits({'AIC': self.model_AIC, 'BIC': self.model_BIC})

@@ -698,3 +698,42 @@ class Plotting:
 
             #Close figure
             plt.close(fig)
+
+    def plot_model_fits(self, fits: dict) -> None:
+        group_labels = ['no pain', 'acute pain', 'chronic pain', 'full']
+
+        for fit in fits:
+            current_fit = fits[fit].copy().iloc[:,:-1]
+            current_fit = current_fit.reset_index()
+            current_models = current_fit.columns[1:]
+            current_models = [model.replace('ContextualQ', 'w-Relative') for model in current_models]
+            number_subplots = len(group_labels)
+            max_fit = int(current_fit.iloc[:,1:].to_numpy().max()*1.1)
+            
+            fig, ax = plt.subplots(1, number_subplots, figsize=(5*number_subplots, 5))
+            for i, group in enumerate(group_labels):
+                current_values = current_fit.iloc[i,:].values[1:].astype(int)
+                current_colors = ['black' if i == np.min(current_values) else 'white' for i in current_values]
+                ax[i].bar(current_models,
+                          current_values,
+                          color = self.colors['group'][i] if i < number_subplots - 1 else 'dimgrey',
+                          alpha=0.5,
+                          capsize=5,
+                          edgecolor=current_colors,
+                          linewidth=2)            
+                #Add the number above as annotations
+                for j, value in enumerate(current_values):
+                    ax[i].text(j, value + 0.5, str(value), ha='center', va='bottom', fontsize=8, color='darkgrey')
+                ax[i].set_title(group.replace('full','all').title())
+                ax[i].set_xlabel('')
+                ax[i].set_ylabel(fit)
+                ax[i].set_ylim(0, max_fit)
+                ax[i].set_xticks(current_models, current_models)
+                ax[i].set_xticklabels(current_models, rotation=45, ha='right')
+                ax[i].spines['top'].set_visible(False)
+                ax[i].spines['right'].set_visible(False)
+               
+            #Save the plot
+            plt.tight_layout()
+            plt.savefig(f'SOMA_AL/modelling/group_{fit}.png')
+            plt.close()
