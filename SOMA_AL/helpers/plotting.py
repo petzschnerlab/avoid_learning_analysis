@@ -17,7 +17,7 @@ class Plotting:
                        'condition': ['#095086', '#9BD2F2', '#ECA6A6', '#B00000', '#D3D3D3'],
                        'condition_2': ['#9BD2F2', '#ECA6A6']}
         plt.rcParams['font.family'] = 'Helvetica'
-        plt.rcParams['font.size'] = 16
+        plt.rcParams['font.size'] = 14
                                       
     #Helper functions
     def print_plots(self) -> None:
@@ -53,6 +53,7 @@ class Plotting:
         self.plot_select_transfer('select-choice-rate', colors=self.colors['condition'])
         self.plot_neutral_transfer_accuracy('transfer-choice-rate-neutral', colors=self.colors['group'])
         self.plot_neutral_transfer_accuracy('transfer-rt-neutral', metric='rt', colors=self.colors['group'])
+        self.plot_differences_transfer('transfer-choice-rate-differences', colors=self.colors['group'])
 
     def compute_n_and_t(self, data: pd.DataFrame, splitting_column: str) -> tuple:
 
@@ -438,6 +439,37 @@ class Plotting:
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
 
         #Close figure
+        plt.close()
+
+    def plot_differences_transfer(self, save_name: str, colors: list) -> None:
+
+        data = self.choice_rate
+        data = data.reset_index()
+        data = data[data['symbol'].isin(['Low Reward', 'Low Punish'])]
+        data = data.pivot(index=['participant_id', self.group_code], columns='symbol', values='choice_rate')
+        data.reset_index(inplace=True)
+        data['difference'] = data.apply(lambda x: x['Low Reward'] - x['Low Punish'], axis=1)
+
+        #Create a raincloud plot the difference for each group code
+        fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+        _, t_scores = self.compute_n_and_t(data, self.group_code)
+        #Categorize the group code no pain, acute pain, chronic pain
+        data[self.group_code] = pd.Categorical(data[self.group_code], categories=self.group_labels, ordered=True)
+        data = data.set_index(self.group_code)['difference'].astype(float)
+        data.index = pd.CategoricalIndex(data.index, categories=self.group_labels, ordered=True)
+        data = data.sort_index()
+        self.raincloud_plot(data=data, ax=ax, t_scores=t_scores, colors=colors)
+
+        ax.set_xticks([1, 2, 3], ['No Pain', 'Acute Pain', 'Chronic Pain'])
+        ax.set_xlabel('')
+        ax.set_ylabel('Difference in Choice Rate, Low Reward - Low Punish (%)')
+        ax.axhline(y=0, color='darkgrey', linestyle='--')
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.set_ylim(-100, 100)
+        ax.tick_params(axis='both')
+
+        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
         plt.close()
 
     def plot_select_transfer(self, save_name: str, colors: list, plot_type: str = 'raincloud') -> None:
