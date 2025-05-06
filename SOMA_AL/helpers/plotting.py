@@ -16,6 +16,8 @@ class Plotting:
         self.colors = {'group': ['#B2DF8A', '#FFD92F', '#FB9A99'],
                        'condition': ['#095086', '#9BD2F2', '#ECA6A6', '#B00000', '#D3D3D3'],
                        'condition_2': ['#9BD2F2', '#ECA6A6']}
+        plt.rcParams['font.family'] = 'Helvetica'
+        plt.rcParams['font.size'] = 16
                                       
     #Helper functions
     def print_plots(self) -> None:
@@ -86,7 +88,7 @@ class Plotting:
         return sample_sizes, t_scores
 
     #Plotting functions
-    def raincloud_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.25, colors: list = []) -> None:
+    def raincloud_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.5, colors: list = []) -> None:
             
             """
             Create a raincloud plot of the data
@@ -134,7 +136,7 @@ class Plotting:
                 ax.add_patch(plt.Rectangle((factor_index+1-0.4, (mean_data.loc[factor] - CIs.loc[factor])['score']), 0.8, 2*CIs.loc[factor], fill=None, edgecolor='darkgrey'))
                 ax.hlines(mean_data.loc[factor], factor_index+1-0.4, factor_index+1+0.4, color='darkgrey')      
 
-    def bar_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.25, colors: list = []) -> None:
+    def bar_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.5, colors: list = []) -> None:
             
             """
             Create a raincloud plot of the data
@@ -265,8 +267,13 @@ class Plotting:
             ax[i].set_xlabel('Trial Number')
             ax[i].set_ylabel(metric.capitalize() if metric != 'rt' else 'Reaction Time (ms)')
             ax[i].legend(loc='lower right', frameon=False)
+            ax[i].spines['top'].set_visible(False)
+            ax[i].spines['right'].set_visible(False)
+            ax[i].tick_params(axis='both')   
+
 
         #Save the plot
+        plt.tight_layout()
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
 
@@ -410,14 +417,22 @@ class Plotting:
                     ax[group_index].set_title(group.capitalize())
                 else:
                     ax[group_index].set_title('')
+                ax[group_index].spines['top'].set_visible(False)
+                ax[group_index].spines['right'].set_visible(False)
+                ax[group_index].tick_params(axis='both')   
+
             else:
                 ax.set_xticks(x_values, x_labels)
                 ax.set_xlabel('')
                 ax.set_ylabel(y_label)
                 ax.set_title('')
                 ax.axhline(y=0, color='darkgrey', linestyle='--')
+                ax.spines['top'].set_visible(False)
+                ax.spines['right'].set_visible(False)
+                ax.tick_params(axis='both')   
 
         #Save the plot
+        plt.tight_layout()
         save_name = f'{save_name}_supplemental' if plot_type == 'raincloud' else save_name
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
@@ -490,6 +505,7 @@ class Plotting:
                     ax[symbol_index, group_index].set_ylim(-4, 104)
                 if symbol_index == 0:
                     ax[symbol_index, group_index].set_title(group.capitalize())
+                ax[symbol_index, group_index].tick_params(axis='both')   
 
         #Save the plot
         save_name = f'{save_name}_supplemental' if plot_type == 'raincloud' else save_name
@@ -542,6 +558,8 @@ class Plotting:
         ax.set_xticks(x_indexes, x_labels)
         ax.set_xlabel('')
         ax.set_ylabel('Choice Rate (%)' if metric == 'choice_rate' else 'Reaction Time (ms)')
+        ax.tick_params(axis='both')   
+
         if metric == 'choice_rate':
             ax.set_ylim(-4, 104)
             ax.axhline(y=50, color='darkgrey', linestyle='--')
@@ -601,8 +619,11 @@ class Plotting:
             ax[metric_index].set_xticks(list(np.arange(1,num_groups+1)), self.group_labels_formatted)
             ax[metric_index].set_xlabel('')
             ax[metric_index].set_ylabel('Score')
-            #ax[metric_index].set_ylim(-4, 104)
             ax[metric_index].set_title(metric.capitalize())
+            ax[metric_index].spines['top'].set_visible(False)
+            ax[metric_index].spines['right'].set_visible(False)
+            ax[metric_index].set_ylim(0, 10)
+            ax[metric_index].tick_params(axis='both') 
 
         #Save the plot
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
