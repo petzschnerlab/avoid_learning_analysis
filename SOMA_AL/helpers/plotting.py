@@ -462,12 +462,13 @@ class Plotting:
 
         ax.set_xticks([1, 2, 3], ['No Pain', 'Acute Pain', 'Chronic Pain'])
         ax.set_xlabel('')
-        ax.set_ylabel('Difference in Choice Rate, Low Reward - Low Punish (%)')
+        ax.set_ylabel('Choice Rates: Low Reward - Low Punish (%)')
         ax.axhline(y=0, color='darkgrey', linestyle='--')
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
         ax.set_ylim(-100, 100)
         ax.tick_params(axis='both')
+        plt.subplots_adjust(left=0.2)
 
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
         plt.close()
