@@ -80,6 +80,11 @@ class Processing:
         self.data['symbol_R_value'] = self.data['symbol_R_name'].replace({'75R1': 4, '75R2': 4, '25R1': 3, '25R2': 3, '25P1': 2, '25P2': 2, '75P1': 1, '75P2': 1, 'Zero': 0})
         self.data['neutral_values'] = ((self.data['symbol_L_value'] == 3) | (self.data['symbol_L_value'] == 2)) & ((self.data['symbol_R_value'] == 3) | (self.data['symbol_R_value'] == 2))
 
+        #Recode pain variables to be between 1-10 (divide by 10)
+        self.data['intensity'] = self.data['intensity']/10
+        self.data['unpleasant'] = self.data['unpleasant']/10
+        self.data['interference'] = self.data['interference']/10
+
     def check_data(self) -> bool:
 
         """
@@ -188,9 +193,9 @@ class Processing:
 
         #Create new group codes based on composite_pain scores
         self.data['composite_pain'] = self.data.apply(lambda x: np.mean((x['intensity'], x['unpleasant'], x['interference'])), axis=1)
-        self.data['group_code'] = self.data.apply(lambda x: 'no pain' if x['composite_pain'] < 20 else ('acute pain' if (x['composite_pain'] >= 20) & (x['composite_pain'] <= 50) else 'chronic pain'), axis=1)
+        self.data['group_code'] = self.data.apply(lambda x: 'no pain' if x['composite_pain'] < 2 else ('acute pain' if (x['composite_pain'] >= 2) & (x['composite_pain'] <= 5) else 'chronic pain'), axis=1)
 
-    def exclude_pain(self, threshold: int = 20) -> None:
+    def exclude_pain(self, threshold: int = 2) -> None:
         
         """
         Function to recode the pain scores into a binary variable

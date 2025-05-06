@@ -32,7 +32,7 @@ class Pipeline(Master):
         if 'depression' in self.split_by_group_id:
             self.recode_depression()
         if 'pain' in self.split_by_group_id:
-            self.exclude_pain(threshold=20)
+            self.exclude_pain(threshold=2)
         if self.check_data():
             self.process_data()
             self.run_tests()
