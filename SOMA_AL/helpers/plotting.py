@@ -15,9 +15,9 @@ class Plotting:
     def __init__(self):
         self.colors = {'group': ['#B2DF8A', '#FFD92F', '#FB9A99'],
                        'condition': ['#095086', '#9BD2F2', '#ECA6A6', '#B00000', '#D3D3D3'],
-                       'condition_2': ['#9BD2F2', '#ECA6A6']}
+                       'condition_2': ['#095086', '#B00000']}
         plt.rcParams['font.family'] = 'Helvetica'
-        plt.rcParams['font.size'] = 14
+        plt.rcParams['font.size'] = 18
                                       
     #Helper functions
     def print_plots(self) -> None:
@@ -89,7 +89,7 @@ class Plotting:
         return sample_sizes, t_scores
 
     #Plotting functions
-    def raincloud_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.5, colors: list = []) -> None:
+    def raincloud_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.75, colors: list = []) -> None:
             
             """
             Create a raincloud plot of the data
@@ -137,7 +137,7 @@ class Plotting:
                 ax.add_patch(plt.Rectangle((factor_index+1-0.4, (mean_data.loc[factor] - CIs.loc[factor])['score']), 0.8, 2*CIs.loc[factor], fill=None, edgecolor='darkgrey'))
                 ax.hlines(mean_data.loc[factor], factor_index+1-0.4, factor_index+1+0.4, color='darkgrey')      
 
-    def bar_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.5, colors: list = []) -> None:
+    def bar_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.75, colors: list = []) -> None:
             
             """
             Create a raincloud plot of the data
@@ -203,7 +203,7 @@ class Plotting:
         combined_path = f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png'
         combined_img.save(combined_path)
 
-    def plot_learning_curves(self, save_name: str, rolling_mean: int = None,  metric: str = 'accuracy', grouping: str = 'clinical', colors: list = []) -> None:
+    def plot_learning_curves(self, save_name: str, rolling_mean: int = None,  metric: str = 'accuracy', grouping: str = 'clinical', alpha: float = 0.75, colors: list = []) -> None:
 
         """
         Plot the learning curves for the accuracy or reaction time data
@@ -259,19 +259,20 @@ class Plotting:
                 CIs = context_data.groupby(trial_index_name)[metric].sem()*t_score
                 if rolling_mean is not None:
                     mean_accuracy = mean_accuracy.rolling(rolling_mean, min_periods=1, center=True).mean()
-                ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.2, color=colors[context_index], edgecolor='none')
-                ax[i].plot(mean_accuracy, color=colors[context_index], label=context.title(), linewidth=3)
+                ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.1, color=colors[context_index], edgecolor='none')
+                ax[i].plot(mean_accuracy, color=colors[context_index], label=context.title(), linewidth=3, alpha=alpha)
 
             if metric == 'accuracy':
                 ax[i].set_ylim(40, 100)
             ax[i].set_title(f'{group.capitalize()}')
             ax[i].set_xlabel('Trial Number')
-            ax[i].set_ylabel(metric.capitalize() if metric != 'rt' else 'Reaction Time (ms)')
-            ax[i].legend(loc='lower right', frameon=False)
+            ax[i].set_ylabel(f'{metric.capitalize()} (%)' if metric != 'rt' else 'Reaction Time (ms)')
+            legend_loc = 'lower right' if metric != 'rt' else 'upper right'
+            ax[i].legend(loc=legend_loc, frameon=False)
             ax[i].spines['top'].set_visible(False)
             ax[i].spines['right'].set_visible(False)
             ax[i].tick_params(axis='both')   
-
+            ax[i].set_xticks(np.arange(0, 25, 4))
 
         #Save the plot
         plt.tight_layout()
@@ -360,7 +361,8 @@ class Plotting:
             condition_name = 'symbol'
             condition_values = [4, 3, 2, 1, 0]
             x_values = [1, 2, 3, 4, 5]
-            x_labels = ['High\nReward', 'Low\nReward', 'Low\nPunish', 'High\nPunish', 'Novel']
+            #x_labels = ['High\nReward', 'Low\nReward', 'Low\nPunish', 'High\nPunish', 'Novel']
+            x_labels = ['HR', 'LR', 'LP', 'HP', 'N']
 
         if 'diff' in save_name or 'valence-bias' in save_name:
             plot_labels = ['']
@@ -493,8 +495,10 @@ class Plotting:
         y_label = 'Choice Rate (%)'
         condition_name = 'symbol'
         condition_values = [4, 3, 2, 1, 0]
-        x_ids = ['High Reward', 'Low Reward', 'Low Punish', 'High Punish', 'Novel']
-        x_labels = ['High\nReward', 'Low\nReward', 'Low\nPunish', 'High\nPunish', 'Novel']
+        x_ids = ['HR', 'LR', 'LP', 'HP', 'N']
+        #x_labels = ['High\nReward', 'Low\nReward', 'Low\nPunish', 'High\nPunish', 'Novel']
+        x_reference = {'High Reward': 'HR', 'Low Reward': 'LR', 'Low Punish': 'LP', 'High Punish': 'HP', 'Novel': 'N'}
+        x_labels = ['HR', 'LR', 'LP', 'HP', 'N']
         plot_labels = self.group_labels
         
         #Create a bar plot of the choice rate for each symbol
@@ -505,8 +509,8 @@ class Plotting:
             data = data.reset_index()
             data['symbol'] = data['symbol'].replace({'Novel': 0, 'High Reward': 4, 'Low Reward': 3, 'Low Punish': 2, 'High Punish': 1})
             data = data.set_index([self.group_code, 'participant_id', 'symbol'])
-            symbol_x_ids = [x_id for x_id in x_ids if x_id != symbol]
-            symbol_x_labels = [x_label for x_label in x_labels if x_label.replace('\n',' ') != symbol]
+            symbol_x_ids = [x_id for x_id in x_ids if x_id != x_reference[symbol]]
+            symbol_x_labels = [x_label for x_label in x_labels if x_label.replace('\n',' ') != x_reference[symbol]]
             symbol_colours = [colors[x_ids.index(x_id)] for x_id in symbol_x_ids]
             
             for group_index, group in enumerate(plot_labels):
@@ -645,7 +649,7 @@ class Plotting:
             _, t_scores = self.compute_n_and_t(metric_scores, self.group_code)
 
             #Create plot
-            self.raincloud_plot(data=metric_scores, ax=ax[metric_index], t_scores=t_scores, alpha=0.5, colors=colors)
+            self.raincloud_plot(data=metric_scores, ax=ax[metric_index], t_scores=t_scores, alpha=0.75, colors=colors)
 
             #Create horizontal line for the mean the same width
             num_groups = 3 if self.split_by_group == 'pain' else 2
@@ -657,6 +661,8 @@ class Plotting:
             ax[metric_index].spines['right'].set_visible(False)
             ax[metric_index].set_ylim(0, 10)
             ax[metric_index].tick_params(axis='both') 
+
+        plt.subplots_adjust(bottom=0.2)
 
         #Save the plot
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
@@ -771,7 +777,7 @@ class Plotting:
                 ax[i].bar(current_models,
                           current_values,
                           color = self.colors['group'][i] if i < number_subplots - 1 else 'dimgrey',
-                          alpha=0.5,
+                          alpha=0.75,
                           capsize=5,
                           edgecolor=current_colors,
                           linewidth=2)            
