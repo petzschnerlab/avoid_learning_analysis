@@ -1,10 +1,13 @@
 #Import modules
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from scipy import stats
 import matplotlib.pyplot as plt
+from matplotlib import font_manager
 from PIL import Image
+
+if 'Helvetica' in set(f.name for f in font_manager.fontManager.ttflist):
+    plt.rcParams['font.family'] = 'Helvetica'
 
 class Plotting:
 
