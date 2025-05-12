@@ -6,9 +6,6 @@ import matplotlib.pyplot as plt
 from matplotlib import font_manager
 from PIL import Image
 
-if 'Helvetica' in set(f.name for f in font_manager.fontManager.ttflist):
-    plt.rcParams['font.family'] = 'Helvetica'
-
 class Plotting:
 
     """
@@ -19,7 +16,8 @@ class Plotting:
         self.colors = {'group': ['#B2DF8A', '#FFD92F', '#FB9A99'],
                        'condition': ['#095086', '#9BD2F2', '#ECA6A6', '#B00000', '#D3D3D3'],
                        'condition_2': ['#095086', '#B00000']}
-        plt.rcParams['font.family'] = 'Helvetica'
+        if 'Helvetica' in set(f.name for f in font_manager.fontManager.ttflist):
+            plt.rcParams['font.family'] = 'Helvetica'
         plt.rcParams['font.size'] = 18
                                       
     #Helper functions
