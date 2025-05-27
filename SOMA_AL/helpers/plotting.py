@@ -265,7 +265,7 @@ class Plotting:
 
             if metric == 'accuracy':
                 ax[i].set_ylim(40, 100)
-            ax[i].set_title(f'{group.capitalize()}')
+            ax[i].set_title(f'{group.title()}')
             ax[i].set_xlabel('Trial Number')
             ax[i].set_ylabel(f'{metric.capitalize()} (%)' if metric != 'rt' else 'Reaction Time (ms)')
             legend_loc = 'lower right' if metric != 'rt' else 'upper right'

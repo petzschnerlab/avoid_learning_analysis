@@ -505,8 +505,8 @@ class ReportFunctions:
         
         if self.load_models:
             self.model_legend = {'learning-model-behaviour-accuracy': self.model_learning_accuracy_glmm,
-                                 'transfer-model-behaviour-choice-rate': self.learning_accuracy_glmm,
-                                'model-parameters': self.learning_accuracy_glmm
+                                 'transfer-model-behaviour-choice-rate': self.model_transfer_choice_rate_glmm,
+                                 'model-parameters': self.model_parameters_glmm
             }
             self.data_legend.update(self.model_legend)
 
@@ -857,8 +857,11 @@ class ReportFunctions:
         ## Choice rate
         self.model_choice_rate.to_csv(f'SOMA_AL/modelling/model_behaviours_{self.split_by_group}_stats_transfer_data.csv', index=False)
         formula = f'choice_rate~1+{self.group_code}*symbol+(1|participant_id)'
+        self.model_choice_rate.set_index([self.group_code, 'participant_id', 'symbol'], inplace=True)
+        self.model_choice_rate = self.model_choice_rate.sort_index()
+
         self.model_transfer_choice_rate_glmm = statistics.generalized_linear_model(formula, 
-                                        self.model_choice_rate,
+                                        self.model_choice_rate.reset_index(),
                                         path=self.repo_directory,
                                         filename=f"SOMA_AL/modelling/model_behaviours_{self.split_by_group}_stats_transfer_data.csv",
                                         savename=f"SOMA_AL/modelling/model_behaviours_{self.split_by_group_id}_stats_transfer_data.csv",
@@ -869,7 +872,7 @@ class ReportFunctions:
         self.model_transfer_choice_rate_planned_group = self.planned_ttests('choice_rate', self.group_code, comparisons, data)
         
         comparisons = [['High Reward', 'Low Punish'], ['Low Reward', 'Low Punish']]
-        self.model_transfer_choice_rate_planned_context = statistics.planned_ttests('choice_rate', 'symbol', comparisons, self.model_choice_rate)
+        self.model_transfer_choice_rate_planned_context = statistics.planned_ttests('choice_rate', 'symbol', comparisons, self.model_choice_rate.reset_index())
 
         comparisons = [['no pain~High Reward-Low Punish', 'acute pain~High Reward-Low Punish'],
                        ['no pain~High Reward-Low Punish', 'chronic pain~High Reward-Low Punish'],
@@ -942,7 +945,7 @@ class ReportFunctions:
                 p = str(f'{np.round(p, 4):.4f}').replace('0.','.') if p > 0.0001 else '> .0001'
                 correlation_matrix.loc[parameter, pain_metric] = f'{r} ({p})'
 
-        #Create new correlation matrices like above, but for each pain group
+        #Correlation matrices for each pain group
         group_correlation_matrix = {group: pd.DataFrame(index=parameter_names, columns=pain_names) for group in ['no pain', 'acute pain', 'chronic pain']}
         for pain_group in ['no pain', 'acute pain', 'chronic pain']:
             group_fit_data = fit_data[fit_data['pain_group'] == pain_group]
