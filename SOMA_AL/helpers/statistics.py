@@ -120,28 +120,38 @@ class Statistics:
         """
 
         #Demograhpics linear models
+        self.pain_scores['composite'] = self.pain_scores[['intensity', 'unpleasant', 'interference']].mean(axis=1)
         self.stats_age = self.generalized_linear_model(f'age~{self.group_code}', self.demographics)
         self.stats_intensity = self.generalized_linear_model(f'intensity~{self.group_code}', self.pain_scores)
         self.stats_unpleasant = self.generalized_linear_model(f'unpleasant~{self.group_code}', self.pain_scores)
         self.stats_interference = self.generalized_linear_model(f'interference~{self.group_code}', self.pain_scores)
+        self.stats_composite = self.generalized_linear_model(f'composite~{self.group_code}', self.pain_scores)
         if self.depression_scores is not None:
             self.stats_depression = self.generalized_linear_model(f'PHQ8~{self.group_code}', self.depression_scores)
 
         #Demographic planned t-tests
-        comparisons =  [['no pain', 'acute pain'], ['no pain', 'chronic pain']]
+        comparisons =  [['chronic pain', 'no pain'], ['chronic pain', 'acute pain']]
         self.tstats_age = self.planned_ttests('age', self.group_code, comparisons, self.demographics)
         self.tstats_intensity = self.planned_ttests('intensity', self.group_code, comparisons, self.pain_scores)
         self.tstats_unpleasant = self.planned_ttests('unpleasant', self.group_code, comparisons, self.pain_scores)
         self.tstats_interference = self.planned_ttests('interference', self.group_code, comparisons, self.pain_scores)
+        self.tstats_composite = self.planned_ttests('composite', self.group_code, comparisons, self.pain_scores)
+
+        self.tstats_age_posthoc = self.post_hoc_tests('age', self.group_code, self.demographics)
+        self.tstats_intensity_posthoc = self.post_hoc_tests('intensity', self.group_code, self.pain_scores)
+        self.tstats_unpleasant_posthoc = self.post_hoc_tests('unpleasant', self.group_code, self.pain_scores)
+        self.tstats_interference_posthoc = self.post_hoc_tests('interference', self.group_code, self.pain_scores)
+        self.tstats_composite_posthoc = self.post_hoc_tests('composite', self.group_code, self.pain_scores)
         if self.depression_scores is not None:
             self.tstats_depression = self.planned_ttests('PHQ8', self.group_code, comparisons, self.depression_scores)
 
         #Prepare summaries for statistical reporting
-        factor_labels = ['Age', 'Pain Intensity', 'Pain Unpleasantness', 'Pain Interference', 'Depression']
+        factor_labels = ['Age', 'Pain Intensity', 'Pain Unpleasantness', 'Pain Interference', 'Composite', 'Depression']
         self.demo_clinical = pd.concat([self.stats_age['model_summary'],
                                         self.stats_intensity['model_summary'],
                                         self.stats_unpleasant['model_summary'],
-                                        self.stats_interference['model_summary']], axis=0)
+                                        self.stats_interference['model_summary'],
+                                        self.stats_composite['model_summary']], axis=0)
         if self.depression_scores is not None:
             self.demo_clinical = pd.concat([self.demo_clinical, self.stats_depression['model_summary']], axis=0)
         self.demo_clinical = self.demo_clinical.reset_index(drop=True)
@@ -158,14 +168,24 @@ class Statistics:
             self.demo_clinical_planned = pd.concat([self.tstats_age['model_summary'],
                                     self.tstats_intensity['model_summary'],
                                     self.tstats_unpleasant['model_summary'],
-                                    self.tstats_interference['model_summary']], axis=0)
+                                    self.tstats_interference['model_summary'],
+                                    self.tstats_composite['model_summary']], axis=0)
+            self.demo_clinical_posthoc = pd.concat([self.tstats_age_posthoc,
+                                    self.tstats_intensity_posthoc,
+                                    self.tstats_unpleasant_posthoc,
+                                    self.tstats_interference_posthoc,
+                                    self.tstats_composite_posthoc], axis=0)
             if self.depression_scores is not None:
                 self.demo_clinical_planned = pd.concat([self.demo_clinical_planned, self.tstats_depression['model_summary']], axis=0)
             self.demo_clinical_planned = self.demo_clinical_planned.reset_index(drop=True)
+            self.demo_clinical_posthoc = self.demo_clinical_posthoc.reset_index(drop=True)
             demo_clinical_labels = pd.DataFrame({'factor': [label for label in factor_labels for _ in range(2)]})
             self.demo_clinical_planned = pd.concat([demo_clinical_labels, self.demo_clinical_planned], axis=1)
+            demo_clinical_labels = pd.DataFrame({'factor': [label for label in factor_labels for _ in range(3)]})
+            self.demo_clinical_posthoc = pd.concat([demo_clinical_labels, self.demo_clinical_posthoc], axis=1)
 
             self.demo_clinical_planned = {'metadata': self.demo_metadata, 'model_summary': self.demo_clinical_planned}
+            self.demo_clinical_posthoc = {'metadata': self.demo_metadata, 'model_summary': self.demo_clinical_posthoc}
     
         #Linear Mixed Effects Models
         #Learning accuracy
