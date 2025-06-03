@@ -1,5 +1,6 @@
 #Import modules
 from . import Master
+from .help import Help
 
 #Pipeline class
 class Pipeline(Master):
@@ -23,7 +24,8 @@ class Pipeline(Master):
 
         #Run the help
         if self.help:
-            self.print_help()
+            help = Help()
+            help.print_help()
             return None
         
         #Run the pipeline

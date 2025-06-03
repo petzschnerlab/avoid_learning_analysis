@@ -14,7 +14,7 @@ class Help:
     
         self.parameter_descriptions = {
             'help': ['Print the help information.', 'bool', False],
-            'author': ['Author of the package.', 'str', 'SOMA Team'],
+            'author': ['Author of the package.', 'str', 'PEAC_Team'],
             'rscripts_path': ['Path to the R executible file, which is used when running GLMMs.', 'str', None],
             'file_path': ['Path to the data file(s) to be loaded. This is a required parameter.', 'str', None],
             'file_name': ['Name of the file(s) to be loaded. This is a required parameter.', 'list[str] | str', None],
