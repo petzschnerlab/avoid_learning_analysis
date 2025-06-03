@@ -5,6 +5,12 @@ class Help:
     """
 
     def __init__(self):
+
+        """
+        Initialize the Help class with parameter descriptions.
+        This class provides an overview of the package and details about each parameter that can be set when running the package.
+
+        """
     
         self.parameter_descriptions = {
             'help': ['Print the help information.', 'bool', False],

@@ -104,6 +104,8 @@ class Parameters:
                            'load_posthocs',
                            'load_models',
                            'verbose']
+        
+        #Check for unknown parameters
         for key in kwargs:
             if key not in accepted_params:
                 warnings.warn(f'Unknown parameter {key} is being ignored', stacklevel=2)
@@ -111,6 +113,7 @@ class Parameters:
         #Warning of missing required params
         required_params = ['file_path', 
                            'file_name']
+        
         if not kwargs.get('help', False):
             for param in required_params:
                 if param not in kwargs:
@@ -134,7 +137,7 @@ class Parameters:
         self.split_by_group_id = kwargs.get('split_by_group_id', self.split_by_group)
         self.covariate = kwargs.get('covariate', None)
         self.depression_cutoff = kwargs.get('depression_cutoff', 10)
-        self.accuracy_exclusion_threshold = kwargs.get('accuracy_exclusion_threshold', 55)
+        self.accuracy_exclusion_threshold = kwargs.get('accuracy_exclusion_threshold', 70)
         self.RT_low_threshold = kwargs.get('RT_low_threshold', 200)
         self.RT_high_threshold = kwargs.get('RT_high_threshold', 5000)
         self.rolling_mean = kwargs.get('rolling_mean', 5)
@@ -145,7 +148,7 @@ class Parameters:
         self.load_stats = kwargs.get('load_stats', False)
         self.hide_posthocs = kwargs.get('hide_posthocs', False)
         self.load_posthocs = kwargs.get('load_posthocs', False)
-        self.load_models = kwargs.get('load_models', True)
+        self.load_models = kwargs.get('load_models', False)
         self.verbose = kwargs.get('verbose', False)
         
         #Format parameters

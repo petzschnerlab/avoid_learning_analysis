@@ -180,7 +180,6 @@ class Processing:
         self.data['depression'] = self.data['depression'].replace({0: 'healthy', 1: 'depressed'})
 
     def recode_pain(self) -> None:
-
         
         """
         Function to recode the pain scores into a binary variable
@@ -236,7 +235,6 @@ class Processing:
         Returns (External)
         ------------------
         Data: csv
-            The processed data
             The learning data
             The transfer data
         """
@@ -382,6 +380,19 @@ class Processing:
         self.accuracy_excluded_participant = excluded_participants.unique()
 
     def remove_participants(self) -> None:
+
+        """
+        Function to remove participants from the data based on exclusion criteria
+
+        Returns (Internal)
+        ------------------
+        self.data : pd.DataFrame
+            The data with participants excluded
+        self.learning_data : pd.DataFrame
+            The learning data with participants excluded
+        self.transfer_data : pd.DataFrame
+            The transfer data with participants excluded
+        """
         
         #Determine number of participants excluded
         self.number_participants = self.data['participant_id'].nunique()
@@ -444,6 +455,12 @@ class Processing:
             The averaged learning data
         self.avg_transfer_data : pd.DataFrame
             The averaged transfer data
+        self.transfer_data_reduced : pd.DataFrame
+            The reduced transfer data with paired symbols
+        self.learning_data : pd.DataFrame
+            The learning data with trials included
+        self.transfer_data : pd.DataFrame
+            The transfer data with trials included
         """
 
         #Create participant average for learning data
@@ -685,7 +702,7 @@ class Processing:
 
     def compute_choice_rate(self, neutral: bool = False) -> None:
 
-        '''
+        """
         Function to compute the choice rate for each participant and symbol within each group
 
         parameters:
@@ -703,7 +720,7 @@ class Processing:
             The choice rate for each participant and symbol within each group for the neutral analyses
         self.neutral_choice_rt : pd.DataFrame
             The reaction time for each participant and symbol within each group for the neutral analyses
-        '''
+        """
 
         data = self.transfer_data if not neutral else self.transfer_data[self.transfer_data['neutral_values']]
 
@@ -773,6 +790,17 @@ class Processing:
             self.neutral_choice_rt = choice_rt
 
     def compute_select_choice_rate(self) -> None:
+
+        """
+        Function to compute the choice rate for each participant and symbol within each group, specifically for the selection task
+
+        Returns (Internal)
+        ------------------
+        self.select_choice_rate : dict
+            The choice rate for each participant and symbol within each group
+        self.select_choice_rt : dict
+            The reaction time for each participant and symbol within each group
+        """
 
         symbols = [0, 1, 2, 3, 4]
         symbol_names = ['Novel', 'High Punish', 'Low Punish', 'Low Reward', 'High Reward']

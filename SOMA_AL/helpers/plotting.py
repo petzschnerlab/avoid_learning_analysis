@@ -13,11 +13,15 @@ class Plotting:
     """
 
     def __init__(self):
+
+        #Initialize plot formatting
         self.colors = {'group': ['#B2DF8A', '#FFD92F', '#FB9A99'],
                        'condition': ['#095086', '#9BD2F2', '#ECA6A6', '#B00000', '#D3D3D3'],
                        'condition_2': ['#095086', '#B00000']}
+        
         if 'Helvetica' in set(f.name for f in font_manager.fontManager.ttflist):
             plt.rcParams['font.family'] = 'Helvetica'
+
         plt.rcParams['font.size'] = 18
                                       
     #Helper functions
@@ -89,7 +93,6 @@ class Plotting:
 
         return sample_sizes, t_scores
 
-    #Plotting functions
     def raincloud_plot(self, data: pd.DataFrame, ax: plt.axes, t_scores: list[float], alpha: float=0.75, colors: list = []) -> None:
             
             """
@@ -105,6 +108,12 @@ class Plotting:
                 The t-scores for each group
             alpha : float
                 The transparency of the scatter plot
+            colors : list
+                The colors to use for the violin plot bodies, if not provided, will use a default color scheme
+
+            Returns
+            -------
+            None
             """
 
             #Set index name
@@ -153,6 +162,12 @@ class Plotting:
                 The t-scores for each group
             alpha : float
                 The transparency of the scatter plot
+            colors : list
+                The colors to use for the bar plot, if not provided, will use a default color scheme
+
+            Returns
+            -------
+            None
             """
 
             #Set index name
@@ -170,7 +185,8 @@ class Plotting:
             #Add barplot with CIs
             ax.bar(np.arange(1,len(mean_data['score'])+1), mean_data['score'], yerr=CIs, color=colors, alpha=alpha, capsize=5, ecolor='dimgrey')                        
 
-    def plot_combined_learning_and_transfer(self, save_name: str, learning_name: str, transfer_name: str, image_height: int = 1000) -> None:
+    def plot_combined_learning_and_transfer(self, save_name: str, learning_name: str, transfer_name: str) -> None:
+        
         """
         Combine separately saved learning and transfer plots into a single stacked image.
 
@@ -182,8 +198,11 @@ class Plotting:
             Arguments to pass to plot_learning_curves (must include 'save_name').
         transfer_args : dict
             Arguments to pass to plot_transfer_data (must include 'save_name').
-        image_height : int
-            Desired height (in pixels) of each subplot image.
+
+        Returns (External)
+        ------------------
+        Image: PNG
+            A combined image of the learning and transfer plots.
         """
 
         path = f'SOMA_AL/plots/{self.split_by_group}'
@@ -219,6 +238,10 @@ class Plotting:
             The metric to plot (y)
         grouping : str
             The grouping to plot the data by
+        alpha : float
+            The transparency of the lines in the plot
+        colors : list
+            The colors to use for the lines in the plot, if not provided, will use a default color scheme
 
         Returns (External)
         ------------------
@@ -292,6 +315,12 @@ class Plotting:
         ----------
         save_name : str
             The name to save the plot as
+        colors : list
+            The colors to use for the plots, if not provided, will use a default color scheme
+        plot_type : str
+            The type of plot to create, either 'raincloud' or 'bar'
+        group_labels : bool
+            Whether to use group labels in the plot titles
 
         Returns (External)
         ------------------
@@ -446,6 +475,22 @@ class Plotting:
 
     def plot_differences_transfer(self, save_name: str, colors: list) -> None:
 
+        """
+        Create a raincloud plot of the difference in choice rates between low reward and low punish symbols for each group code
+
+        Parameters
+        ----------
+        save_name : str
+            The name to save the plot as
+        colors : list
+            The colors to use for the plot, if not provided, will use a default color scheme
+
+        Returns (External)
+        ------------------
+        Image: PNG
+            A plot of the raincloud plot
+        """
+
         data = self.choice_rate
         data = data.reset_index()
         data = data[data['symbol'].isin(['Low Reward', 'Low Punish'])]
@@ -477,6 +522,7 @@ class Plotting:
         plt.close()
 
     def plot_select_transfer(self, save_name: str, colors: list, plot_type: str = 'raincloud') -> None:
+        
         """
         Create raincloud plots of the data
 
@@ -673,6 +719,25 @@ class Plotting:
         plt.close()
             
     def plot_model_parameters_by_pain(self, fit_data: pd.DataFrame, parameter_names: list, pain_names: list) -> None:
+        
+        """
+        Plot model parameters against pain metrics for different pain groups.
+
+        Parameters
+        ----------
+        fit_data : DataFrame
+            DataFrame containing model parameters and pain metrics.
+        parameter_names : list
+            List of model parameter names to plot.
+        pain_names : list
+            List of pain metric names to plot against model parameters.
+
+        Returns (External)
+        -------
+        Image: PNG
+            A plot of model parameters against pain metrics for different pain groups.
+        """
+
         fig, axes = plt.subplots(nrows=len(parameter_names), ncols=len(pain_names), figsize=(len(pain_names)*3, len(parameter_names)*3))
         colours = ['#B2DF8A', '#FB9A99', '#FFD92F']
         for i, parameter in enumerate(parameter_names):
@@ -717,7 +782,26 @@ class Plotting:
         #Close figure
         plt.close(fig)
 
-    def plot_model_parameters_by_pain_split(self, fit_data: pd.DataFrame, parameter_names: list, pain_names: list):
+    def plot_model_parameters_by_pain_split(self, fit_data: pd.DataFrame, parameter_names: list, pain_names: list) -> None:
+
+        """
+        Plot model parameters against pain metrics for different pain groups, split by pain group.
+
+        Parameters
+        ----------
+        fit_data : DataFrame
+            DataFrame containing model parameters and pain metrics.
+        parameter_names : list
+            List of model parameter names to plot.
+        pain_names : list
+            List of pain metric names to plot against model parameters.
+
+        Returns (External)
+        -------
+        Image: PNG
+            A plot of model parameters against pain metrics for different pain groups, split by pain group.
+        """
+
         colours = {'no pain': '#B2DF8A', 'chronic pain': '#FB9A99', 'acute pain': '#FFD92F'}
         
         for group in ['no pain', 'chronic pain', 'acute pain']:
@@ -761,6 +845,21 @@ class Plotting:
             plt.close(fig)
 
     def plot_model_fits(self, fits: dict) -> None:
+
+        """
+        Plot the model fits for each group.
+
+        Parameters
+        ----------
+        fits : dict
+            Dictionary containing model fits for each group, where keys are fit names and values are DataFrames.
+
+        Returns (External)
+        ------------------
+        Image: PNG
+            A plot of the model fits for each group.
+        """
+
         group_labels = ['no pain', 'acute pain', 'chronic pain', 'full']
 
         for fit in fits:

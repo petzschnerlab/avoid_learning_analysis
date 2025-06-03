@@ -14,6 +14,7 @@ from helpers.plotting import Plotting
 
 
 class ReportFunctions:
+    
     """
     This class contains functions for generating reports.
     """
@@ -105,7 +106,7 @@ class ReportFunctions:
 
         Returns (External)
         ------------------ 
-        Report: PDF
+        Report: str
             A section of the PEAC report
         """
 
@@ -614,7 +615,6 @@ class ReportFunctions:
 
         return [subsection]
     
-    #Content builders
     def insert_image(self, image_name: str, filename = None) -> list[str]:
 
         """
@@ -683,8 +683,8 @@ class ReportFunctions:
 
         Returns (External)
         ------------------
-        Report: PDF
-            Adds the title page to the SOMA report
+        Report: list
+            Section of the reportf
         """
 
         section_text = [f'# PEAC Lab Report',
@@ -698,7 +698,7 @@ class ReportFunctions:
 
         Returns (External)
         ------------------
-        Report: PDF
+        Report: list
             Adds the report details to the SOMA report
         """
 
@@ -719,7 +719,7 @@ class ReportFunctions:
 
         Returns (External)
         ------------------
-        Report: PDF
+        Report: list
             Adds the analysis details to the PEAC report
         """
 
@@ -770,6 +770,77 @@ class ReportFunctions:
                                            self.depression_summary], axis=0)
             
     def load_modelling_results(self, rscripts_path=None, load_stats=False):
+
+        """
+        Loads the modelling results for the report
+
+        Parameters
+        ----------
+        rscripts_path : str, optional
+            The path to the R scripts, by default None
+        load_stats : bool, optional
+            Whether to load the statistics for the modelling results, by default False
+
+        Returns (Internal)
+        ------------------
+        self.model_AIC : pd.DataFrame
+            The AIC values for the models
+        self.model_BIC : pd.DataFrame
+            The BIC values for the models
+        self.model_AIC_percentages : pd.DataFrame
+            The AIC percentages for the models
+        self.model_BIC_percentages : pd.DataFrame
+            The BIC percentages for the models
+        self.best_model : str
+            The best model based on BIC
+        self.best_model_label : str
+            The label for the best model, formatted for display
+
+        self.model_accuracy : pd.DataFrame
+            The model accuracy data
+        self.model_choice_rate : pd.DataFrame
+            The model choice rate data
+
+        self.model_learning_accuracy_glmm : dict
+            The GLMM for the model learning accuracy
+        self.model_transfer_choice_rate_glmm : dict
+            The GLMM for the model transfer choice rate
+        self.model_parameters_glmm : dict
+            The GLMM for the model parameters
+
+        self.model_learning_accuracy_planned_group : dict
+            The planned comparisons for the model learning accuracy by group  
+        self.model_transfer_choice_rate_planned_group : dict
+            The planned comparisons for the model transfer choice rate by group
+        self.model_transfer_accuracy_planned_interaction : dict
+            The planned comparisons for the model transfer accuracy by interaction
+        self.model_learning_accuracy_planned_interaction : dict
+            The planned comparisons for the model learning accuracy by interaction
+        self.model_transfer_choice_rate_planned_context : dict
+            The planned comparisons for the model transfer choice rate by context
+        self.model_learning_accuracy_planned_interaction : dict
+            The planned comparisons for the model learning accuracy by interaction
+        self.model_parameters_planned_group : dict
+            The planned comparisons for the model parameters by group
+
+        self.model_parameters_posthoc_group : pd.DataFrame
+            The post-hoc comparisons for the model parameters by group
+        self.model_parameters_posthoc_interaction : pd.DataFrame
+            The post-hoc comparisons for the model parameters by interaction
+        self.model_parameters_posthoc_context : pd.DataFrame
+            The post-hoc comparisons for the model parameters by context
+        self.model_parameters_posthoc_interaction : pd.DataFrame
+            The post-hoc comparisons for the model parameters by interaction
+        
+        self.model_parameters_correlation_table : pd.DataFrame
+            The correlation table for the model parameters and pain scores
+        self.model_parameters_correlation_table_no : pd.DataFrame
+            The correlation table for the model parameters and pain scores for the No Pain group
+        self.model_parameters_correlation_table_acute : pd.DataFrame
+            The correlation table for the model parameters and pain scores for the Acute Pain group
+        self.model_parameters_correlation_table_chronic : pd.DataFrame
+            The correlation table for the model parameters and pain scores for the Chronic Pain group
+        """
 
         #Assign attributes
         self.rscripts_path = rscripts_path

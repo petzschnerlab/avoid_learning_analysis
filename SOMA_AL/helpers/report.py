@@ -12,6 +12,15 @@ class Report(ReportFunctions):
         """
         Builds and prints the SOMA report
 
+        Parameters
+        ----------
+        rscripts_path : str, optional
+            The path to the Rscript executable, by default None
+        load_stats : bool, optional
+            Whether to load the statistics from the backend if pre-run, by default False
+        load_models : bool, optional
+            Whether to load the modelling results from the backend if pre-run, by default True
+
         Returns (External)
         ------------------
         Report: PDF
