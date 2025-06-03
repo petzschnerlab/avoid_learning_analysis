@@ -262,7 +262,7 @@ class Statistics:
                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rates_context.csv", #Note, this will override the previous file made above
                                               family='gaussian')
         
-        #Transfer choice rate using averaged data
+        #Transfer choice RT using averaged data
         formula = f'choice_rt~1+{self.group_code}*symbol+(1|participant_id)'
         assumption_data = self.choice_rt.reset_index()
         assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
@@ -294,6 +294,7 @@ class Statistics:
                                         family='Gaussian')
 
         #Group factor comparisons
+        
         '''
 
         == Pain Analyses ==
@@ -313,6 +314,7 @@ class Statistics:
            None needed
 
         '''
+
         comparisons = [['chronic pain', 'no pain'], 
                        ['chronic pain', 'acute pain']]
         
@@ -333,6 +335,7 @@ class Statistics:
         self.transfer_rt_posthoc_group = self.post_hoc_tests('rt', self.group_code, data)
         
         #Context factor comparisons
+        
         '''
 
         == Pain and Depression Analyses ==
@@ -363,9 +366,11 @@ class Statistics:
         == Pain & Depression Analyses ==
         There are no planned comparisons for valence bias
         '''
+
         self.transfer_accuracy_posthoc_bias = self.post_hoc_tests('valence_bias', self.group_code, self.valence_bias.reset_index())
         
         #Interactions comparisons
+        
         '''
 
         == Pain Analyses ==
@@ -395,6 +400,7 @@ class Statistics:
         2. Health vs Depression: Low Reward - Low Punish
         
         '''
+        
         if self.split_by_group == 'pain':
             comparisons = [['chronic pain~Reward', 'no pain~Reward'], 
                         ['chronic pain~Loss Avoid', 'no pain~Loss Avoid'], 
