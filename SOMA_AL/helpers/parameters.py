@@ -71,6 +71,8 @@ class Parameters:
             Whether to load the statistics from the backend.
         self.hide_posthocs : bool
             Whether to hide the posthocs in the report.
+        self.load_posthocs : bool
+            Whether to load the posthocs from the backend.
         self.load_models : bool
             Whether to load the models from the backend.
         self.verbose : bool
