@@ -126,31 +126,35 @@ class Parameters:
 
         #Unpack parameters
         self.kwargs = kwargs
-        self.help = kwargs.get('help', False)
-        self.author = kwargs.get('author', 'PEAC_Team')
-        self.rscripts_path = kwargs.get('rscripts_path', None)
-        self.file_path = kwargs.get('file_path', None)
-        self.file_name = kwargs.get('file_name', None)
-        self.dataset = kwargs.get('dataset', '')
-        self.print_filename = kwargs.get('print_filename', r'SOMA_AL/reports/PEAC_report.pdf')
-        self.split_by_group = kwargs.get('split_by_group', 'pain')
-        self.split_by_group_id = kwargs.get('split_by_group_id', self.split_by_group)
-        self.covariate = kwargs.get('covariate', None)
-        self.depression_cutoff = kwargs.get('depression_cutoff', 10)
-        self.accuracy_exclusion_threshold = kwargs.get('accuracy_exclusion_threshold', 70)
-        self.RT_low_threshold = kwargs.get('RT_low_threshold', 200)
-        self.RT_high_threshold = kwargs.get('RT_high_threshold', 5000)
-        self.rolling_mean = kwargs.get('rolling_mean', 5)
-        self.tests = kwargs.get('tests', 'basic') #'basic' or 'extensive'
-        self.test_rolling_mean = kwargs.get('test_rolling_mean', None)
-        self.test_context_type = kwargs.get('test_context_type', 'context')
-        self.hide_stats = kwargs.get('hide_stats', False)
-        self.load_stats = kwargs.get('load_stats', False)
-        self.hide_posthocs = kwargs.get('hide_posthocs', False)
-        self.load_posthocs = kwargs.get('load_posthocs', False)
-        self.load_models = kwargs.get('load_models', False)
-        self.verbose = kwargs.get('verbose', False)
-        
+        defaults = {
+            'help': False,
+            'author': 'PEAC_Team',
+            'rscripts_path': None,
+            'file_path': None,
+            'file_name': None,
+            'dataset': '',
+            'print_filename': r'SOMA_AL/reports/PEAC_report.pdf',
+            'split_by_group': 'pain',
+            'split_by_group_id': kwargs.get('split_by_group', 'pain'),
+            'covariate': None,
+            'depression_cutoff': 10,
+            'accuracy_exclusion_threshold': 70,
+            'RT_low_threshold': 200,
+            'RT_high_threshold': 5000,
+            'rolling_mean': 5,
+            'tests': 'basic',
+            'test_rolling_mean': None,
+            'test_context_type': 'context',
+            'hide_stats': False,
+            'load_stats': False,
+            'hide_posthocs': False,
+            'load_posthocs': False,
+            'load_models': False,
+            'verbose': False,
+        }
+        for key, default in defaults.items():
+            setattr(self, key, kwargs.get(key, default))
+
         #Format parameters
         self.split_by_group = self.split_by_group if ',' not in self.split_by_group else self.split_by_group
         self.hide_posthocs = True if self.load_stats == False else self.hide_posthocs
