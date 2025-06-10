@@ -33,10 +33,10 @@ class Plotting:
 
         #Main figures
         self.plot_clinical_scores('demo-clinical-scores', colors=self.colors['group'])
-        self.plot_learning_curves('learning-accuracy-by-group', rolling_mean=self.rolling_mean, grouping='clinical', colors=self.colors['condition_2'])
-        self.plot_learning_curves('learning-rt-by-group', rolling_mean=self.rolling_mean, grouping='clinical', metric='rt', colors=self.colors['condition_2'])
-        self.plot_transfer_data('transfer-choice-rate', colors=self.colors['condition'], plot_type='bar', group_labels=False)
-        self.plot_transfer_data('transfer-rt', colors=self.colors['condition'], plot_type='bar', group_labels=False)
+        self.plot_learning_curves('learning-accuracy-by-group', rolling_mean=self.rolling_mean, grouping='clinical', colors=self.colors['condition_2'], subplot_title='A. Learning Phase')
+        self.plot_learning_curves('learning-rt-by-group', rolling_mean=self.rolling_mean, grouping='clinical', metric='rt', colors=self.colors['condition_2'], subplot_title='A. Learning Phase')
+        self.plot_transfer_data('transfer-choice-rate', colors=self.colors['condition'], plot_type='bar', group_labels=False, subplot_title='B. Transfer Phase')
+        self.plot_transfer_data('transfer-rt', colors=self.colors['condition'], plot_type='bar', group_labels=False, subplot_title='B. Transfer Phase')
         self.plot_combined_learning_and_transfer('empirical-performance', 'learning-accuracy-by-group', 'transfer-choice-rate')
         self.plot_combined_learning_and_transfer('empirical-rt', 'learning-rt-by-group', 'transfer-rt')
 
@@ -223,7 +223,15 @@ class Plotting:
         combined_path = f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png'
         combined_img.save(combined_path)
 
-    def plot_learning_curves(self, save_name: str, rolling_mean: int = None,  metric: str = 'accuracy', grouping: str = 'clinical', alpha: float = 0.75, colors: list = []) -> None:
+    def plot_learning_curves(self,
+                             save_name: str,
+                             rolling_mean: int = None, 
+                             metric: str = 'accuracy',
+                             grouping: str = 'clinical',
+                             alpha: float = 0.75,
+                             colors: list = [],
+                             binned_trial: bool = True,
+                             subplot_title: str = None) -> None:
 
         """
         Plot the learning curves for the accuracy or reaction time data
@@ -242,6 +250,10 @@ class Plotting:
             The transparency of the lines in the plot
         colors : list
             The colors to use for the lines in the plot, if not provided, will use a default color scheme
+        binned_trial : bool
+            Whether to use binned trial numbers (Early, Mid-Early, Mid-Late, Late) or trial numbers (1-24)
+        subplot_title : str
+            The title to add to the subplot, if None, no title will be added
 
         Returns (External)
         ------------------
@@ -272,31 +284,61 @@ class Plotting:
             t_score = stats.t.ppf(0.975, sample_size-1)
 
             #Average duplicate trial_numbers for each participant within each symbol_name but then also keep the symbol_name column
-            group_data = group_data[['participant_id', 'trial_number', contexts_code, metric]]
-            group_data = group_data.groupby(['participant_id', 'trial_number', contexts_code]).mean().reset_index()
+            if binned_trial:
+                group_data = group_data[['participant_id', 'binned_trial', contexts_code, metric]]
+                group_data = group_data.groupby(['participant_id', 'binned_trial', contexts_code]).mean().reset_index()
+            else:
+                group_data = group_data[['participant_id', 'trial_number', contexts_code, metric]]
+                group_data = group_data.groupby(['participant_id', 'trial_number', contexts_code]).mean().reset_index()
+                group_data['binned_trial'] = pd.Categorical(group_data['binned_trial'], categories=['Early', 'Mid-Early', 'Mid-Late', 'Late'], ordered=True)
 
             #Determine information of interest
-            trial_index_name = 'trial_number'
+            trial_index_name = 'binned_trial' if binned_trial else 'trial_number'
             for context_index, context in enumerate(contexts):
                 context_data = group_data[group_data[contexts_code] == context]
                 mean_accuracy = context_data.groupby(trial_index_name)[metric].mean()
                 CIs = context_data.groupby(trial_index_name)[metric].sem()*t_score
-                if rolling_mean is not None:
+                if rolling_mean is not None and binned_trial == False:
                     mean_accuracy = mean_accuracy.rolling(rolling_mean, min_periods=1, center=True).mean()
-                ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.1, color=colors[context_index], edgecolor='none')
-                ax[i].plot(mean_accuracy, color=colors[context_index], label=context.title(), linewidth=3, alpha=alpha)
+                
+                if binned_trial:
+                    mean_accuracy = mean_accuracy.reindex(['Early', 'Mid-Early', 'Mid-Late', 'Late'])
+                    CIs = CIs.reindex(['Early', 'Mid-Early', 'Mid-Late', 'Late'])
+                    ax[i].fill_between(np.arange(4), mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.1, color=colors[context_index], edgecolor='none')
+                    ax[i].plot(np.arange(4), mean_accuracy, color=colors[context_index], label=context.title(), linewidth=3, alpha=0.25)
+                    ax[i].scatter(np.arange(4), mean_accuracy, color=colors[context_index], s=10, alpha=alpha)
+                else:
+                    ax[i].fill_between(mean_accuracy.index, mean_accuracy - CIs, mean_accuracy + CIs, alpha=0.1, color=colors[context_index], edgecolor='none')
+                    ax[i].plot(mean_accuracy, color=colors[context_index], label=context.title(), linewidth=3, alpha=alpha)
 
             if metric == 'accuracy':
-                ax[i].set_ylim(40, 100)
+                ax[i].set_ylim(60, 100) if binned_trial else ax[i].set_ylim(40, 100)
             ax[i].set_title(f'{group.title()}')
-            ax[i].set_xlabel('Trial Number')
+            x_label = '' if binned_trial else 'Trial Number'
+            ax[i].set_xlabel(x_label)
             ax[i].set_ylabel(f'{metric.capitalize()} (%)' if metric != 'rt' else 'Reaction Time (ms)')
             legend_loc = 'lower right' if metric != 'rt' else 'upper right'
             ax[i].legend(loc=legend_loc, frameon=False)
             ax[i].spines['top'].set_visible(False)
             ax[i].spines['right'].set_visible(False)
             ax[i].tick_params(axis='both')   
-            ax[i].set_xticks(np.arange(0, 25, 4))
+
+            if binned_trial:
+                ax[i].set_xticks(np.arange(0, 4), ['Early', 'Mid-Early', 'Mid-Late', 'Late'], rotation=45)
+                ax[i].set_xlim(-0.5, 3.5)
+            else:
+                ax[i].set_xticks(np.arange(0, 25, 4))
+
+        #Add subplot labels
+        if subplot_title:
+            ax[0].annotate(subplot_title,
+                            xy=(-.25, 1.15),
+                            xytext=(0, 0),
+                            xycoords='axes fraction',
+                            textcoords='offset points',
+                            ha='left',
+                            va='top',
+                            fontweight='bold')
 
         #Save the plot
         plt.tight_layout()
@@ -306,7 +348,7 @@ class Plotting:
         #Close figure
         plt.close()
 
-    def plot_transfer_data(self, save_name: str, colors: list, plot_type: str = 'raincloud', group_labels: bool = True) -> None:
+    def plot_transfer_data(self, save_name: str, colors: list, plot_type: str = 'raincloud', group_labels: bool = True, subplot_title: str = None) -> None:
 
         """
         Create raincloud plots of the data
@@ -321,6 +363,8 @@ class Plotting:
             The type of plot to create, either 'raincloud' or 'bar'
         group_labels : bool
             Whether to use group labels in the plot titles
+        subplot_title : str
+            The title to add to the subplot, if None, no title will be added
 
         Returns (External)
         ------------------
@@ -465,6 +509,16 @@ class Plotting:
                 ax.tick_params(axis='both')   
 
         #Save the plot
+        if subplot_title:
+            ax[0].annotate(subplot_title,
+                            xy=(-.25, 1.15),
+                            xytext=(0, 0),
+                            xycoords='axes fraction',
+                            textcoords='offset points',
+                            ha='left',
+                            va='top',
+                            fontweight='bold')
+
         plt.tight_layout()
         save_name = f'{save_name}_supplemental' if plot_type == 'raincloud' else save_name
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
@@ -493,31 +547,37 @@ class Plotting:
 
         data = self.choice_rate
         data = data.reset_index()
-        data = data[data['symbol'].isin(['Low Reward', 'Low Punish'])]
+        data = data[data['symbol'].isin(['High Reward', 'Low Reward', 'Low Punish'])]
         data = data.pivot(index=['participant_id', self.group_code], columns='symbol', values='choice_rate')
         data.reset_index(inplace=True)
-        data['difference'] = data.apply(lambda x: x['Low Reward'] - x['Low Punish'], axis=1)
+        data['lr_lp'] = data.apply(lambda x: x['Low Reward'] - x['Low Punish'], axis=1)
+        data['hr_lp'] = data.apply(lambda x: x['High Reward'] - x['Low Punish'], axis=1)
+        data[self.group_code] = pd.Categorical(data[self.group_code], categories=self.group_labels, ordered=True)
+
 
         #Create a raincloud plot the difference for each group code
-        fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-        _, t_scores = self.compute_n_and_t(data, self.group_code)
-        #Categorize the group code no pain, acute pain, chronic pain
-        data[self.group_code] = pd.Categorical(data[self.group_code], categories=self.group_labels, ordered=True)
-        data = data.set_index(self.group_code)['difference'].astype(float)
-        data.index = pd.CategoricalIndex(data.index, categories=self.group_labels, ordered=True)
-        data = data.sort_index()
-        self.raincloud_plot(data=data, ax=ax, t_scores=t_scores, colors=colors)
+        fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+        for sub in range(2):
+            _, t_scores = self.compute_n_and_t(data, self.group_code)
+            #Categorize the group code no pain, acute pain, chronic pain
+            diff_label = 'hr_lp' if sub == 0 else 'lr_lp'
+            metric_data = data.copy().set_index(self.group_code)[diff_label].astype(float)
+            metric_data.index = pd.CategoricalIndex(metric_data.index, categories=self.group_labels, ordered=True)
+            metric_data = metric_data.sort_index()
+            self.bar_plot(data=metric_data, ax=ax[sub], t_scores=t_scores, colors=colors)
 
-        ax.set_xticks([1, 2, 3], ['No Pain', 'Acute Pain', 'Chronic Pain'])
-        ax.set_xlabel('')
-        ax.set_ylabel('Choice Rates: Low Reward - Low Punish (%)')
-        ax.axhline(y=0, color='darkgrey', linestyle='--')
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.set_ylim(-100, 100)
-        ax.tick_params(axis='both')
-        plt.subplots_adjust(left=0.2)
-
+            ax[sub].set_xticks([1, 2, 3], ['No\nPain', 'Acute\nPain', 'Chronic\nPain'])
+            ax[sub].set_xlabel('')
+            y_label = 'Choice Rates (%)\nHigh Reward - Low Punish' if sub == 0 else 'Choice Rates (%)\nLow Reward - Low Punish'
+            ax[sub].set_ylabel(y_label)
+            ax[sub].axhline(y=0, color='darkgrey', linestyle='--')
+            ax[sub].spines['top'].set_visible(False)
+            ax[sub].spines['right'].set_visible(False)
+            ax[sub].set_ylim(-50, 50)
+            ax[sub].tick_params(axis='both')
+            plt.subplots_adjust(left=0.2)
+        
+        plt.tight_layout()
         plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
         plt.close()
 
