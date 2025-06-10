@@ -59,6 +59,7 @@ class Plotting:
         self.plot_neutral_transfer_accuracy('transfer-choice-rate-neutral', colors=self.colors['group'])
         self.plot_neutral_transfer_accuracy('transfer-rt-neutral', metric='rt', colors=self.colors['group'])
         self.plot_differences_transfer('transfer-choice-rate-differences', colors=self.colors['group'])
+        self.plot_differences_transfer('transfer-select-choice-rate-differences', colors=self.colors['group'], select=True)
 
     def compute_n_and_t(self, data: pd.DataFrame, splitting_column: str) -> tuple:
 
@@ -527,7 +528,7 @@ class Plotting:
         #Close figure
         plt.close()
 
-    def plot_differences_transfer(self, save_name: str, colors: list) -> None:
+    def plot_differences_transfer(self, save_name: str, colors: list, select: bool = False) -> None:
 
         """
         Create a raincloud plot of the difference in choice rates between low reward and low punish symbols for each group code
@@ -545,15 +546,22 @@ class Plotting:
             A plot of the raincloud plot
         """
 
-        data = self.choice_rate
-        data = data.reset_index()
-        data = data[data['symbol'].isin(['High Reward', 'Low Reward', 'Low Punish'])]
-        data = data.pivot(index=['participant_id', self.group_code], columns='symbol', values='choice_rate')
+        if not select:
+            data = self.choice_rate
+            data = data.reset_index()
+            data = data[data['symbol'].isin(['High Reward', 'Low Reward', 'Low Punish'])]
+            data = data.pivot(index=['participant_id', self.group_code], columns='symbol', values='choice_rate')
+        else:
+            hr_data = self.select_choice_rate['High Reward']
+            lr_data = self.select_choice_rate['Low Reward']
+            lp_data = self.select_choice_rate['Low Punish']
+            data = pd.merge(hr_data, lr_data, on=['participant_id', self.group_code], suffixes=('_hr', '_lr'))
+            data = pd.merge(data, lp_data, on=['participant_id', self.group_code])
+            data = data.rename(columns={'choice_rate_hr': 'High Reward', 'choice_rate_lr': 'Low Reward', 'choice_rate': 'Low Punish'})
         data.reset_index(inplace=True)
         data['lr_lp'] = data.apply(lambda x: x['Low Reward'] - x['Low Punish'], axis=1)
         data['hr_lp'] = data.apply(lambda x: x['High Reward'] - x['Low Punish'], axis=1)
         data[self.group_code] = pd.Categorical(data[self.group_code], categories=self.group_labels, ordered=True)
-
 
         #Create a raincloud plot the difference for each group code
         fig, ax = plt.subplots(1, 2, figsize=(10, 5))
