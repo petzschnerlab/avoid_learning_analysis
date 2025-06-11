@@ -119,6 +119,10 @@ class Statistics:
             The posthoc tests for transfer RT interaction
         """
 
+        ############################################################
+        ## DEMOGRAPHICS AND CLINICAL GLMMS, PLANNED, AND POSTHOCS
+        ############################################################
+
         #Demograhpics linear models
         self.pain_scores['composite'] = self.pain_scores[['intensity', 'unpleasant', 'interference']].mean(axis=1)
         self.stats_age = self.generalized_linear_model(f'age~{self.group_code}', self.demographics)
@@ -187,7 +191,10 @@ class Statistics:
             self.demo_clinical_planned = {'metadata': self.demo_metadata, 'model_summary': self.demo_clinical_planned}
             self.demo_clinical_posthoc = {'metadata': self.demo_metadata, 'model_summary': self.demo_clinical_posthoc}
     
-        #Linear Mixed Effects Models
+        ############################################################
+        ## LEARNING PHASE GLMMS
+        ############################################################
+
         #Learning accuracy
         formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)'
         if self.covariate is not None:
@@ -256,7 +263,11 @@ class Statistics:
                                                filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
                                                savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_learning_data_trials.csv",
                                                family='Gamma')
-        
+    
+        ############################################################
+        ## TRANSFER PHASE GLMMS
+        ############################################################
+
         #Transfer choice rate using averaged data
         formula = f'choice_rate~1+{self.group_code}*symbol+(1|participant_id)'
         assumption_data = self.choice_rate.reset_index()
@@ -306,11 +317,6 @@ class Statistics:
                                         family='gaussian')
         '''
         formula = f'choice_rate~1+{self.group_code}*symbol+context_val+(1|participant_id)'
-        assumption_data = self.choice_rate_context.reset_index()
-        assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
-        assumption_data['symbol'] = pd.Categorical(assumption_data['symbol'], ['High Reward', 'Low Reward', 'Low Punish', 'High Punish', 'Novel'])
-        assumption_data['context_val'] = pd.Categorical(assumption_data['context_val'], ['Reward','Punish','Neutral'])
-        assumption_data['choice_rate'] = assumption_data['choice_rate'].astype(float)
         self.transfer_accuracy_glmm_context = self.generalized_linear_model(formula, 
                                                self.choice_rate_context.reset_index(),
                                                path=self.repo_directory,
@@ -359,6 +365,11 @@ class Statistics:
                                         savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_transfer_valence_bias.csv",
                                         family='Gaussian')
 
+    
+        ############################################################
+        ## LEARNING AND TRANSFER PHASE PLANNED AND POSTHOCS
+        ############################################################
+
         #Group factor comparisons
         
         '''
@@ -399,9 +410,9 @@ class Statistics:
         data = self.average_transform_data(self.transfer_data_reduced.copy(), 'rt', self.group_code,'1/x')
         self.transfer_rt_planned_group = self.planned_ttests('rt', self.group_code, comparisons, data)
         self.transfer_rt_posthoc_group = self.post_hoc_tests('rt', self.group_code, data)
-        
+
         #Context factor comparisons
-        
+
         '''
 
         == Pain and Depression Analyses ==
@@ -418,7 +429,7 @@ class Statistics:
         self.transfer_accuracy_posthoc_context = self.post_hoc_tests('choice_rate', 'symbol', self.choice_rate.reset_index())
         self.transfer_rt_planned_context = self.planned_ttests('choice_rt', 'symbol', comparisons, self.choice_rt.reset_index())
         self.transfer_rt_posthoc_context = self.post_hoc_tests('choice_rt', 'symbol', self.choice_rt.reset_index())
-
+        
         #Trial factor comparisons
         data = self.average_byfactor(self.learning_data, 'accuracy', 'binned_trial')
         self.learning_accuracy_posthoc_trials = self.post_hoc_tests('accuracy', 'binned_trial', data)
@@ -429,7 +440,7 @@ class Statistics:
 
         '''
         
-        == Pain & Depression Analyses ==
+        == Pain and Depression Analyses ==
         There are no planned comparisons for valence bias
         '''
 
@@ -544,6 +555,48 @@ class Statistics:
         data = [data1, data1, data1, data2, data2, data2] if self.split_by_group == 'pain' else [data1, data2]
         self.transfer_rt_planned_interaction = self.planned_ttests('choice_rt', factors, comparisons, data)
         self.transfer_rt_posthoc_interaction = self.post_hoc_tests('choice_rt', factors, self.choice_rt.reset_index())
+
+        #Constraining to choice rates/rts based on only the pairs of stimuli being assessed
+        hr_lp_data = self.select_choice_rate['High Reward'].reset_index()
+        hr_lp_data = hr_lp_data[hr_lp_data['symbol'] == 'Low Punish']
+        hr_lp_data['choice_rate'] = hr_lp_data['choice_rate'] - (100-hr_lp_data['choice_rate']) #The low punish is the reciprocal of the high reward, so we subtract it from 100 to get the choice rate for the high reward
+
+        lr_lp_data = self.select_choice_rate['Low Reward'].reset_index()
+        lr_lp_data = lr_lp_data[lr_lp_data['symbol'] == 'Low Punish']
+        lr_lp_data['choice_rate'] = lr_lp_data['choice_rate'] - (100-lr_lp_data['choice_rate'])
+
+        comparisons = [['no pain', 'acute pain'], ['no pain', 'chronic pain'], ['acute pain', 'chronic pain']] if self.split_by_group == 'pain' else [['Healthy', 'Depressed']]
+        self.transfer_accuracy_planned_group_select_hrlp = self.planned_ttests('choice_rate', self.group_code, comparisons, hr_lp_data)
+        self.transfer_accuracy_planned_group_select_lrlp = self.planned_ttests('choice_rate', self.group_code, comparisons, lr_lp_data)
+        self.transfer_accuracy_planned_interaction = {}
+        self.transfer_accuracy_planned_interaction['metadata'] = self.transfer_accuracy_planned_group_select_hrlp['metadata']
+        self.transfer_accuracy_planned_interaction['model_summary'] = pd.concat((self.transfer_accuracy_planned_group_select_hrlp['model_summary'], 
+                                                                                self.transfer_accuracy_planned_group_select_lrlp['model_summary']), 
+                                                                                axis=0).reset_index(drop=True)
+        
+        hr_rt = self.select_choice_rt['High Reward'].reset_index()
+        hr_rt = hr_rt[hr_rt['symbol'] == 'Low Punish']
+        lr_rt = self.select_choice_rt['Low Reward'].reset_index()
+        lr_rt = lr_rt[lr_rt['symbol'] == 'Low Punish']
+        lp_rt = self.select_choice_rt['Low Punish'].reset_index()
+        lp_hr_rt = lp_rt[(lp_rt['symbol'] == 'High Reward')]
+        lp_lr_rt = lp_rt[(lp_rt['symbol'] == 'Low Reward')]
+
+        hr_rt = pd.merge(hr_rt, lp_hr_rt[['participant_id', 'choice_rt']], on='participant_id', suffixes=('_hr', '_lp_hr')) 
+        hr_rt['choice_rt'] = hr_rt.apply(lambda x: x['choice_rt_hr'] - x['choice_rt_lp_hr'], axis=1)
+        hr_lp_rt = hr_rt[[self.group_code, 'participant_id', 'symbol', 'choice_rt']].copy()
+
+        lr_rt = pd.merge(lr_rt, lp_lr_rt[['participant_id', 'choice_rt']], on='participant_id', suffixes=('_lr', '_lp_lr'))
+        lr_rt['choice_rt'] = lr_rt.apply(lambda x: x['choice_rt_lr'] - x['choice_rt_lp_lr'], axis=1)
+        lr_lp_rt = lr_rt[[self.group_code, 'participant_id', 'symbol', 'choice_rt']].copy()
+        
+        self.transfer_rt_planned_group_select_hrlp = self.planned_ttests('choice_rt', self.group_code, comparisons, hr_lp_rt)
+        self.transfer_rt_planned_group_select_lrlp = self.planned_ttests('choice_rt', self.group_code, comparisons, lr_lp_rt)
+        self.transfer_rt_planned_interaction_constrained = {}
+        self.transfer_rt_planned_interaction_constrained['metadata'] = self.transfer_rt_planned_group_select_hrlp['metadata']
+        self.transfer_rt_planned_interaction_constrained['model_summary'] = pd.concat((self.transfer_rt_planned_group_select_hrlp['model_summary'], 
+                                                                            self.transfer_rt_planned_group_select_lrlp['model_summary']), 
+                                                                            axis=0).reset_index(drop=True)
 
         self.insert_statistics()
 
@@ -1010,7 +1063,7 @@ class Statistics:
                     condition2_data = condition2_data.sort_values('participant_id')[metric].reset_index(drop=True)
                     
                     assumption_check = self.ttest_assumption_check(condition1_data, condition2_data, test_type='paired')
-                    ttest = sp.stats.ttest_rel(condition1_data, condition2_data)
+                    ttest = sp.stats.ttest_rel(condition1_data, condition2_data, nan_policy='omit')
                     cohens_d = self.cohens_d(condition1_data, condition2_data, test_type='paired')
 
                 else:
@@ -1019,7 +1072,7 @@ class Statistics:
 
                     assumption_check = self.ttest_assumption_check(condition1_data, condition2_data, test_type='independent')
                     equal_var = assumption_check['homogeneity_assumption'] == 'met'
-                    ttest = sp.stats.ttest_ind(condition1_data, condition2_data, equal_var=equal_var)
+                    ttest = sp.stats.ttest_ind(condition1_data, condition2_data, equal_var=equal_var, nan_policy='omit')
                     cohens_d = self.cohens_d(condition1_data, condition2_data, test_type='independent')
 
                 ttest = pd.DataFrame({'condition1': comparison[0], 

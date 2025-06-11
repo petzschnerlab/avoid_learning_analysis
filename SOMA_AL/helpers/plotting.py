@@ -551,16 +551,22 @@ class Plotting:
             data = data.reset_index()
             data = data[data['symbol'].isin(['High Reward', 'Low Reward', 'Low Punish'])]
             data = data.pivot(index=['participant_id', self.group_code], columns='symbol', values='choice_rate')
+            data.reset_index(inplace=True)
+            data['lr_lp'] = data.apply(lambda x: x['Low Reward'] - x['Low Punish'], axis=1)
+            data['hr_lp'] = data.apply(lambda x: x['High Reward'] - x['Low Punish'], axis=1)
         else:
-            hr_data = self.select_choice_rate['High Reward']
-            lr_data = self.select_choice_rate['Low Reward']
-            lp_data = self.select_choice_rate['Low Punish']
-            data = pd.merge(hr_data, lr_data, on=['participant_id', self.group_code], suffixes=('_hr', '_lr'))
-            data = pd.merge(data, lp_data, on=['participant_id', self.group_code])
-            data = data.rename(columns={'choice_rate_hr': 'High Reward', 'choice_rate_lr': 'Low Reward', 'choice_rate': 'Low Punish'})
-        data.reset_index(inplace=True)
-        data['lr_lp'] = data.apply(lambda x: x['Low Reward'] - x['Low Punish'], axis=1)
-        data['hr_lp'] = data.apply(lambda x: x['High Reward'] - x['Low Punish'], axis=1)
+            hr_lp_data = self.select_choice_rate['High Reward'].reset_index()
+            hr_lp_data = hr_lp_data[hr_lp_data['symbol'] == 'Low Punish']
+            hr_lp_data['choice_rate'] = hr_lp_data['choice_rate'] - (100-hr_lp_data['choice_rate']) #The low punish is the reciprocal of the high reward, so we subtract it from 100 to get the choice rate for the high reward
+
+            lr_lp_data = self.select_choice_rate['Low Reward'].reset_index()
+            lr_lp_data = lr_lp_data[lr_lp_data['symbol'] == 'Low Punish']
+            lr_lp_data['choice_rate'] = lr_lp_data['choice_rate'] - (100-lr_lp_data['choice_rate'])
+
+            data = pd.merge(hr_lp_data[[self.group_code, 'participant_id', 'choice_rate']],
+                            lr_lp_data[[self.group_code, 'participant_id', 'choice_rate']],
+                            on=['participant_id', self.group_code], suffixes=('_hr', '_lr'))
+            data = data.rename(columns={'choice_rate_hr': 'hr_lp', 'choice_rate_lr': 'lr_lp'})
         data[self.group_code] = pd.Categorical(data[self.group_code], categories=self.group_labels, ordered=True)
 
         #Create a raincloud plot the difference for each group code
@@ -581,7 +587,8 @@ class Plotting:
             ax[sub].axhline(y=0, color='darkgrey', linestyle='--')
             ax[sub].spines['top'].set_visible(False)
             ax[sub].spines['right'].set_visible(False)
-            ax[sub].set_ylim(-50, 50)
+            ylim = [-20, 90] if sub == 0 else [-20, 40]
+            ax[sub].set_ylim(ylim)
             ax[sub].tick_params(axis='both')
             plt.subplots_adjust(left=0.2)
         
