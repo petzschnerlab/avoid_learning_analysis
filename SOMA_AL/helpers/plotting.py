@@ -894,7 +894,7 @@ class Plotting:
                     r, p = stats.pearsonr(correlation_data[parameter], correlation_data[pain_metric])
                     
                     axes[i, j].scatter(correlation_data[pain_metric], correlation_data[parameter], 
-                                    alpha=0.3, color=colours[group], s=10)
+                                    alpha=0.8, color=colours[group], s=14)
                     
                     slope, intercept, _, _, _ = stats.linregress(correlation_data[pain_metric], 
                                                                 correlation_data[parameter])
@@ -902,16 +902,22 @@ class Plotting:
                                     slope * correlation_data[pain_metric] + intercept, 
                                     color=colours[group], linewidth=1.5)
                     
-                    if i == 0:
-                        axes[i, j].set_title(pain_metric.title(), fontsize=10)
+                    if i == len(parameter_names) - 1:
+                        axes[i, j].set_xlabel(pain_metric.title(), fontsize=18)
+                    else:
+                        axes[i, j].set_xlabel('')
                     if j == 0:
-                        y_label = parameter.replace('_', ' ').replace('lr', 'learning rate').title().replace('Learning', '\nLearning')
-                        axes[i, j].set_ylabel(y_label, fontsize=10)
+                        y_label = parameter.replace('_', ' ').replace('lr', 'learning rate').replace(' learning', '\nlearning').replace('weighing ', 'weighting\n')
+                        axes[i, j].set_ylabel(y_label.title(), fontsize=18)
                     
-                    axes[i, j].set_xlim(x_min, x_max)
-                    axes[i, j].set_ylim(y_min, y_max)
-                    axes[i, j].tick_params(axis='both', which='major', labelsize=8)
-                    axes[i, j].tick_params(axis='both', which='minor', labelsize=6)
+                    axes[i, j].set_xlim(np.floor(x_min), np.ceil(x_max))
+                    axes[i, j].set_ylim(np.floor(y_min), np.ceil(y_max))
+                    axes[i, j].tick_params(axis='both', which='major', labelsize=12)
+                    axes[i, j].tick_params(axis='both', which='minor', labelsize=12)
+                    axes[i, j].set_xticks(np.arange(0, 11, 2))
+                    axes[i, j].set_xticklabels(np.arange(0, 11, 2), fontsize=12)
+                    axes[i, j].spines['top'].set_visible(False)
+                    axes[i, j].spines['right'].set_visible(False)
             
             plt.savefig(f'SOMA_AL/plots/model_parameter_by_pain_{group.replace(" ", "_")}.png', dpi=300, bbox_inches='tight')
             plt.savefig(f'SOMA_AL/plots/model_parameter_by_pain_{group.replace(" ", "_")}.svg', format='svg', bbox_inches='tight')

@@ -1005,6 +1005,7 @@ class ReportFunctions:
         parameter_names = fit_data.columns[4:]
         pain_names = pain_scores.columns[2:]
         fit_data = fit_data.merge(pain_scores[['participant_id', 'intensity', 'unpleasant', 'interference']], on='participant_id', how='left')
+        fit_data['composite'] = fit_data.apply(lambda row: np.mean([row['intensity'], row['unpleasant'], row['interference']]), axis=1)
 
         #Create a corellation matrix for the model parameters and pain scores
         correlation_matrix = pd.DataFrame(index=parameter_names, columns=pain_names)
