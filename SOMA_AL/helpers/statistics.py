@@ -568,9 +568,9 @@ class Statistics:
         comparisons = [['no pain', 'acute pain'], ['no pain', 'chronic pain'], ['acute pain', 'chronic pain']] if self.split_by_group == 'pain' else [['Healthy', 'Depressed']]
         self.transfer_accuracy_planned_group_select_hrlp = self.planned_ttests('choice_rate', self.group_code, comparisons, hr_lp_data)
         self.transfer_accuracy_planned_group_select_lrlp = self.planned_ttests('choice_rate', self.group_code, comparisons, lr_lp_data)
-        self.transfer_accuracy_planned_interaction = {}
-        self.transfer_accuracy_planned_interaction['metadata'] = self.transfer_accuracy_planned_group_select_hrlp['metadata']
-        self.transfer_accuracy_planned_interaction['model_summary'] = pd.concat((self.transfer_accuracy_planned_group_select_hrlp['model_summary'], 
+        self.transfer_accuracy_planned_interaction_constrained = {}
+        self.transfer_accuracy_planned_interaction_constrained['metadata'] = self.transfer_accuracy_planned_group_select_hrlp['metadata']
+        self.transfer_accuracy_planned_interaction_constrained['model_summary'] = pd.concat((self.transfer_accuracy_planned_group_select_hrlp['model_summary'], 
                                                                                 self.transfer_accuracy_planned_group_select_lrlp['model_summary']), 
                                                                                 axis=0).reset_index(drop=True)
         
@@ -933,7 +933,7 @@ class Statistics:
         dict
             Metadata and the model summary
         """
-        
+
         #Format formula
         formula = formula.replace(' ', '')
 
@@ -1113,7 +1113,7 @@ class Statistics:
         pd.DataFrame
             The post-hoc test results
         """
-        
+
         #Create combined factor
         if type(factor) is list:
             data['factor'] = data.apply(lambda x: ' & '.join([str(x[f]) for f in factor]), axis=1)
