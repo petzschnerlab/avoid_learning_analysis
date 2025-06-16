@@ -21,7 +21,7 @@ if __name__ == '__main__':
               'RT_low_threshold':               200,
               'RT_high_threshold':              5000,
 
-              'load_stats':                     True,
+              'load_stats':                     True, 
               'load_posthocs':                  True,
               'load_models':                    True,
     }

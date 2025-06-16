@@ -88,20 +88,20 @@ class Report(ReportFunctions):
 
             section_text = []
             section_text.append('### Number of Runs')
-            filename = 'SOMA_AL/modelling/fit-by-runs.png'
+            filename = 'AL/modelling/fit-by-runs.png'
             section_text.extend(self.insert_image('fit-by-runs', filename))
             self.add_data_pdf(section_text, center=True)
 
             section_text = []
             section_text.append('### Parameter Recovery')
             for model_name in self.model_names:
-                filename = f'SOMA_AL/modelling/correlations/{model_name}_correlation_plot.png'
+                filename = f'AL/modelling/correlations/{model_name}_correlation_plot.png'
                 section_text.extend(self.insert_image(f'{model_name}-correlation-plot', filename))
             self.add_data_pdf(section_text, center=True)
 
             section_text = []
             section_text.append('### Model Recovery')
-            filename = f'SOMA_AL/modelling/model_recovery.png'
+            filename = f'AL/modelling/model_recovery.png'
             section_text.extend(self.insert_image('model-recovery', filename))
             self.add_data_pdf(section_text, center=True)
 
@@ -114,7 +114,7 @@ class Report(ReportFunctions):
             Thus, the following will only describe the results of the {best_model_name} model."""
             section_text.append(model_introduction)
             section_text.append(f'### Model Fit')
-            filename = f'SOMA_AL/modelling/model_behaviours/{self.best_model}_model_behaviours.png'
+            filename = f'AL/modelling/model_behaviours/{self.best_model}_model_behaviours.png'
             section_text.extend(self.insert_image('model-behaviour', filename))
             self.add_data_pdf(section_text, center=True)
 
@@ -130,7 +130,7 @@ class Report(ReportFunctions):
 
             section_text = []
             section_text.append('### Model Parameters')
-            filename = f'SOMA_AL/modelling/parameter_fits/{self.best_model}-model-fits.png'
+            filename = f'AL/modelling/parameter_fits/{self.best_model}-model-fits.png'
             section_text.extend(self.insert_image('model-parameters', filename))
             self.add_data_pdf(section_text, center=True)
 
@@ -141,7 +141,7 @@ class Report(ReportFunctions):
             for group in self.group_labels:
                 section_text = []
                 section_text.append(f'### Model Parameter Correlations with Pain for {group.title()} Group')
-                filename = f'SOMA_AL/plots/model_parameter_by_pain_{group.replace(" ","_")}.png'
+                filename = f'AL/plots/model_parameter_by_pain_{group.replace(" ","_")}.png'
                 section_text.extend(self.insert_image(f'parameter-correlation-{group.replace(" ","-")}', filename))
                 self.add_data_pdf(section_text, center=True)
 

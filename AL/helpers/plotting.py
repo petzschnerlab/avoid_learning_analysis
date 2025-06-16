@@ -206,7 +206,7 @@ class Plotting:
             A combined image of the learning and transfer plots.
         """
 
-        path = f'SOMA_AL/plots/{self.split_by_group}'
+        path = f'AL/plots/{self.split_by_group}'
         learning_path = f'{path}/{learning_name}.png'
         transfer_path = f'{path}/{transfer_name}.png'
 
@@ -221,7 +221,7 @@ class Plotting:
         combined_img.paste(transfer_img, (0, learning_img.height))
 
         # Save combined image
-        combined_path = f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png'
+        combined_path = f'AL/plots/{self.split_by_group}/{save_name}.png'
         combined_img.save(combined_path)
 
     def plot_learning_curves(self,
@@ -343,8 +343,8 @@ class Plotting:
 
         #Save the plot
         plt.tight_layout()
-        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
-        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
+        plt.savefig(f'AL/plots/{self.split_by_group}/{save_name}.png')
+        plt.savefig(f'AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
 
         #Close figure
         plt.close()
@@ -522,8 +522,8 @@ class Plotting:
 
         plt.tight_layout()
         save_name = f'{save_name}_supplemental' if plot_type == 'raincloud' else save_name
-        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
-        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
+        plt.savefig(f'AL/plots/{self.split_by_group}/{save_name}.png')
+        plt.savefig(f'AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
 
         #Close figure
         plt.close()
@@ -593,7 +593,7 @@ class Plotting:
             plt.subplots_adjust(left=0.2)
         
         plt.tight_layout()
-        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
+        plt.savefig(f'AL/plots/{self.split_by_group}/{save_name}.png')
         plt.close()
 
     def plot_select_transfer(self, save_name: str, colors: list, plot_type: str = 'raincloud') -> None:
@@ -668,8 +668,8 @@ class Plotting:
 
         #Save the plot
         save_name = f'{save_name}_supplemental' if plot_type == 'raincloud' else save_name
-        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/selected_{save_name}.png')
-        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/selected_{save_name}.svg', format='svg')
+        plt.savefig(f'AL/plots/{self.split_by_group}/selected_{save_name}.png')
+        plt.savefig(f'AL/plots/{self.split_by_group}/selected_{save_name}.svg', format='svg')
 
         #Close figure
         plt.close()
@@ -728,8 +728,8 @@ class Plotting:
             ax.annotate('Punish', xy=(0.55, 5), xytext=(0.55, 5), rotation=90, textcoords='data', ha='center', va='center', color='darkgrey')
 
         #Save the plot
-        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
-        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
+        plt.savefig(f'AL/plots/{self.split_by_group}/{save_name}.png')
+        plt.savefig(f'AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
 
         #Close figure
         plt.close()
@@ -787,8 +787,8 @@ class Plotting:
         plt.subplots_adjust(bottom=0.2)
 
         #Save the plot
-        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.png')
-        plt.savefig(f'SOMA_AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
+        plt.savefig(f'AL/plots/{self.split_by_group}/{save_name}.png')
+        plt.savefig(f'AL/plots/{self.split_by_group}/{save_name}.svg', format='svg')
 
         #Close figure
         plt.close()
@@ -851,8 +851,8 @@ class Plotting:
                 if j == len(pain_names) - 1 and i == 0:
                     axes[i,j].legend(['No Pain', 'Chronic Pain', 'Acute Pain'], loc='upper left', fontsize=8, frameon=False, bbox_to_anchor=(1.05, 1))
 
-        plt.savefig(f'SOMA_AL/plots/model_parameter_by_pain.png', dpi=300, bbox_inches='tight')
-        plt.savefig(f'SOMA_AL/plots/model_parameter_by_pain.svg', format='svg', bbox_inches='tight')
+        plt.savefig(f'AL/plots/model_parameter_by_pain.png', dpi=300, bbox_inches='tight')
+        plt.savefig(f'AL/plots/model_parameter_by_pain.svg', format='svg', bbox_inches='tight')
 
         #Close figure
         plt.close(fig)
@@ -919,8 +919,8 @@ class Plotting:
                     axes[i, j].spines['top'].set_visible(False)
                     axes[i, j].spines['right'].set_visible(False)
             
-            plt.savefig(f'SOMA_AL/plots/model_parameter_by_pain_{group.replace(" ", "_")}.png', dpi=300, bbox_inches='tight')
-            plt.savefig(f'SOMA_AL/plots/model_parameter_by_pain_{group.replace(" ", "_")}.svg', format='svg', bbox_inches='tight')
+            plt.savefig(f'AL/plots/model_parameter_by_pain_{group.replace(" ", "_")}.png', dpi=300, bbox_inches='tight')
+            plt.savefig(f'AL/plots/model_parameter_by_pain_{group.replace(" ", "_")}.svg', format='svg', bbox_inches='tight')
 
             #Close figure
             plt.close(fig)
@@ -976,5 +976,5 @@ class Plotting:
                
             #Save the plot
             plt.tight_layout()
-            plt.savefig(f'SOMA_AL/modelling/group_{fit}.png')
+            plt.savefig(f'AL/modelling/group_{fit}.png')
             plt.close()

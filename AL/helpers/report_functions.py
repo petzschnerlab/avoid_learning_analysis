@@ -115,7 +115,7 @@ class ReportFunctions:
         section = Section(' \n '.join(content), toc=toc)
         self.pdf.add_section(section, user_css=user_css)
 
-    def table_to_png(self, table: pd.DataFrame, save_name: str = "SOMA_AL/plots/tables/Table.png") -> None:
+    def table_to_png(self, table: pd.DataFrame, save_name: str = "AL/plots/tables/Table.png") -> None:
 
         """
         Converts a table to a png
@@ -631,7 +631,7 @@ class ReportFunctions:
             The subsection for the report
         """
 
-        filename = f'SOMA_AL/plots/{self.split_by_group}/{image_name}.png' if filename is None else filename
+        filename = f'AL/plots/{self.split_by_group}/{image_name}.png' if filename is None else filename
         subsection = [f'#### ![{image_name}]({filename})\n', 
                       f'{self.get_caption(image_name)}\n']
        
@@ -667,12 +667,12 @@ class ReportFunctions:
             subtables = [table[i:i+max_rows] for i in range(0, n, max_rows)]
             for i, subtable in enumerate(subtables):
                 if self.load_posthocs == False:
-                    self.table_to_png(subtable.set_index('factor'), save_name=f'SOMA_AL/plots/tables/{self.split_by_group}_{save_name}_{i}.png')
-                subsection += [f'#### ![{save_name}_{i}](SOMA_AL/plots/tables/{self.split_by_group}_{save_name}_{i}.png)\n']
+                    self.table_to_png(subtable.set_index('factor'), save_name=f'AL/plots/tables/{self.split_by_group}_{save_name}_{i}.png')
+                subsection += [f'#### ![{save_name}_{i}](AL/plots/tables/{self.split_by_group}_{save_name}_{i}.png)\n']
         else: #Print full table
             if self.load_posthocs == False:
-                self.table_to_png(table, save_name=f'SOMA_AL/plots/tables/{self.split_by_group}_{save_name}.png')
-            subsection += [f'#### ![{save_name}](SOMA_AL/plots/tables/{self.split_by_group}_{save_name}.png)\n']
+                self.table_to_png(table, save_name=f'AL/plots/tables/{self.split_by_group}_{save_name}.png')
+            subsection += [f'#### ![{save_name}](AL/plots/tables/{self.split_by_group}_{save_name}.png)\n']
        
         return subsection
     
@@ -688,7 +688,7 @@ class ReportFunctions:
         """
 
         section_text = [f'# PEAC Lab Report',
-                        f'![PEAC_logo](SOMA_AL/media/PEAC_logo.png)']
+                        f'![PEAC_logo](AL/media/PEAC_logo.png)']
         self.add_data_pdf(section_text)
 
     def insert_report_details(self) -> None:
@@ -846,10 +846,10 @@ class ReportFunctions:
         self.rscripts_path = rscripts_path
 
         #Model Fits
-        self.model_AIC = pd.read_csv('SOMA_AL/modelling/group_AIC.csv')
-        self.model_BIC = pd.read_csv('SOMA_AL/modelling/group_BIC.csv')
-        self.model_AIC_percentages = pd.read_csv('SOMA_AL/modelling/group_AIC_percentages.csv')
-        self.model_BIC_percentages = pd.read_csv('SOMA_AL/modelling/group_BIC_percentages.csv')
+        self.model_AIC = pd.read_csv('AL/modelling/group_AIC.csv')
+        self.model_BIC = pd.read_csv('AL/modelling/group_BIC.csv')
+        self.model_AIC_percentages = pd.read_csv('AL/modelling/group_AIC_percentages.csv')
+        self.model_BIC_percentages = pd.read_csv('AL/modelling/group_BIC_percentages.csv')
 
         self.model_AIC.set_index('Unnamed: 0', inplace=True)
         self.model_BIC.set_index('Unnamed: 0', inplace=True)
@@ -869,6 +869,7 @@ class ReportFunctions:
         self.model_AIC['best_model'] = self.model_AIC.idxmin(axis=1)
         self.model_BIC['best_model'] = self.model_BIC.idxmin(axis=1)
         best_model_BIC = self.model_BIC['best_model'].values[-1]
+
         self.best_model = best_model_BIC
         self.best_model_label = best_model_BIC.split('+')[0].replace('Hybrid2', 'Hybrid 2').replace('ActorCritic', 'Actor Critic').replace('QLearning', 'Q Learning').replace('best_model', 'Best Model')
         
@@ -879,8 +880,8 @@ class ReportFunctions:
         self.model_BIC_percentages.columns = [col.split('+')[0].replace('Hybrid2', 'Hybrid 2').replace('ActorCritic', 'Actor Critic').replace('QLearning', 'Q Learning').replace('best_model', 'Best Model') for col in self.model_BIC_percentages.columns]
 
         #Load model simulation data
-        self.model_accuracy = pd.read_csv(f'SOMA_AL/modelling/modelsimulation_accuracy_data.csv')
-        self.model_choice_rate = pd.read_csv(f'SOMA_AL/modelling/modelsimulation_choice_data.csv')
+        self.model_accuracy = pd.read_csv(f'AL/modelling/modelsimulation_accuracy_data.csv')
+        self.model_choice_rate = pd.read_csv(f'AL/modelling/modelsimulation_choice_data.csv')
 
         self.model_accuracy.rename(columns={'context': 'symbol_name', 'run': 'participant_id', 'group': self.group_code}, inplace=True)
         self.model_choice_rate.rename(columns={'group': self.group_code}, inplace=True)
@@ -903,13 +904,13 @@ class ReportFunctions:
         plotting = Plotting()
 
         ## Learning accuracy
-        self.model_accuracy.to_csv(f'SOMA_AL/modelling/model_behaviours_{self.split_by_group}_stats_learning_data_trials.csv', index=False)
+        self.model_accuracy.to_csv(f'AL/modelling/model_behaviours_{self.split_by_group}_stats_learning_data_trials.csv', index=False)
         formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)'
         self.model_learning_accuracy_glmm = statistics.generalized_linear_model(formula, 
                                                self.model_accuracy,
                                                path=self.repo_directory,
-                                               filename=f"SOMA_AL/modelling/model_behaviours_{self.split_by_group}_stats_learning_data_trials.csv",
-                                               savename=f"SOMA_AL/modelling/model_behaviours_{self.split_by_group_id}_stats_learning_data_trials.csv",
+                                               filename=f"AL/modelling/model_behaviours_{self.split_by_group}_stats_learning_data_trials.csv",
+                                               savename=f"AL/modelling/model_behaviours_{self.split_by_group_id}_stats_learning_data_trials.csv",
                                                family='binomial')
         
         comparisons = [['chronic pain', 'no pain'], ['chronic pain', 'acute pain']]
@@ -926,7 +927,7 @@ class ReportFunctions:
         self.model_learning_accuracy_planned_interaction = self.planned_ttests('accuracy', factors, comparisons, data)
 
         ## Choice rate
-        self.model_choice_rate.to_csv(f'SOMA_AL/modelling/model_behaviours_{self.split_by_group}_stats_transfer_data.csv', index=False)
+        self.model_choice_rate.to_csv(f'AL/modelling/model_behaviours_{self.split_by_group}_stats_transfer_data.csv', index=False)
         formula = f'choice_rate~1+{self.group_code}*symbol+(1|participant_id)'
         self.model_choice_rate.set_index([self.group_code, 'participant_id', 'symbol'], inplace=True)
         self.model_choice_rate = self.model_choice_rate.sort_index()
@@ -934,8 +935,8 @@ class ReportFunctions:
         self.model_transfer_choice_rate_glmm = statistics.generalized_linear_model(formula, 
                                         self.model_choice_rate.reset_index(),
                                         path=self.repo_directory,
-                                        filename=f"SOMA_AL/modelling/model_behaviours_{self.split_by_group}_stats_transfer_data.csv",
-                                        savename=f"SOMA_AL/modelling/model_behaviours_{self.split_by_group_id}_stats_transfer_data.csv",
+                                        filename=f"AL/modelling/model_behaviours_{self.split_by_group}_stats_transfer_data.csv",
+                                        savename=f"AL/modelling/model_behaviours_{self.split_by_group_id}_stats_transfer_data.csv",
                                         family='gaussian')
         
         data = self.average_byfactor(self.model_choice_rate, 'choice_rate', self.group_code)
@@ -963,7 +964,7 @@ class ReportFunctions:
         #post-hoc comparisons
 
         #Model Results (parameter statistics)
-        self.model_parameters_glmm_summary = pd.read_csv(f'SOMA_AL/modelling/{self.split_by_group}_fits_linear_results.csv')
+        self.model_parameters_glmm_summary = pd.read_csv(f'AL/modelling/{self.split_by_group}_fits_linear_results.csv')
         self.model_parameters_glmm_summary = self.model_parameters_glmm_summary[self.model_parameters_glmm_summary['model']==self.best_model]
         self.model_parameters_glmm_summary.rename(columns={'parameter': 'factor', 'df_model': 'df', 'F': 'test_value'}, inplace=True)
 
@@ -979,7 +980,7 @@ class ReportFunctions:
         self.model_parameters_glmm = {'metadata': parameter_metadata,
                                       'model_summary': self.model_parameters_glmm_summary}
         
-        self.model_parameters_planned_group_summary = pd.read_csv(f'SOMA_AL/modelling/{self.split_by_group}_fits_ttest_results.csv')
+        self.model_parameters_planned_group_summary = pd.read_csv(f'AL/modelling/{self.split_by_group}_fits_ttest_results.csv')
         self.model_parameters_planned_group_summary = self.model_parameters_planned_group_summary[self.model_parameters_planned_group_summary['model']==self.best_model]
         self.model_parameters_planned_group_summary.rename(columns={'parameter': 'factor'}, inplace=True)
 
@@ -994,11 +995,11 @@ class ReportFunctions:
         self.model_parameters_planned_group = {'metadata': parameter_metadata,
                                                'model_summary': self.model_parameters_planned_group_summary}
         
-        self.model_parameters_posthoc_group = pd.read_csv(f'SOMA_AL/modelling/{self.split_by_group}_fits_posthoc_results.csv')
+        self.model_parameters_posthoc_group = pd.read_csv(f'AL/modelling/{self.split_by_group}_fits_posthoc_results.csv')
 
         #Parameter Correlations
         pain_scores = self.pain_scores
-        with open('SOMA_AL/modelling/fit_data_FIT.pkl', 'rb') as f:
+        with open('AL/modelling/fit_data_FIT.pkl', 'rb') as f:
             fit_data = pickle.load(f)
         fit_data = fit_data[self.best_model]
         fit_data.rename(columns={'participant': 'participant_id'}, inplace=True)

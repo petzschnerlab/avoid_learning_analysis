@@ -18,7 +18,7 @@ class Help:
             'rscripts_path': ['Path to the R executible file, which is used when running GLMMs.', 'str', None],
             'file_path': ['Path to the data file(s) to be loaded. This is a required parameter.', 'str', None],
             'file_name': ['Name of the file(s) to be loaded. This is a required parameter.', 'list[str] | str', None],
-            'print_filename': ['The report filename.', 'str', r'SOMA_AL/reports/SOMA_report.pdf'],
+            'print_filename': ['The report filename.', 'str', r'AL/reports/SOMA_report.pdf'],
             'split_by_group': ['Split the data by group [depression, pain].', 'str', 'pain'],
             'split_by_group_id': ['Analysis ID, which is used in the backend to save the statistics so you do not need to rerun them every time.', 'str', 'pain'],
             'dataset': ['Title to describe the dataset(s).', 'str', ''],
@@ -53,7 +53,7 @@ class Help:
         Print the package overview.
         """
         
-        overview = """The SOMA_AL package is a tool to analyze the data from the SOMA avoidance learning study.
+        overview = """The Avoid Learning Analysis package is a tool to analyze the data from the SOMA avoidance learning study.
         The package is designed to be run as a function with parameters that can be set to customize the analysis.
         The package will generate a report with the results of the analysis.
         The package requires two parameters to be set: file_path and file_name.
@@ -73,7 +73,7 @@ class Help:
         Print the parameter descriptions.
         """
 
-        print('SOMA_AL package help information:')
+        print('Avoid Learning Analysis package help information:')
         print('The following parameters can be set when running the package:')
         print('-------------------------------------------------------------')
 

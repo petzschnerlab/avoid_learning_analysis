@@ -26,7 +26,7 @@ class Parameters:
         self.table_count : int
             The table count for the report.
         self.repo_directory : str
-            The directory of the SOMA_AL repository.
+            The directory of the AL repository.
         self.kwargs : dict
             The parameters to assign to the SOMA pipeline class.
         self.help : bool
@@ -122,7 +122,7 @@ class Parameters:
         #Set internal parameters
         self.figure_count = 1
         self.table_count = 1
-        self.repo_directory = os.path.dirname(os.path.realpath(__file__)).split('SOMA_AL')[0]
+        self.repo_directory = os.path.dirname(os.path.realpath(__file__)).split('AL')[0]
 
         #Unpack parameters
         self.kwargs = kwargs
@@ -133,7 +133,7 @@ class Parameters:
             'file_path': None,
             'file_name': None,
             'dataset': '',
-            'print_filename': r'SOMA_AL/reports/PEAC_report.pdf',
+            'print_filename': r'AL/reports/PEAC_report.pdf',
             'split_by_group': 'pain',
             'split_by_group_id': kwargs.get('split_by_group', 'pain'),
             'covariate': None,

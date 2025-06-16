@@ -209,8 +209,8 @@ class Statistics:
         self.learning_accuracy_glmm = self.generalized_linear_model(formula, 
                                                self.learning_data,
                                                path=self.repo_directory,
-                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
-                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_learning_data_trials.csv",
+                                               filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials.csv",
                                                family='binomial')
         
         #Learning with covariates
@@ -218,32 +218,32 @@ class Statistics:
         self.learning_accuracy_glmm_age = self.generalized_linear_model(formula, 
                                                self.learning_data,
                                                path=self.repo_directory,
-                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
-                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_learning_data_trials_age.csv",
+                                               filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_age.csv",
                                                family='binomial')
         '''
         formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial*age+(1|participant_id)'
         self.learning_accuracy_glmm_age_interaction = self.generalized_linear_model(formula, 
                                                self.learning_data,
                                                path=self.repo_directory,
-                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
-                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_learning_data_trials_age_interaction.csv",
+                                               filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_age_interaction.csv",
                                                family='binomial')
         '''
         formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+composite_pain+(1|participant_id)'
         self.learning_accuracy_glmm_pain = self.generalized_linear_model(formula, 
                                                self.learning_data,
                                                path=self.repo_directory,
-                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
-                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_learning_data_trials_pain.csv",
+                                               filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_pain.csv",
                                                family='binomial')
         '''
         formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial*composite_pain+(1|participant_id)'
         self.learning_accuracy_glmm_pain_interaction = self.generalized_linear_model(formula, 
                                                self.learning_data,
                                                path=self.repo_directory,
-                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
-                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_learning_data_trials_pain_interaction.csv",
+                                               filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_pain_interaction.csv",
                                                family='binomial')
         '''
         #Learning RT
@@ -260,8 +260,8 @@ class Statistics:
         self.learning_rt_glmm = self.generalized_linear_model(formula, 
                                                self.learning_data,
                                                path=self.repo_directory,
-                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
-                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_learning_data_trials.csv",
+                                               filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials.csv",
                                                family='Gamma')
     
         ############################################################
@@ -279,8 +279,8 @@ class Statistics:
         self.transfer_accuracy_glmm = self.generalized_linear_model(formula, 
                                                self.choice_rate.reset_index(),
                                                path=self.repo_directory,
-                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_choice_rates.csv",
-                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rates.csv",
+                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_rates.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates.csv",
                                                family='gaussian')
 
         #Transfer with covariates
@@ -288,40 +288,40 @@ class Statistics:
         self.transfer_accuracy_glmm_age = self.generalized_linear_model(formula, 
                                         self.choice_rate.reset_index(),
                                         path=self.repo_directory,
-                                        filename=f"SOMA_AL/stats/{self.split_by_group}_stats_choice_rates_age.csv",
-                                        savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rates_age.csv",
+                                        filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_age.csv",
+                                        savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_age.csv",
                                         family='gaussian')
         '''
         formula = f'choice_rate~1+{self.group_code}*symbol*age+(1|participant_id)'
         self.transfer_accuracy_glmm_age_interaction = self.generalized_linear_model(formula, 
                                         self.choice_rate.reset_index(),
                                         path=self.repo_directory,
-                                        filename=f"SOMA_AL/stats/{self.split_by_group}_stats_choice_rates_age.csv",
-                                        savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rates_age_interaction.csv",
+                                        filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_age.csv",
+                                        savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_age_interaction.csv",
                                         family='gaussian')
         '''
         formula = f'choice_rate~1+{self.group_code}*symbol+pain+(1|participant_id)'
         self.transfer_accuracy_glmm_pain = self.generalized_linear_model(formula, 
                                         self.choice_rate.reset_index(),
                                         path=self.repo_directory,
-                                        filename=f"SOMA_AL/stats/{self.split_by_group}_stats_choice_rates_pain.csv",
-                                        savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rates_pain.csv",
+                                        filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_pain.csv",
+                                        savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_pain.csv",
                                         family='gaussian')
         '''
         formula = f'choice_rate~1+{self.group_code}*symbol*pain+(1|participant_id)'
         self.transfer_accuracy_glmm_pain_interaction = self.generalized_linear_model(formula, 
                                         self.choice_rate.reset_index(),
                                         path=self.repo_directory,
-                                        filename=f"SOMA_AL/stats/{self.split_by_group}_stats_choice_rates_pain.csv",
-                                        savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rates_pain_interaction.csv",
+                                        filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_pain.csv",
+                                        savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_pain_interaction.csv",
                                         family='gaussian')
         '''
         formula = f'choice_rate~1+{self.group_code}*symbol+context_val+(1|participant_id)'
         self.transfer_accuracy_glmm_context = self.generalized_linear_model(formula, 
                                                self.choice_rate_context.reset_index(),
                                                path=self.repo_directory,
-                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_choice_rates_context.csv",
-                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rates_context.csv",
+                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_context.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_context.csv",
                                                family='gaussian')
 
         '''
@@ -329,8 +329,8 @@ class Statistics:
         self.transfer_accuracy_glmm_context_interaction = self.generalized_linear_model(formula, 
                                               self.choice_rate_context.reset_index(),
                                               path=self.repo_directory,
-                                              filename=f"SOMA_AL/stats/{self.split_by_group}_stats_choice_rates_context.csv",
-                                              savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rates_context_interaction.csv",
+                                              filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_context.csv",
+                                              savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_context_interaction.csv",
                                               family='gaussian')
         '''
 
@@ -345,8 +345,8 @@ class Statistics:
         self.transfer_rt_glmm = self.generalized_linear_model(formula, 
                                                self.choice_rt.reset_index(),
                                                path=self.repo_directory,
-                                               filename=f"SOMA_AL/stats/{self.split_by_group}_stats_choice_rt.csv",
-                                               savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_choice_rt.csv",
+                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_rt.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rt.csv",
                                                family='Gamma')
         
         #Transfer valence bias
@@ -361,8 +361,8 @@ class Statistics:
         self.transfer_valence_bias_glmm = self.generalized_linear_model(formula, 
                                         self.valence_bias.reset_index(),
                                         path=self.repo_directory,
-                                        filename=f"SOMA_AL/stats/{self.split_by_group}_stats_transfer_valence_bias.csv",
-                                        savename=f"SOMA_AL/stats/{self.split_by_group_id}_stats_transfer_valence_bias.csv",
+                                        filename=f"AL/stats/{self.split_by_group}_stats_transfer_valence_bias.csv",
+                                        savename=f"AL/stats/{self.split_by_group_id}_stats_transfer_valence_bias.csv",
                                         family='Gaussian')
 
     
@@ -752,8 +752,8 @@ class Statistics:
             plt.ylabel('Residuals')
             plt.title(f'{dependent_variable}~{fixed_effect}'.title())
             plt.axhline(y=0, color='black', linestyle='--')
-            plt.savefig(f"{self.repo_directory}/SOMA_AL/stats/assumptions/{self.split_by_group_id}_assumption_{phase}_{dependent_variable.replace('_','')}_{fixed_effect.replace('_','')}_residuals.png")
-            plt.savefig(f"{self.repo_directory}/SOMA_AL/stats/assumptions/{self.split_by_group_id}_assumption_{phase}_{dependent_variable.replace('_','')}_{fixed_effect.replace('_','')}_residuals.svg")
+            plt.savefig(f"{self.repo_directory}/AL/stats/assumptions/{self.split_by_group_id}_assumption_{phase}_{dependent_variable.replace('_','')}_{fixed_effect.replace('_','')}_residuals.png")
+            plt.savefig(f"{self.repo_directory}/AL/stats/assumptions/{self.split_by_group_id}_assumption_{phase}_{dependent_variable.replace('_','')}_{fixed_effect.replace('_','')}_residuals.svg")
             plt.close()
 
             #Run linearity test
@@ -960,7 +960,7 @@ class Statistics:
                                   However, the file {filename.replace(".csv", f"_{outcome}_results.csv")} does not exist. 
                                   So, we will run the linear mixed effects model now.''', stacklevel=2)
                 _ = subprocess.call([self.rscripts_path,
-                                    'SOMA_AL/helpers/mixed_effects_models.R', 
+                                    'AL/helpers/mixed_effects_models.R', 
                                     path, 
                                     filename,
                                     savename, 

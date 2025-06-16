@@ -240,8 +240,8 @@ class Processing:
         """
 
         #Save the processed data to a new file
-        self.learning_data.to_csv(os.path.join('SOMA_AL','data',f'{self.split_by_group}_learning_processed.csv'), index=False)
-        self.transfer_data.to_csv(os.path.join('SOMA_AL','data',f'{self.split_by_group}_transfer_processed.csv'), index=False)
+        self.learning_data.to_csv(os.path.join('AL','data',f'{self.split_by_group}_learning_processed.csv'), index=False)
+        self.transfer_data.to_csv(os.path.join('AL','data',f'{self.split_by_group}_transfer_processed.csv'), index=False)
 
     #Data filtering
     def filter_learning_data(self) -> None:
@@ -488,13 +488,13 @@ class Processing:
             self.avg_transfer_data.loc[self.avg_transfer_data[self.group_code] == 'depressed', 'group'] = 1
 
         #Save to csv
-        self.avg_learning_data.to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_learning_data.csv', index=False)
-        self.learning_data.to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_learning_data_trials.csv', index=False)
+        self.avg_learning_data.to_csv(f'AL/stats/{self.split_by_group}_stats_learning_data.csv', index=False)
+        self.learning_data.to_csv(f'AL/stats/{self.split_by_group}_stats_learning_data_trials.csv', index=False)
 
         #Create participant average for transfer data
-        self.avg_transfer_data.to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_transfer_data.csv', index=False)
-        self.transfer_data.to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials.csv', index=False)
-        self.transfer_data_reduced.to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv', index=False)
+        self.avg_transfer_data.to_csv(f'AL/stats/{self.split_by_group}_stats_transfer_data.csv', index=False)
+        self.transfer_data.to_csv(f'AL/stats/{self.split_by_group}_stats_transfer_data_trials.csv', index=False)
+        self.transfer_data_reduced.to_csv(f'AL/stats/{self.split_by_group}_stats_transfer_data_trials_reduced.csv', index=False)
 
     def average_transform_data(self, data: pd.DataFrame, metric: str, factor: str, transformation: str) -> pd.DataFrame:
 
@@ -698,7 +698,7 @@ class Processing:
         self.valence_bias = self.valence_bias.set_index([self.group_code, 'participant_id', 'symbol'])
 
         #Save to csv
-        self.valence_bias.reset_index().to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_transfer_valence_bias.csv', index=False)
+        self.valence_bias.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_transfer_valence_bias.csv', index=False)
 
     def compute_choice_rate(self, neutral: bool = False) -> None:
 
@@ -790,11 +790,11 @@ class Processing:
             self.choice_rate_context = choice_rate_context
             self.choice_rt = choice_rt
 
-            self.choice_rate.reset_index().to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_choice_rates.csv', index=False)
-            self.choice_rate_age.reset_index().to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_choice_rates_age.csv', index=False)
-            self.choice_rate_pain.reset_index().to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_choice_rates_pain.csv', index=False)
-            self.choice_rate_context.reset_index().to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_choice_rates_context.csv', index=False)
-            self.choice_rt.reset_index().to_csv(f'SOMA_AL/stats/{self.split_by_group}_stats_choice_rt.csv', index=False)
+            self.choice_rate.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rates.csv', index=False)
+            self.choice_rate_age.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rates_age.csv', index=False)
+            self.choice_rate_pain.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rates_pain.csv', index=False)
+            self.choice_rate_context.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rates_context.csv', index=False)
+            self.choice_rt.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rt.csv', index=False)
 
         else:
             choice_rate = choice_rate.reset_index()

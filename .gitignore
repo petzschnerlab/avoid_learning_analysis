@@ -1,0 +1,11 @@
+.gitattribute
+Literature
+Documents
+AL/stats
+.RData
+.RHistory
+
+/AL/data
+/Presentations
+/AL/modelling
+/AL/plots
