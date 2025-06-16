@@ -1030,6 +1030,28 @@ class ReportFunctions:
                     p = str(f'{np.round(p, 4):.4f}').replace('0.','.') if p > 0.0001 else '> .0001'
                     group_correlation_matrix[pain_group].loc[parameter, pain_metric] = f'{r} ({p})'
 
+        #Correlation between model parameters and pain duration
+        duration_correlation_matrix = pd.DataFrame(index=parameter_names, columns=['pain_duration'])
+        duration_data = pd.DataFrame(index=fit_data['participant_id'], columns=['duration'])
+        for participant in fit_data['participant_id'].unique():
+            duration_data.loc[participant, 'duration'] = self.data[self.data['participant_id'] == participant]['duration'].values[0]
+        duration_data['pain_duration'] = duration_data['duration'].map({'I am not in pain': 0,
+                                                                        '< 2 weeks': 1,
+                                                                        '2-4 weeks': 2,
+                                                                        '1 – 3 months': 3,
+                                                                        '3 – 6 months': 4,
+                                                                        '6 – 12 months': 5,
+                                                                        '1 – 5 years': 6,
+                                                                        '> 5 years': 7,
+                                                                        '> 10 years': 8})
+        #Add it to fit_data, matching participant_id
+        fit_data = fit_data.merge(duration_data[['pain_duration']], on='participant_id', how='left')
+        for parameter in parameter_names:
+            r, p = stats.spearmanr(fit_data[parameter], fit_data['pain_duration'])
+            r = str(f'{np.round(r, 2):.2f}').replace('0.','.') 
+            p = str(f'{np.round(p, 4):.4f}').replace('0.','.') if p >= 0.0001 else '< .0001'
+            duration_correlation_matrix.loc[parameter, 'pain_duration'] = f'{r} ({p})' 
+
         metadata = {'formula': 'parameter~pain_score',
                     'fixed_effects': pain_names.tolist(),
                     'random_effects': '',
@@ -1037,7 +1059,7 @@ class ReportFunctions:
                     'sample_size': fit_data['participant_id'].nunique(),
                     'test': 'r',
                     'df_residual': fit_data.shape[0] - 2}
-        self.model_parameters_pain = {'metadata': metadata, 'model_summary': correlation_matrix, 'group_summary': group_correlation_matrix}
+        self.model_parameters_pain = {'metadata': metadata, 'model_summary': correlation_matrix, 'group_summary': group_correlation_matrix, 'duration_summary': duration_correlation_matrix}
         
         #Plot the correlations
         plotting.plot_model_parameters_by_pain_split(fit_data, parameter_names, pain_names)

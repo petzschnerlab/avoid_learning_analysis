@@ -569,19 +569,17 @@ class Statistics:
         self.transfer_accuracy_planned_group_select_hrlp = self.planned_ttests('choice_rate', self.group_code, comparisons, hr_lp_data)
         self.transfer_accuracy_planned_group_select_lrlp = self.planned_ttests('choice_rate', self.group_code, comparisons, lr_lp_data)
 
-    
         #These are modified post-hocs
         self.select_transfer_choice_rate_posthocs = pd.DataFrame(index=hr_lp_data[self.group_code].unique(), columns=['HR_LP', 'LR_LP'])
         for group in hr_lp_data[self.group_code].unique():
             group_data = hr_lp_data[hr_lp_data[self.group_code] == group]
             t_stat, p_value = sp.stats.ttest_1samp(group_data['choice_rate'].astype(float), 0)
-            p_value = np.min(p_value*hr_lp_data[self.group_code].nunique(), 1) #Bonferroni correction
+            p_value = np.min((p_value*hr_lp_data[self.group_code].nunique(), 1)) #Bonferroni correction
             cohen_d = t_stat / np.sqrt(len(group_data['choice_rate']) - 1)
-
             self.select_transfer_choice_rate_posthocs.loc[group, 'HR_LP'] = f"t={t_stat:.2f}, p={p_value:.4f}, d={cohen_d:.2f}"
             group_data = lr_lp_data[lr_lp_data[self.group_code] == group]
             t_stat, p_value = sp.stats.ttest_1samp(group_data['choice_rate'].astype(float), 0)
-            p_value = np.min(p_value*hr_lp_data[self.group_code].nunique(), 1) #Bonferroni correction
+            p_value = np.min((p_value*hr_lp_data[self.group_code].nunique(), 1)) #Bonferroni correction
             cohen_d = t_stat / np.sqrt(len(group_data['choice_rate']) - 1)
             self.select_transfer_choice_rate_posthocs.loc[group, 'LR_LP'] = f"t={t_stat:.2f}, p={p_value:.4f}, d={cohen_d:.2f}"
 
@@ -590,7 +588,7 @@ class Statistics:
         self.transfer_accuracy_planned_interaction_constrained['model_summary'] = pd.concat((self.transfer_accuracy_planned_group_select_hrlp['model_summary'], 
                                                                                 self.transfer_accuracy_planned_group_select_lrlp['model_summary']), 
                                                                                 axis=0).reset_index(drop=True)
-        
+
         hr_rt = self.select_choice_rt['High Reward'].reset_index()
         hr_rt = hr_rt[hr_rt['symbol'] == 'Low Punish']
         lr_rt = self.select_choice_rt['Low Reward'].reset_index()
