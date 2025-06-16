@@ -57,21 +57,21 @@ class Tests:
         """
 
         #Create folder for plots if non existent
-        if not os.path.exists('SOMA_AL/plots/tests'):
-            os.makedirs('SOMA_AL/plots/tests')
-        if not os.path.exists('SOMA_AL/plots/tests/no pain'):
-            os.makedirs('SOMA_AL/plots/tests/no pain')
-        if not os.path.exists('SOMA_AL/plots/tests/acute pain'):
-            os.makedirs('SOMA_AL/plots/tests/acute pain')
-        if not os.path.exists('SOMA_AL/plots/tests/chronic pain'):
-            os.makedirs('SOMA_AL/plots/tests/chronic pain')
-        if not os.path.exists('SOMA_AL/plots/tests/healthy'):
-            os.makedirs('SOMA_AL/plots/tests/healthy')
-        if not os.path.exists('SOMA_AL/plots/tests/depressed'):
-            os.makedirs('SOMA_AL/plots/tests/depressed')
+        if not os.path.exists('AL/plots/tests'):
+            os.makedirs('AL/plots/tests')
+        if not os.path.exists('AL/plots/tests/no pain'):
+            os.makedirs('AL/plots/tests/no pain')
+        if not os.path.exists('AL/plots/tests/acute pain'):
+            os.makedirs('AL/plots/tests/acute pain')
+        if not os.path.exists('AL/plots/tests/chronic pain'):
+            os.makedirs('AL/plots/tests/chronic pain')
+        if not os.path.exists('AL/plots/tests/healthy'):
+            os.makedirs('AL/plots/tests/healthy')
+        if not os.path.exists('AL/plots/tests/depressed'):
+            os.makedirs('AL/plots/tests/depressed')
 
         for i, group in enumerate(self.group_labels):
-            folder_name = f'SOMA_AL/plots/tests/{group}/'
+            folder_name = f'AL/plots/tests/{group}/'
             group_data = self.learning_data[self.learning_data[self.group_code] == group]
             
             if context_type == 'context':
