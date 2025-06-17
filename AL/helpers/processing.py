@@ -47,7 +47,9 @@ class Processing:
             self.file = []
             for file in file_name:
                 self.file.append(os.path.join(file_path, file))
-                data.append(pd.read_csv(os.path.join(file_path, file)))
+                file_data = pd.read_csv(os.path.join(file_path, file))
+                file_data['task'] = os.path.split(file)[-1].replace('.csv', '')
+                data.append(file_data)
 
             #Drop any columns that do not exist in the first dataset and reorganize columns to match the first dataset
             for i in range(1, len(data)):
@@ -726,9 +728,11 @@ class Processing:
 
         #Compute choice rates for each participant and symbol within each group
         choice_rate = pd.DataFrame(columns=['choice_rate'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=[self.group_code, 'participant_id', 'symbol']))
+        choice_rt = pd.DataFrame(columns=['choice_rt'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=[self.group_code, 'participant_id', 'symbol']))
+
         choice_rate_age = pd.DataFrame(columns=['choice_rate', 'age'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=[self.group_code, 'participant_id', 'symbol']))
         choice_rate_pain = pd.DataFrame(columns=['choice_rate', 'pain'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=[self.group_code, 'participant_id', 'symbol']))
-        choice_rt = pd.DataFrame(columns=['choice_rt'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=[self.group_code, 'participant_id', 'symbol']))
+        choice_rate_task = pd.DataFrame(columns=['choice_rate', 'task'], index=pd.MultiIndex(levels=[[], [], []], codes=[[], [], []], names=[self.group_code, 'participant_id', 'symbol']))
         choice_rate_context = pd.DataFrame(columns=['choice_rate'], index=pd.MultiIndex(levels=[[], [], [], []], codes=[[], [], [], []], names=[self.group_code, 'participant_id', 'symbol', 'context_val']))
 
         for group in self.group_labels:
@@ -747,6 +751,8 @@ class Processing:
                     choice_rate_age.loc[(group, participant, symbol), 'age'] = participant_data.reset_index().loc[0]['age']
                     choice_rate_pain.loc[(group, participant, symbol), 'choice_rate'] = symbol_choice_rate
                     choice_rate_pain.loc[(group, participant, symbol), 'pain'] = participant_data.reset_index().loc[0]['composite_pain']
+                    choice_rate_task.loc[(group, participant, symbol), 'choice_rate'] = symbol_choice_rate
+                    choice_rate_task.loc[(group, participant, symbol), 'task'] = participant_data.reset_index().loc[0]['task']
                     choice_rt.loc[(group, participant, symbol), 'choice_rt'] = participant_data[participant_data['symbol_chosen'] == symbol]['rt'].mean()
 
         for group in self.group_labels:
@@ -780,6 +786,10 @@ class Processing:
             choice_rate_context['symbol'] = choice_rate_context['symbol'].replace({0: 'Novel', 1: 'High Punish', 2: 'Low Punish', 3: 'Low Reward', 4: 'High Reward'})
             choice_rate_context = choice_rate_context.set_index([self.group_code, 'participant_id', 'symbol', 'context_val'])
 
+            choice_rate_task = choice_rate_task.reset_index()
+            choice_rate_task['symbol'] = choice_rate_task['symbol'].replace({0: 'Novel', 1: 'High Punish', 2: 'Low Punish', 3: 'Low Reward', 4: 'High Reward'})
+            choice_rate_task = choice_rate_task.set_index([self.group_code, 'participant_id', 'symbol', 'task'])
+
             choice_rt = choice_rt.reset_index()
             choice_rt['symbol'] = choice_rt['symbol'].replace({0: 'Novel', 1: 'High Punish', 2: 'Low Punish', 3: 'Low Reward', 4: 'High Reward'})
             choice_rt = choice_rt.set_index([self.group_code, 'participant_id', 'symbol'])
@@ -788,12 +798,14 @@ class Processing:
             self.choice_rate_age = choice_rate_age
             self.choice_rate_pain = choice_rate_pain
             self.choice_rate_context = choice_rate_context
+            self.choice_rate_task = choice_rate_task
             self.choice_rt = choice_rt
 
             self.choice_rate.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rates.csv', index=False)
             self.choice_rate_age.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rates_age.csv', index=False)
             self.choice_rate_pain.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rates_pain.csv', index=False)
             self.choice_rate_context.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rates_context.csv', index=False)
+            self.choice_rate_task.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rates_task.csv', index=False)
             self.choice_rt.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rt.csv', index=False)
 
         else:

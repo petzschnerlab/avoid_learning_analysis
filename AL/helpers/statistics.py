@@ -246,6 +246,14 @@ class Statistics:
                                                savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_pain_interaction.csv",
                                                family='binomial')
         '''
+        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+task+(1|participant_id)'
+        self.learning_accuracy_glmm_task = self.generalized_linear_model(formula, 
+                                               self.learning_data,
+                                               path=self.repo_directory,
+                                               filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_task.csv",
+                                               family='binomial')
+        
         #Learning RT
         formula = f'rt~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)'
         if self.covariate is not None:
@@ -333,7 +341,14 @@ class Statistics:
                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_context_interaction.csv",
                                               family='gaussian')
         '''
-
+        formula = f'choice_rate~1+{self.group_code}*symbol+task+(1|participant_id)'
+        self.transfer_accuracy_glmm_task = self.generalized_linear_model(formula, 
+                                               self.choice_rate_context.reset_index(),
+                                               path=self.repo_directory,
+                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_task.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_task.csv",
+                                               family='gaussian')
+        
         #Transfer choice RT using averaged data
         formula = f'choice_rt~1+{self.group_code}*symbol+(1|participant_id)'
         assumption_data = self.choice_rt.reset_index()
@@ -969,11 +984,11 @@ class Statistics:
             #The reason this is done in R is because the statsmodels package in Python does not provide factor level p-values for (generalized) linear mixed effects models.
             #This is worth looking into further, as there might be a parameter I have overlooked, or else there could be a different package that fits our needs.
             outcome = formula.split('~')[0]
-            file_exists = os.path.isfile(filename.replace('.csv', f'_{outcome}_results.csv'))
+            file_exists = os.path.isfile(savename.replace('.csv', f'_{outcome}_results.csv'))
             if not self.load_stats or not file_exists:
                 if self.load_stats and not file_exists:
                     warnings.warn(f'''You requested to load rather than run the statistics using the load_stats=True parameter.
-                                  However, the file {filename.replace(".csv", f"_{outcome}_results.csv")} does not exist. 
+                                  However, the file {savename.replace(".csv", f"_{outcome}_results.csv")} does not exist. 
                                   So, we will run the linear mixed effects model now.''', stacklevel=2)
                 _ = subprocess.call([self.rscripts_path,
                                     'AL/helpers/mixed_effects_models.R', 
