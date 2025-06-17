@@ -1051,6 +1051,7 @@ class ReportFunctions:
             r = str(f'{np.round(r, 2):.2f}').replace('0.','.') 
             p = str(f'{np.round(p, 4):.4f}').replace('0.','.') if p >= 0.0001 else '< .0001'
             duration_correlation_matrix.loc[parameter, 'pain_duration'] = f'{r} ({p})' 
+        self.duration_data = duration_data
 
         metadata = {'formula': 'parameter~pain_score',
                     'fixed_effects': pain_names.tolist(),
@@ -1064,3 +1065,4 @@ class ReportFunctions:
         #Plot the correlations
         plotting.plot_model_parameters_by_pain_split(fit_data, parameter_names, pain_names)
         plotting.plot_model_fits({'AIC': self.model_AIC, 'BIC': self.model_BIC})
+        plotting.plot_param_duration(parameter_names, fit_data)

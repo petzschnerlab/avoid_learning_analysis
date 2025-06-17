@@ -15,7 +15,7 @@ class Plotting:
     def __init__(self):
 
         #Initialize plot formatting
-        self.colors = {'group': ['#B2DF8A', '#FFD92F', '#FB9A99'],
+        self.colors = {'group': ['#85A947', '#3E7B27', '#123524'],
                        'condition': ['#095086', '#9BD2F2', '#ECA6A6', '#B00000', '#D3D3D3'],
                        'condition_2': ['#095086', '#B00000']}
         
@@ -173,7 +173,8 @@ class Plotting:
 
             #Set index name
             data.index.name = 'code'
-            data = data.to_frame()
+            if not isinstance(data, pd.DataFrame):
+                data = data.to_frame()
             data.columns = ['score']
             
             #Compute the mean and 95% CIs for the choice rate for each symbol
@@ -573,7 +574,6 @@ class Plotting:
         fig, ax = plt.subplots(1, 2, figsize=(10, 5))
         for sub in range(2):
             _, t_scores = self.compute_n_and_t(data, self.group_code)
-            #Categorize the group code no pain, acute pain, chronic pain
             diff_label = 'hr_lp' if sub == 0 else 'lr_lp'
             metric_data = data.copy().set_index(self.group_code)[diff_label].astype(float)
             metric_data.index = pd.CategoricalIndex(metric_data.index, categories=self.group_labels, ordered=True)
@@ -582,12 +582,12 @@ class Plotting:
 
             ax[sub].set_xticks([1, 2, 3], ['No\nPain', 'Acute\nPain', 'Chronic\nPain'])
             ax[sub].set_xlabel('')
-            y_label = 'Choice Rates (%)\nHigh Reward - Low Punish' if sub == 0 else 'Choice Rates (%)\nLow Reward - Low Punish'
+            y_label = 'Choice Rate: HR - LP (%)' if sub == 0 else 'Choice Rate: LR - LP (%)'
             ax[sub].set_ylabel(y_label)
             ax[sub].axhline(y=0, color='darkgrey', linestyle='--')
             ax[sub].spines['top'].set_visible(False)
             ax[sub].spines['right'].set_visible(False)
-            ylim = [-20, 90] if sub == 0 else [-20, 40]
+            ylim = [0, 50] if sub == 0 else [-10, 20]
             ax[sub].set_ylim(ylim)
             ax[sub].tick_params(axis='both')
             plt.subplots_adjust(left=0.2)
@@ -978,3 +978,110 @@ class Plotting:
             plt.tight_layout()
             plt.savefig(f'AL/modelling/group_{fit}.png')
             plt.close()
+
+    def plot_param_duration(self, parameter_names, fit_data):
+        parameter_names = list(parameter_names)
+        duration_levels = fit_data['pain_duration'].unique()
+        plot_data = fit_data[parameter_names+['pain_duration']].copy()
+
+        significant_parameters = []
+        nonsignificant_parameters = []
+        for parameter in parameter_names:
+            _, pval = stats.spearmanr(plot_data[parameter], plot_data['pain_duration'])
+            if pval < 0.05:
+                significant_parameters.append(parameter)
+            else:
+                nonsignificant_parameters.append(parameter)
+        
+        fig, ax = plt.subplots(nrows=1, ncols=len(parameter_names), figsize=(5*(len(parameter_names)), 5))
+        for pi, parameter in enumerate(parameter_names):
+            param_data = plot_data[[parameter, 'pain_duration']]
+            param_data.set_index('pain_duration', inplace=True)
+            _, t_scores = self.compute_n_and_t(param_data, 'pain_duration')
+
+            self.bar_plot(param_data, ax[pi], t_scores=t_scores, colors=self.colors['group'][0])
+
+            #Set the x-ticks and labels
+            duration_key = {
+                0: 'I am not in pain', 1: '< 2 weeks', 2: '2-4 weeks', 3: '1 – 3 months',
+                4: '3 – 6 months', 5: '6 – 12 months', 6: '1 – 5 years', 7: '> 5 years', 8: '> 10 years'
+            }
+            duration_key = {k: v for k, v in duration_key.items() if k in duration_levels}
+            ax[pi].set_xticks(np.arange(1, len(duration_key)+1))
+            ax[pi].set_xticklabels(list(duration_key.values()), rotation=45, ha='right', va='top', fontsize=12)
+            ax[pi].set_xlabel('')
+            ax[pi].set_ylabel(parameter.replace('_', ' ').replace('lr', 'learning rate').replace(' learning', '\nlearning').title())
+            ax[pi].spines['top'].set_visible(False)
+            ax[pi].spines['right'].set_visible(False)
+            ax[pi].tick_params(axis='both')
+            
+            plt.subplots_adjust(bottom=0.3)
+            plt.tight_layout()
+
+        #Save the plot
+        plt.savefig(f'AL/plots/parameter_duration_corr.png')
+        plt.close()
+
+        if significant_parameters:
+            fig, ax = plt.subplots(nrows=1, ncols=len(significant_parameters), figsize=(5 * len(significant_parameters), 5))
+            if len(significant_parameters) == 1:
+                ax = [ax]
+
+            for pi, parameter in enumerate(significant_parameters):
+                param_data = plot_data[[parameter, 'pain_duration']].copy()
+                param_data.set_index('pain_duration', inplace=True)
+                _, t_scores = self.compute_n_and_t(param_data, 'pain_duration')
+
+                self.bar_plot(param_data, ax[pi], t_scores=t_scores, colors=self.colors['group'][0])
+
+                duration_key = {
+                    0: 'I am not in pain', 1: '< 2 weeks', 2: '2-4 weeks', 3: '1 – 3 months',
+                    4: '3 – 6 months', 5: '6 – 12 months', 6: '1 – 5 years', 7: '> 5 years', 8: '> 10 years'
+                }
+                duration_key = {k: v for k, v in duration_key.items() if k in duration_levels}
+                ax[pi].set_xticks(np.arange(1, len(duration_key) + 1))
+                ax[pi].set_xticklabels(list(duration_key.values()), rotation=45, ha='right', va='top', fontsize=12)
+                ax[pi].set_xlabel('')
+                ax[pi].set_ylabel(parameter.replace('_', ' ').replace('lr', 'learning rate').replace(' learning', '\nlearning').title())
+                ax[pi].spines['top'].set_visible(False)
+                ax[pi].spines['right'].set_visible(False)
+                ax[pi].tick_params(axis='both')
+
+            plt.subplots_adjust(bottom=0.3)
+            plt.tight_layout()
+            plt.savefig(f'AL/plots/parameter_duration_corr-significant.png')
+            plt.close()
+
+        # === Plot non-significant parameters ===
+        if nonsignificant_parameters:
+            fig, ax = plt.subplots(nrows=1, ncols=len(nonsignificant_parameters), figsize=(5 * len(nonsignificant_parameters), 5))
+            if len(nonsignificant_parameters) == 1:
+                ax = [ax]
+
+            for pi, parameter in enumerate(nonsignificant_parameters):
+                param_data = plot_data[[parameter, 'pain_duration']].copy()
+                param_data.set_index('pain_duration', inplace=True)
+                _, t_scores = self.compute_n_and_t(param_data, 'pain_duration')
+
+                self.bar_plot(param_data, ax[pi], t_scores=t_scores, colors=self.colors['group'][0])
+
+                duration_key = {
+                    0: 'I am not in pain', 1: '< 2 weeks', 2: '2-4 weeks', 3: '1 – 3 months',
+                    4: '3 – 6 months', 5: '6 – 12 months', 6: '1 – 5 years', 7: '> 5 years', 8: '> 10 years'
+                }
+                duration_key = {k: v for k, v in duration_key.items() if k in duration_levels}
+                ax[pi].set_xticks(np.arange(1, len(duration_key) + 1))
+                ax[pi].set_xticklabels(list(duration_key.values()), rotation=45, ha='right', va='top', fontsize=12)
+                ax[pi].set_xlabel('')
+                ax[pi].set_ylabel(parameter.replace('_', ' ').replace('lr', 'learning rate').replace(' learning', '\nlearning').title())
+                ax[pi].spines['top'].set_visible(False)
+                ax[pi].spines['right'].set_visible(False)
+                ax[pi].tick_params(axis='both')
+
+            plt.suptitle("Non-Significant Parameters", fontsize=16, x=0.01, ha='left')
+            plt.subplots_adjust(bottom=0.3)
+            plt.tight_layout()
+            plt.savefig(f'AL/plots/parameter_duration_corr-nonsignificant.png')
+            plt.close()
+                
+
