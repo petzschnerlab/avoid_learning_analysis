@@ -1,1 +1,0 @@
-from SOMA_main import SOMAPipeline
