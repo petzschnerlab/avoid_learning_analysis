@@ -171,6 +171,9 @@ class Parameters:
         if not os.path.exists(f"AL/plots/{self.split_by_group}"):
             os.makedirs(f"AL/plots/{self.split_by_group}")
 
+        if not os.path.exists(f"AL/modelling/"):
+            os.makedirs(f"AL/modelling/")
+
     #Print chosen parameters
     def announce(self, case: str = 'start') -> None:
 
