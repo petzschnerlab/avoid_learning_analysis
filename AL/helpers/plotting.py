@@ -771,7 +771,7 @@ class Plotting:
             _, t_scores = self.compute_n_and_t(metric_scores, self.group_code)
 
             #Create plot
-            self.raincloud_plot(data=metric_scores, ax=ax[metric_index], t_scores=t_scores, alpha=0.75, colors=colors)
+            self.raincloud_plot(data=metric_scores, ax=ax[metric_index], t_scores=t_scores, alpha=1, colors=colors)
 
             #Create horizontal line for the mean the same width
             num_groups = 3 if self.split_by_group == 'pain' else 2
@@ -814,7 +814,7 @@ class Plotting:
         """
 
         fig, axes = plt.subplots(nrows=len(parameter_names), ncols=len(pain_names), figsize=(len(pain_names)*3, len(parameter_names)*3))
-        colours = ['#B2DF8A', '#FB9A99', '#FFD92F']
+        colours = self.colors['group']
         for i, parameter in enumerate(parameter_names):
             for j, pain_metric in enumerate(pain_names):
                 rs = []
@@ -877,7 +877,8 @@ class Plotting:
             A plot of model parameters against pain metrics for different pain groups, split by pain group.
         """
 
-        colours = {'no pain': '#B2DF8A', 'chronic pain': '#FB9A99', 'acute pain': '#FFD92F'}
+        cols = self.colors['group']
+        colours = {'no pain': cols[0], 'chronic pain': cols[2], 'acute pain': cols[1]}
         
         for group in ['no pain', 'chronic pain', 'acute pain']:
             fig, axes = plt.subplots(nrows=len(parameter_names), ncols=len(pain_names), 
