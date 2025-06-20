@@ -33,10 +33,10 @@ class Plotting:
 
         #Main figures
         self.plot_clinical_scores('demo-clinical-scores', colors=self.colors['group'])
-        self.plot_learning_curves('learning-accuracy-by-group', rolling_mean=self.rolling_mean, grouping='clinical', colors=self.colors['condition_2'], subplot_title='A. Learning Phase')
-        self.plot_learning_curves('learning-rt-by-group', rolling_mean=self.rolling_mean, grouping='clinical', metric='rt', colors=self.colors['condition_2'], subplot_title='A. Learning Phase')
-        self.plot_transfer_data('transfer-choice-rate', colors=self.colors['condition'], plot_type='bar', group_labels=False, subplot_title='B. Transfer Phase')
-        self.plot_transfer_data('transfer-rt', colors=self.colors['condition'], plot_type='bar', group_labels=False, subplot_title='B. Transfer Phase')
+        self.plot_learning_curves('learning-accuracy-by-group', rolling_mean=self.rolling_mean, grouping='clinical', colors=self.colors['condition_2'], subplot_title='a. Learning Phase')
+        self.plot_learning_curves('learning-rt-by-group', rolling_mean=self.rolling_mean, grouping='clinical', metric='rt', colors=self.colors['condition_2'], subplot_title='a. Learning Phase')
+        self.plot_transfer_data('transfer-choice-rate', colors=self.colors['condition'], plot_type='bar', group_labels=False, subplot_title='b. Transfer Phase')
+        self.plot_transfer_data('transfer-rt', colors=self.colors['condition'], plot_type='bar', group_labels=False, subplot_title='b. Transfer Phase')
         self.plot_combined_learning_and_transfer('empirical-performance', 'learning-accuracy-by-group', 'transfer-choice-rate')
         self.plot_combined_learning_and_transfer('empirical-rt', 'learning-rt-by-group', 'transfer-rt')
 
