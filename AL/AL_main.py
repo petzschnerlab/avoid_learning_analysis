@@ -27,5 +27,5 @@ if __name__ == '__main__':
     }
 
     #Run the pipeline
-    pipeline = Pipeline()
+    pipeline = Pipeline(seed=1251)
     pipeline.run(**kwargs)
