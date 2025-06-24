@@ -36,8 +36,7 @@ class Pipeline(Master):
         self.load_data(file_path = self.file_path, file_name = self.file_name)
         if 'depression' in self.split_by_group_id:
             self.recode_depression()
-        if 'pain' in self.split_by_group_id:
-            self.exclude_pain(threshold=2)
+        self.exclude_pain(threshold=self.pain_cutoff)
         if self.check_data():
             self.process_data()
             self.run_tests()

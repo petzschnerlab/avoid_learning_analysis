@@ -196,10 +196,7 @@ class Statistics:
         ############################################################
 
         #Learning accuracy
-        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)'
-        if self.covariate is not None:
-            formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+{self.covariate}+(1|participant_id)'
-        
+        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)'    
         assumption_data = self.average_byfactor(self.learning_data, 'accuracy', [self.group_code, 'symbol_name', 'binned_trial'])
         assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
         assumption_data['symbol_name'] = pd.Categorical(assumption_data['symbol_name'], ['Reward', 'Punish'])
@@ -256,9 +253,6 @@ class Statistics:
         
         #Learning RT
         formula = f'rt~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)'
-        if self.covariate is not None:
-            formula = f'rt~1+{self.group_code}*symbol_name*binned_trial+{self.covariate}+(1|participant_id)'
-
         assumption_data = self.average_byfactor(self.learning_data, 'rt', [self.group_code, 'symbol_name', 'binned_trial'])
         assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
         assumption_data['symbol_name'] = pd.Categorical(assumption_data['symbol_name'], ['Reward', 'Punish'])
@@ -366,9 +360,6 @@ class Statistics:
         
         #Transfer valence bias
         formula = f'valence_bias~1+{self.group_code}'
-        if self.covariate is not None:
-            formula = f'valence_bias~1+{self.group_code}+{self.covariate}'
-
         assumption_data = self.valence_bias.reset_index()
         assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
         self.transfer_valence_bias_glmm_assumptions = self.glmm_assumption_check(assumption_data, formula, phase='transfer')

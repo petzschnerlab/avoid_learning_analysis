@@ -47,8 +47,8 @@ class Parameters:
             The group to split the data by.
         self.split_by_group_id : str
             The group ID to split the data by.
-        self.covariate : str
-            The covariate to use in the GLMMs.
+        self.pain_cutoff : int
+            The cutoff for the pain group.
         self.depression_cutoff : int
             The cutoff for the depression group.
         self.accuracy_exclusion_threshold : int
@@ -89,7 +89,7 @@ class Parameters:
                            'split_by_group',
                            'split_by_group_id',
                            'dataset',
-                           'covariate',
+                           'pain_cutoff',
                            'depression_cutoff',
                            'accuracy_exclusion_threshold',
                            'RT_low_threshold',
@@ -136,7 +136,7 @@ class Parameters:
             'print_filename': r'AL/reports/PEAC_report.pdf',
             'split_by_group': 'pain',
             'split_by_group_id': kwargs.get('split_by_group', 'pain'),
-            'covariate': None,
+            'pain_cutoff': 2,
             'depression_cutoff': 10,
             'accuracy_exclusion_threshold': 70,
             'RT_low_threshold': 200,
@@ -157,7 +157,7 @@ class Parameters:
 
         #Format parameters
         self.split_by_group = self.split_by_group if ',' not in self.split_by_group else self.split_by_group
-        self.hide_posthocs = True if self.load_stats == False else self.hide_posthocs
+        self.hide_posthocs = True if self.hide_stats == True else self.hide_posthocs
         self.print_filename = self.print_filename.replace('.pdf', f'_{self.split_by_group_id}.pdf')
         self.group_code = 'group_code' if self.split_by_group == 'pain' else 'depression'
         if self.split_by_group == 'pain':

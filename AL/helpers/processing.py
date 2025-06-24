@@ -214,15 +214,20 @@ class Processing:
         
         #Recode the participants who are in the transition group (duration = 3 – 6 months)
         transition_index = self.data['duration'] == '3 – 6 months'
-        self.data.loc[transition_index, self.group_code] = 'acute pain'
+        self.data.loc[transition_index, 'group_code'] = 'acute pain'
 
         #Create composite score
         self.data['composite_pain'] = self.data.apply(lambda x: np.mean((x['intensity'], x['unpleasant'], x['interference'])), axis=1)
 
         #Find row indexes of participants in no pain (column 'group_code') where their average_pain scores are less than the threshold
-        no_pain_participants = (self.data[self.group_code] == 'no pain') & (self.data['composite_pain'] < threshold)        
-        acute_pain_participants = (self.data[self.group_code] == 'acute pain') & (self.data['composite_pain'] >= threshold)
-        chronic_pain_participants = (self.data[self.group_code] == 'chronic pain') & (self.data['composite_pain'] >= threshold)
+        if threshold:
+            no_pain_participants = (self.data['group_code'] == 'no pain') & (self.data['composite_pain'] < threshold)        
+            acute_pain_participants = (self.data['group_code'] == 'acute pain') & (self.data['composite_pain'] >= threshold)
+            chronic_pain_participants = (self.data['group_code'] == 'chronic pain') & (self.data['composite_pain'] >= threshold)
+        else:
+            no_pain_participants = self.data['group_code'] == 'no pain'
+            acute_pain_participants = self.data['group_code'] == 'acute pain'
+            chronic_pain_participants = self.data['group_code'] == 'chronic pain'
         kept_participants = no_pain_participants | acute_pain_participants | chronic_pain_participants
         removed_participants = ~kept_participants
 
