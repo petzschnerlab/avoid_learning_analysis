@@ -9,8 +9,11 @@ class Pipeline(Master):
     Class to run the SOMA project pipeline
     """
 
-    def __init__(self):
+    def __init__(self, help: bool = False) -> None:
         super().__init__()
+
+        if help:
+            self.run(help=True)
 
     def run(self, **kwargs):
 
