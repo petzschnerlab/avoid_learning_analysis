@@ -179,7 +179,10 @@ class Parameters:
 
         if not os.path.exists(f"AL/plots/"):
             os.makedirs(f"AL/plots/")
-        
+
+        if not os.path.exists(f"AL/plots/tables/"):
+            os.makedirs(f"AL/plots/tables/")
+
         if not os.path.exists(f"AL/plots/{self.split_by_group}"):
             os.makedirs(f"AL/plots/{self.split_by_group}")
 
