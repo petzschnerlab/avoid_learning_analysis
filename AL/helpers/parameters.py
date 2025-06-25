@@ -168,11 +168,17 @@ class Parameters:
             self.group_labels_formatted = ['Healthy', 'Depressed']
 
         #Create needed directories
-        if not os.path.exists(f"AL/plots/{self.split_by_group}"):
-            os.makedirs(f"AL/plots/{self.split_by_group}")
-
         if not os.path.exists(f"AL/modelling/"):
             os.makedirs(f"AL/modelling/")
+
+        if not os.path.exists(f"AL/stats/"):
+            os.makedirs(f"AL/stats/")
+
+        if not os.path.exists(f"AL/plots/"):
+            os.makedirs(f"AL/plots/")
+        
+        if not os.path.exists(f"AL/plots/{self.split_by_group}"):
+            os.makedirs(f"AL/plots/{self.split_by_group}")
 
     #Print chosen parameters
     def announce(self, case: str = 'start') -> None:
