@@ -1006,6 +1006,7 @@ class Statistics:
                             Here is an example of where the rscripts executable may live: C:/Program Files/R/R-4.4.1/bin/x64/Rscript.
                             Until these steps are fulfilled, this analysis will proceed as a multiple regression *without* the random effect:
                             {fixed_formula}\n''', stacklevel=2)
+            data[fixed_formula.split('~')[0]] = data[fixed_formula.split('~')[0]].astype(float) #Ensure the outcome variable is float
             model_results = smf.ols(formula=fixed_formula, data=data).fit()
             model_summary = sm.stats.anova_lm(model_results, type=3)
             df_residual = model_results.df_resid
