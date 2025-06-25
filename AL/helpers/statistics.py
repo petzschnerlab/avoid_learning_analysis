@@ -1084,6 +1084,8 @@ class Statistics:
                 if len(set(condition1_data['participant_id']).intersection(set(condition2_data['participant_id']))) == condition1_data['participant_id'].shape[0]:
                     condition1_data = condition1_data.sort_values('participant_id')[metric].reset_index(drop=True)
                     condition2_data = condition2_data.sort_values('participant_id')[metric].reset_index(drop=True)
+                    condition1_data = condition1_data.astype(float)
+                    condition2_data = condition2_data.astype(float)
                     
                     assumption_check = self.ttest_assumption_check(condition1_data, condition2_data, test_type='paired')
                     ttest = sp.stats.ttest_rel(condition1_data, condition2_data, nan_policy='omit')
