@@ -244,12 +244,12 @@ class Help:
         The easiest implementation of this package is:
             from helpers.pipeline import Pipeline
             
-            kwargs = {
+            params = {
                 'file_path': 'path/to/data',
                 'file_name': ['subfolder1/data1.csv', 'subfolder2/data2.csv']}
             
             pipeline = Pipeline()
-            pipeline.run(**kwargs)
+            pipeline.run(**params)
 
         Please note: The docstrings within the classes and methods of this package are mostly built using AI. They should be alright, but there may be errors
         However, this help function was written by hand and should be accurate. If there is any conflict between the two, believe the help function.
