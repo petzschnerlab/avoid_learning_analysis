@@ -1,0 +1,835 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../datastructure/">
+      
+      
+        <link rel="next" href="../../Tutorials/AL_tutorial/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+    
+    
+      
+        <title>Parameters - Avoid Learning Analysis</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="dark-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#pipeline-parameters" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Avoid Learning Analysis" class="md-header__button md-logo" aria-label="Avoid Learning Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Avoid Learning Analysis
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Parameters
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="dark-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="dark-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Avoid Learning Analysis" class="md-nav__button md-logo" aria-label="Avoid Learning Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Avoid Learning Analysis
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    How To Use
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            How To Use
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Install
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../datastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Data Structure
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Parameters
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameters
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Start
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Tutorials
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Tutorials/AL_tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    AL Analysis Tutorial
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/petzschnerlab/avoid_learning_analysis" target="_blank" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Repository
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" hidden>
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Start
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+
+
+
+
+<h1 id="pipeline-parameters">Pipeline Parameters</h1>
+<p>The <strong>Avoid Learning Analysis</strong> package is a tool for analyzing data from the SOMA avoidance learning study. It is designed to run with customizable parameters and generates a report summarizing the analysis results.</p>
+<p>This package can be run as a standalone tool or alongside the companion package <a href="https://github.com/your-org/avoid_learning_rl_models"><code>avoid_learning_rl_models</code></a>. When used together, the <code>load_models</code> parameter enables the inclusion of model outputs in the report.</p>
+<h2 id="quick-start">Quick Start</h2>
+<pre><code class="language-python">from helpers.pipeline import Pipeline
+
+params = {
+    'file_path': 'path/to/data',
+    'file_name': ['subfolder1/data1.csv', 'subfolder2/data2.csv']
+}
+
+pipeline = Pipeline()
+pipeline.run(**params)
+</code></pre>
+<p>!!! note
+    The docstrings for this package are primarily AI-generated. The help function below is written by hand and should be considered authoritative in the case of any discrepancy.</p>
+<hr />
+<h1 id="parameters">Parameters</h1>
+<h2 id="pipeline-constructor-parameters"><code>Pipeline</code> Constructor Parameters</h2>
+<pre><code class="language-python">from helpers.pipeline import Pipeline
+
+pipeline = Pipeline(**params)
+</code></pre>
+<table>
+  <tr>
+    <th><strong>NAME</strong></th>
+    <th><strong>TYPE</strong></th>
+    <th><strong>DEFAULT</strong></th>
+  </tr>
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>help</strong></td>
+    <td><strong>bool</strong></td>
+    <td><strong>False</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">Prints the help information for the package, including an overview and parameter descriptions.</td>
+  </tr>
+</table>
+
+<hr />
+<h2 id="run-method-parameters"><code>run()</code> Method Parameters</h2>
+<pre><code class="language-python">from helpers.pipeline import Pipeline
+
+pipeline = Pipeline()
+pipeline.run(**params)
+</code></pre>
+<table>
+  <tr>
+    <th><strong>NAME</strong></th>
+    <th><strong>TYPE</strong></th>
+    <th><strong>DEFAULT</strong></th>
+  </tr>
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>help</strong></td>
+    <td><strong>bool</strong></td>
+    <td><strong>False</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">Prints the help information for the package, including an overview and parameter descriptions.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>author</strong></td>
+    <td><strong>str</strong></td>
+    <td><strong>PEAC_Team</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">Author of the report, which will be displayed on the report.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>print_filename</strong></td>
+    <td><strong>str</strong></td>
+    <td><strong>AL/reports/SOMA_report.pdf</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">This package generates a report including some main demographics, statistics, and figures. The report will be saved at the provided location, originating from the root directory of the repo. This will overwrite any existing report with the same name, but if this report is open, it will add -N to the report name where N increases from 1 until a unique name is found.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>file_path</strong></td>
+    <td><strong>str</strong></td>
+    <td><strong>None</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">Path to the data file(s) to be loaded. This is a required parameter. From this path, you can load several different files using the file_name parameter.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>file_name</strong></td>
+    <td><strong>list[str] | str</strong></td>
+    <td><strong>None</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">Name of the file(s) to be loaded. This is a required parameter. These filenames should be relative to the file_path parameter. You can load multiple files by providing a list of file names or a single file name as a string. You can add further path information here if your data splits at the point of file_path. For example, file_path = "path/to/data" and file_name = ["subfolder1/data1.csv", "subfolder2/data2.csv"] will load two files from different subfolders.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>dataset</strong></td>
+    <td><strong>str</strong></td>
+    <td><strong>""</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">This is a description of the dataset(s) in the report. It allows for you to provide a brief overview of the dataset(s) used in the analysis, if you like.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>split_by_group</strong></td>
+    <td><strong>str</strong></td>
+    <td><strong>pain</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">Split the data by clinical group, options are 'pain' and 'depression'. Unfortunately, somewhere along the way, I stopped testing the depression group, so it crashes. A lot of functionality is in place for this group, but lots of stats/plots were added after I stopped testing it. Moreover, the loading of model data was also not tested for the depression group. So, future development can bring this back to life, potentially without much effort. But, do not use it for now.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>split_by_group_id</strong></td>
+    <td><strong>str</strong></td>
+    <td><strong>None</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">This ID is used as a unique identifier for the analysis. That way, you can run the pain analysis multiple times (with different parameters) without overwriting the previous results. This is designed around statistics, which saves data and results using this ID. If you do not add this parameter, it will default to the value of the split_by_group parameter.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>accuracy_exclusion_threshold</strong></td>
+    <td><strong>int</strong></td>
+    <td><strong>70</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">Threshold for excluding participants based on their accuracy (%) in the learning phase. Specifically, this is the accuracy in the last quarter of the learning phase. Anyone below this threshold will be excluded from the analysis. The number of people excluded will be indicated in the report.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>RT_low_threshold</strong></td>
+    <td><strong>int</strong></td>
+    <td><strong>200</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">Lower threshold for excluding trials based on reaction times (ms).</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>RT_high_threshold</strong></td>
+    <td><strong>int</strong></td>
+    <td><strong>5000</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">Upper threshold for excluding trials based on reaction times (ms).</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>rscripts_path</strong></td>
+    <td><strong>str</strong></td>
+    <td><strong>None</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">Path to the R executible file, which is used when running GLMMs. The reason this is done in R is because the statsmodels package in Python does not provide factor level p-values for (generalized) linear mixed effects models. This is tricky because you need to have R and a few packages (lme4, lmerTest, car, afex, and emmeans) installed. This is worth looking into further, as there might be a parameter I have overlooked, or else there could be a different package that fits our needs.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>pain_cutoff</strong></td>
+    <td><strong>int</strong></td>
+    <td><strong>2</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">A threshold used as exclusion criteria for participant pain group IDs. Threshold considers the composite pain score (average of intensity, unpleasantness, and interference) This score ranges from 0 to 10, where 0 is no pain and 10 is the worst pain imaginable. The cutoff is used wherein any participant in the no pain group that exceeds this threshold will be excluded from the analysis. And any participant in the pain groups (acute, chronic) that falls below this threshold will be excluded from the analysis. If set to None, no participants will be excluded based on pain.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>depression_cutoff</strong></td>
+    <td><strong>int</strong></td>
+    <td><strong>10</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">A threshold used to classify participants into depression groups. This threshold considers the PHQ-8 score, which ranges from 0 to 24. The cutoff is used to classify participants into the depression group if their score is equal to or above this threshold. The data (which is determined using the avoid_learning_data_extraction repo) will already have participants classified into the depression group, but this parameter overrides that classification (because the data incorrectly used a cutoff of > 10).</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>rolling_mean</strong></td>
+    <td><strong>int</strong></td>
+    <td><strong>5</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">This parameter determines how many trials to average across the learning phase for plotting the learning curves. This functionality is actually no longer used in the current implementation, because learning curves are now plotted using the binned trials data (early, mid-early, mid-late, late). In the plotting class, the plot_learning_curves function has a binned_trial parameter, which can manually be set to False. If it is set to False (which requires changing the code), then the rolling mean will be used.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>load_stats</strong></td>
+    <td><strong>bool</strong></td>
+    <td><strong>False</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">The GLMMs take a long time to run, so the results are saved in the backend. If this parameter is set to True, the results will be loaded from the backend, instead of running the GLMMs every time this has been run. If this is set to True, but the GLMMs have not been run, it will run the GLMMs anyhow. Make sure to re-run these stats anytime changes are made to the data.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>load_posthocs</strong></td>
+    <td><strong>bool</strong></td>
+    <td><strong>False</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">The posthoc tests can take a long time to add to the report, so the results are saved in the backend. Specifically, tables are turned into png images (which is what takes long), and then uploaded to the report. If this parameter is set to True, the results will be loaded from the backend, and will skip saving to png. Otherwise, it will take the time to save posthocs to png images. If your posthoc stats change, you will need to set this to False for the changes to be reflected in the report.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>load_models</strong></td>
+    <td><strong>bool</strong></td>
+    <td><strong>False</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">If set to True, the models will be loaded from the backend. This is useful if you have run the avoid_learning_rl_models package and want to include the model results in the report. If set to False, the models will not be loaded, and the report will not include any model information. Incorporating data from the avoid_learning_rl_models requires a few steps. You need to first run the analysis with this repo, which will generate data that the avoid_learning_rl_models package can use. This data will be saved in AL/data/ as pain_learning_processed.csv and pain_transfer_processed.csv. You then have to manually copy these files to the avoid_learning_rl_models/RL/data/ directory. After that, you can run the avoid_learning_rl_models package, which will generate the models, and a directory called 'RL/modelling'. This directory can be manually copied to the AL directory, as 'AL/modelling'. Then, you can set this parameter to True, and the models will be loaded from the backend. Sorry this is a bit complicated, with manual steps, but I felt keeping these repos as standalones were better than merging them.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>hide_stats</strong></td>
+    <td><strong>bool</strong></td>
+    <td><strong>False</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">If set to True, the statistics will not be hidden in the report. They will exist but their values will be replaced with 'hidden'. I included this functionality because I believe stats should only be observed once, to mitigate p-hacking. This way, you can hide the stats but still see all other information, such as report details and plots. If you want to see the stats, set this to False.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>hide_posthocs</strong></td>
+    <td><strong>bool</strong></td>
+    <td><strong>False</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">In these analyses, we end up with a lot of posthoc tests, which can clutter the report. It literally adds 40+ pages of tables to the report. This takes a long time to generate, and is not always necessary. Furthermore, it makes the report very large, which is not ideal for sharing. If this parameter is set to True, the posthoc tests will not be included in the report, saving time and space.</td>
+  </tr>
+
+  <tr style="background-color:#f0f0f0;">
+    <td><strong>verbose</strong></td>
+    <td><strong>bool</strong></td>
+    <td><strong>False</strong></td>
+  </tr>
+  <tr>
+    <td colspan="3">If set to True, the pipeline will print additional information to the console during execution. This can be useful for debugging or understanding the flow of the pipeline. If set to False, the pipeline will run more silently without printing additional information.</td>
+  </tr>
+</table>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+  
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.path", "navigation.indexes", {"tab": true}], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      
+    
+  </body>
+</html>
