@@ -288,7 +288,7 @@ class Statistics:
         #Transfer with covariates
         formula = f'choice_rate~1+{self.group_code}*symbol+age+(1|participant_id)'
         self.transfer_accuracy_glmm_age = self.generalized_linear_model(formula, 
-                                        self.choice_rate.reset_index(),
+                                        self.choice_rate_age.reset_index(),
                                         path=self.repo_directory,
                                         filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_age.csv",
                                         savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_age.csv",
@@ -304,7 +304,7 @@ class Statistics:
         '''
         formula = f'choice_rate~1+{self.group_code}*symbol+pain+(1|participant_id)'
         self.transfer_accuracy_glmm_pain = self.generalized_linear_model(formula, 
-                                        self.choice_rate.reset_index(),
+                                        self.choice_rate_pain.reset_index(),
                                         path=self.repo_directory,
                                         filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_pain.csv",
                                         savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_pain.csv",
@@ -337,7 +337,7 @@ class Statistics:
         '''
         formula = f'choice_rate~1+{self.group_code}*symbol+task+(1|participant_id)'
         self.transfer_accuracy_glmm_task = self.generalized_linear_model(formula, 
-                                               self.choice_rate_context.reset_index(),
+                                               self.choice_rate_task.reset_index(),
                                                path=self.repo_directory,
                                                filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_task.csv",
                                                savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_task.csv",
