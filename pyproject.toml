@@ -1,5 +1,5 @@
 [project]
-name = "soma_al"
+name = "Avoid Learning Analysis"
 version = "0.0.1"
 authors = [
   { name="Chad Williams", email="chad_williams@brown.edu" },
