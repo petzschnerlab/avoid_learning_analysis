@@ -40,7 +40,6 @@ class Processing:
         #Create variables to store the file path and file name
         self.file_path = file_path
         self.file_name = file_name if isinstance(file_name, list) else [file_name]
-        file_name = file_name if isinstance(file_name, list) else file_name
         
         #check if file name is a list and if so, load each dataset and concatenate them, adding NAs if columns are missing
         if isinstance(file_name, list):
@@ -65,6 +64,7 @@ class Processing:
 
             self.file = os.path.join(file_path, file_name)
             self.data = pd.read_csv(self.file)
+            self.data['task'] = self.file.replace('.csv', '')
             file_name = file_name.split('\\')[-1]
 
         #Modify unnamed column
