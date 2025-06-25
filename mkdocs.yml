@@ -34,5 +34,5 @@ nav:
     - Data Structure: 'HowToUse/datastructure.md'
     - Parameters: 'HowToUse/parameters.md'
   - Tutorials:
-    - AL Tutorial: 'Tutorials/___.ipynb'
+    - AL Tutorial: 'Tutorials/AL_tutorial.ipynb'
   - Repository: https://github.com/petzschnerlab/avoid_learning_analysis" target="_blank
