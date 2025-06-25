@@ -1,5 +1,5 @@
 [project]
-name = "Avoid Learning Analysis"
+name = "AL"
 version = "0.0.1"
 authors = [
   { name="Chad Williams", email="chad_williams@brown.edu" },
@@ -24,6 +24,3 @@ dependencies = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.hatch.build]
-packages = ["AL"]
