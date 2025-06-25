@@ -174,6 +174,9 @@ class Parameters:
         if not os.path.exists(f"AL/stats/"):
             os.makedirs(f"AL/stats/")
 
+        if not os.path.exists(f"AL/stats/assumptions"):
+            os.makedirs(f"AL/stats/assumptions")
+
         if not os.path.exists(f"AL/plots/"):
             os.makedirs(f"AL/plots/")
         
