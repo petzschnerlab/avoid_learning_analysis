@@ -6,6 +6,12 @@ hide:
 
 Welcome to the avoidance learning analysis repo. This repo was built for the PEAC lab to analyse behavioural data from the various avoidance learning tasks. This repo loads the data, conducts statistics on the data, plots the data, and generates a report as a PDF file, which presents the main findings of the study. 
 
+<div style="text-align: center; margin-top: 1em;">
+  <a href="Tutorials/AL_tutorial/" class="md-button md-button--primary" target="_blank">
+    Jump to the tutorial!
+  </a>
+</div>
+
 ## Project Pipeline
 This repo is one part of a project pipeline, which requires the coordination of multiple repos. Projects begin with a <b>task repo</b>, which is used to collect behavioural data from participants either locally or on Prolific. The collected data must then be pushed through a <b>data extraction repo</b> to prepare CSV files for analysis. These CSV files are used in <b>the analysis repo (this repo)</b>, which creates a PDF report (`AL/reports`), ending the project pipeline. 
 
