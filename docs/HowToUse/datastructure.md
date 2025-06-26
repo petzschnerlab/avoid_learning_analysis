@@ -8,8 +8,6 @@ This dataset contains trial-level data from an avoidance learning task. This dat
 
 ## Sample Data
 
-## Sample Data
-
 | participant_id         | trial_type     | rt   | symbol_L_name | symbol_R_name | feedback_L | feedback_R | context_val | choice_made | context_val_name | duration        | group_code | intensity | unpleasant | interference | age | sex    |
 |------------------------|----------------|------|----------------|----------------|------------|------------|-------------|--------------|-------------------|------------------|------------|-----------|-------------|---------------|-----|--------|
 | 6644c218e860482bd1d5113a | learning-trials | 1529 | 75P1           | 25P1           | -10        | 0          | -1          | 1            | Loss Avoid        | I am not in pain | 0          | 4         | 3           | 3             | 37  | Female |
