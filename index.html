@@ -649,6 +649,12 @@
 
 <h1 id="avoidance-learning-analysis">Avoidance Learning Analysis</h1>
 <p>Welcome to the avoidance learning analysis repo. This repo was built for the PEAC lab to analyse behavioural data from the various avoidance learning tasks. This repo loads the data, conducts statistics on the data, plots the data, and generates a report as a PDF file, which presents the main findings of the study. </p>
+<div style="text-align: center; margin-top: 1em;">
+  <a href="Tutorials/AL_tutorial/" class="md-button md-button--primary">
+    Jump to the tutorial!
+  </a>
+</div>
+
 <h2 id="project-pipeline">Project Pipeline</h2>
 <p>This repo is one part of a project pipeline, which requires the coordination of multiple repos. Projects begin with a <b>task repo</b>, which is used to collect behavioural data from participants either locally or on Prolific. The collected data must then be pushed through a <b>data extraction repo</b> to prepare CSV files for analysis. These CSV files are used in <b>the analysis repo (this repo)</b>, which creates a PDF report (<code>AL/reports</code>), ending the project pipeline. </p>
 <p>Optionally, you can run computational reinforcement learning models using the <b>modelling repo</b>, and the results can be added to the report here. This is a bit clunky because it requires a bit of back-and-forth between this repo and the modelling repo. Specifically, this repo must be run (with <code>load_models=False</code>, see <a href="HowToUse/parameters/">Parameters</a> in documentation) in order to create two CSV files that the modelling repo needs (<code>AL/data/pain_learning_processed.csv</code> and <code>AL/data/pain_transfer_processed.csv</code>). These files can then be manually moved into the modelling repo's data directory (<code>RL/data</code>). The modelling repo can then be used to model the data, which will result in a newly constructed directory called <code>modelling</code> (<code>RL/modelling</code>). This folder can then be manually moved to this analysis repo as <code>AL/modelling</code>. Then you can re-run this repo (with <code>load_models=True</code>) and the modelling results will be included in the PDF report. </p>

@@ -1134,9 +1134,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="o">%%</span><span class="n">capture</span>
-
-<span class="kn">import</span> <span class="nn">sys</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="c1"># We will now clone the repo, pull any updates, and install dependencies</span>
@@ -1148,9 +1146,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="c1">#Only necessary for Google Colab</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">"/content/avoid_learning_analysis/AL"</span><span class="p">))</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-1">%%capture
-
-import sys
+<div class="clipboard-copy-txt" id="cell-1">import sys
 import os
 
 # We will now clone the repo, pull any updates, and install dependencies
@@ -1384,6 +1380,165 @@ with open(pdf_path, "rb") as f:
 pdf_display = f'<embed height="900" src="data:application/pdf;base64,{encoded}" type="application/pdf" width="700"/>'
 
 HTML(pdf_display)</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=53f17d61">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Although the report gives you a general overview of all findings, you may want to look at the files used to build it more directly. Let's begin by observing the participant pain scores across the groups.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=02f358f4">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-6">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">'AL/plots/pain/demo-clinical-scores.png'</span><span class="p">))</span>
+
+<span class="n">caption</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s1">'Pain metrics for each group. Boxplots show the mean and 95</span><span class="si">% c</span><span class="s1">onfidence intervals of the corresponding metric for each group. '</span>
+    <span class="s1">'Half-violin plots show the distribution of the scores of the corresponding metric for each group. '</span>
+    <span class="s1">'Scatter points show the scores of the corresponding metric for each participant within each group.'</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">caption</span><span class="p">)</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-6">from IPython.display import Image, display
+
+display(Image(filename='AL/plots/pain/demo-clinical-scores.png'))
+
+caption = (
+    'Pain metrics for each group. Boxplots show the mean and 95% confidence intervals of the corresponding metric for each group. '
+    'Half-violin plots show the distribution of the scores of the corresponding metric for each group. '
+    'Scatter points show the scores of the corresponding metric for each participant within each group.'
+)
+print(caption)</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e1f40500">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Next, we can view the behavioural data for both the learning and transfer phases across our groups.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=75563342">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-7">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">'AL/plots/pain/empirical-performance.png'</span><span class="p">))</span>
+
+<span class="n">caption</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s1">'Empirical findings of learning accuracy and transfer choice rates. '</span>
+    <span class="s1">'a. Learning Phase: Behavioral performance across binned learning trials for the reward and punishment contexts for each group. Shaded regions represent 95</span><span class="si">% c</span><span class="s1">onfidence intervals. '</span>
+    <span class="s1">'b. Transfer Phase: Choice rates for each stimulus type during transfer trials for each group. '</span>
+    <span class="s1">'Choice rate is computed as the percentage of times a stimulus type was chosen, given the number of times it was presented. '</span>
+    <span class="s1">'Bar plots show the mean and 95</span><span class="si">% c</span><span class="s1">onfidence intervals of the choice rate for each stimulus type across participants within each group. '</span>
+    <span class="s1">'Abbreviations: HR – high reward rate (75</span><span class="si">% r</span><span class="s1">eward), LR – low reward rate (25</span><span class="si">% r</span><span class="s1">eward), LP – low punishment rate (25</span><span class="si">% lo</span><span class="s1">ss), HP – high punishment rate (75</span><span class="si">% lo</span><span class="s1">ss), N - novel stimulus.'</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">caption</span><span class="p">)</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-7">display(Image(filename='AL/plots/pain/empirical-performance.png'))
+
+caption = (
+    'Empirical findings of learning accuracy and transfer choice rates. '
+    'a. Learning Phase: Behavioral performance across binned learning trials for the reward and punishment contexts for each group. Shaded regions represent 95% confidence intervals. '
+    'b. Transfer Phase: Choice rates for each stimulus type during transfer trials for each group. '
+    'Choice rate is computed as the percentage of times a stimulus type was chosen, given the number of times it was presented. '
+    'Bar plots show the mean and 95% confidence intervals of the choice rate for each stimulus type across participants within each group. '
+    'Abbreviations: HR – high reward rate (75% reward), LR – low reward rate (25% reward), LP – low punishment rate (25% loss), HP – high punishment rate (75% loss), N - novel stimulus.'
+)
+print(caption)
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b607e7d0">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>Let's look at some statistics next. We can see the results for our GLMMs (or multiple regression if not using R) for all of our analyses. Let's focus on the choice rates in the transfer phase.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=9946e5f4">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-8">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">glmm_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'AL/stats/pain_stats_choice_rates_choice_rate_results.csv'</span><span class="p">)</span>
+<span class="n">glmm_results</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-8">import pandas as pd
+
+glmm_results = pd.read_csv('AL/stats/pain_stats_choice_rates_choice_rate_results.csv')
+glmm_results</div>
 </div>
 </div>
 </div>
