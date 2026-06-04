@@ -575,6 +575,9 @@ class Statistics:
         self.transfer_accuracy_planned_group_select_hrlp = self.planned_ttests('choice_rate', self.group_code, comparisons, hr_lp_data)
         self.transfer_accuracy_planned_group_select_lrlp = self.planned_ttests('choice_rate', self.group_code, comparisons, lr_lp_data)
 
+        #Additional post-hoc comparison to check whether this effect is linear (low punish - low reward: no pain < acute pain < chronic pain)
+        self.transfer_accuracy_gradient = self.generalized_linear_model(f'choice_rate~group_code', lr_lp_data)
+
         #These are modified post-hocs
         self.select_transfer_choice_rate_posthocs = pd.DataFrame(index=hr_lp_data[self.group_code].unique(), columns=['HR_LP', 'LR_LP'])
         for group in hr_lp_data[self.group_code].unique():
