@@ -214,8 +214,9 @@ class Processing:
         """
         
         #Recode the participants who are in the transition group (duration = 3 – 6 months)
-        transition_index = self.data['duration'] == '3 – 6 months'
-        self.data.loc[transition_index, 'group_code'] = 'acute pain'
+        #NOTE: These next two lines are commented out just for this branch analysis specifically (branch: extra-3month-chronic-cutoff)
+        #transition_index = self.data['duration'] == '3 – 6 months'
+        #self.data.loc[transition_index, 'group_code'] = 'acute pain'
 
         #Create composite score
         self.data['composite_pain'] = self.data.apply(lambda x: np.mean((x['intensity'], x['unpleasant'], x['interference'])), axis=1)
