@@ -154,7 +154,7 @@ class ReportFunctions:
                                                                            ('border-right', '1px solid white')]},])
         
         #Save the table as a png
-        dfi.export(table, save_name, table_conversion="selenium", max_rows=-1)
+        dfi.export(table, save_name, table_conversion="chrome", max_rows=-1)
     
     #Data retrieval functions   
     def add_figure_caption(self, text: str) -> str:
