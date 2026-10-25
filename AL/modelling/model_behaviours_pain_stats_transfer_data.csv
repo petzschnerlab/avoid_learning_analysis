@@ -1,0 +1,1196 @@
+group_code,participant_id,symbol,choice_rate
+chronic pain,1,High Reward,95.0
+chronic pain,2,High Reward,96.5
+chronic pain,3,High Reward,96.5
+chronic pain,4,High Reward,94.0
+chronic pain,5,High Reward,87.0
+chronic pain,6,High Reward,81.0
+chronic pain,7,High Reward,78.5
+chronic pain,8,High Reward,78.5
+chronic pain,9,High Reward,89.5
+chronic pain,10,High Reward,91.5
+chronic pain,11,High Reward,96.5
+chronic pain,12,High Reward,87.0
+chronic pain,13,High Reward,77.5
+chronic pain,14,High Reward,85.5
+chronic pain,15,High Reward,90.0
+chronic pain,16,High Reward,79.5
+chronic pain,17,High Reward,89.5
+chronic pain,18,High Reward,97.0
+chronic pain,19,High Reward,98.0
+chronic pain,20,High Reward,70.0
+chronic pain,21,High Reward,59.5
+chronic pain,22,High Reward,90.0
+chronic pain,23,High Reward,99.0
+chronic pain,24,High Reward,99.0
+chronic pain,25,High Reward,87.5
+chronic pain,26,High Reward,94.0
+chronic pain,27,High Reward,73.0
+chronic pain,28,High Reward,91.0
+chronic pain,29,High Reward,97.0
+chronic pain,30,High Reward,94.0
+chronic pain,31,High Reward,88.5
+chronic pain,32,High Reward,78.0
+chronic pain,33,High Reward,94.0
+chronic pain,34,High Reward,87.0
+chronic pain,35,High Reward,82.5
+chronic pain,36,High Reward,92.0
+chronic pain,37,High Reward,94.5
+chronic pain,38,High Reward,90.5
+chronic pain,39,High Reward,79.5
+chronic pain,40,High Reward,80.0
+chronic pain,41,High Reward,90.0
+chronic pain,42,High Reward,84.0
+chronic pain,43,High Reward,95.5
+chronic pain,44,High Reward,89.0
+chronic pain,45,High Reward,86.0
+chronic pain,46,High Reward,73.5
+chronic pain,47,High Reward,67.0
+chronic pain,48,High Reward,63.0
+chronic pain,49,High Reward,92.0
+chronic pain,50,High Reward,93.0
+chronic pain,51,High Reward,95.0
+chronic pain,52,High Reward,95.5
+chronic pain,53,High Reward,83.0
+chronic pain,54,High Reward,86.0
+chronic pain,55,High Reward,76.5
+chronic pain,56,High Reward,48.5
+chronic pain,57,High Reward,99.0
+chronic pain,58,High Reward,96.5
+chronic pain,59,High Reward,96.0
+chronic pain,60,High Reward,61.5
+chronic pain,61,High Reward,82.0
+chronic pain,62,High Reward,99.0
+chronic pain,63,High Reward,97.5
+chronic pain,64,High Reward,72.5
+chronic pain,65,High Reward,63.0
+chronic pain,66,High Reward,96.5
+chronic pain,67,High Reward,91.5
+chronic pain,68,High Reward,96.5
+chronic pain,69,High Reward,100.0
+chronic pain,70,High Reward,70.0
+chronic pain,71,High Reward,94.5
+chronic pain,72,High Reward,80.5
+chronic pain,73,High Reward,82.5
+chronic pain,74,High Reward,94.5
+chronic pain,75,High Reward,73.0
+chronic pain,76,High Reward,92.5
+chronic pain,77,High Reward,85.5
+chronic pain,78,High Reward,95.5
+acute pain,79,High Reward,99.0
+acute pain,80,High Reward,88.5
+acute pain,81,High Reward,81.0
+acute pain,82,High Reward,93.5
+acute pain,83,High Reward,98.0
+acute pain,84,High Reward,94.0
+acute pain,85,High Reward,97.5
+acute pain,86,High Reward,58.5
+acute pain,87,High Reward,100.0
+acute pain,88,High Reward,100.0
+acute pain,89,High Reward,92.5
+acute pain,90,High Reward,75.0
+acute pain,91,High Reward,96.0
+acute pain,92,High Reward,91.5
+acute pain,93,High Reward,96.5
+acute pain,94,High Reward,99.0
+acute pain,95,High Reward,93.0
+acute pain,96,High Reward,85.0
+acute pain,97,High Reward,64.5
+acute pain,98,High Reward,71.0
+acute pain,99,High Reward,98.0
+acute pain,100,High Reward,83.5
+acute pain,101,High Reward,80.5
+acute pain,102,High Reward,99.0
+acute pain,103,High Reward,90.5
+acute pain,104,High Reward,84.5
+acute pain,105,High Reward,78.5
+acute pain,106,High Reward,65.0
+acute pain,107,High Reward,98.0
+acute pain,108,High Reward,80.0
+acute pain,109,High Reward,93.0
+acute pain,110,High Reward,90.0
+acute pain,111,High Reward,93.5
+acute pain,112,High Reward,86.0
+acute pain,113,High Reward,65.5
+acute pain,114,High Reward,90.0
+acute pain,115,High Reward,67.5
+acute pain,116,High Reward,93.0
+acute pain,117,High Reward,85.0
+acute pain,118,High Reward,89.5
+acute pain,119,High Reward,76.5
+acute pain,120,High Reward,98.5
+acute pain,121,High Reward,86.0
+acute pain,122,High Reward,92.0
+acute pain,123,High Reward,64.5
+acute pain,124,High Reward,90.0
+acute pain,125,High Reward,95.5
+acute pain,126,High Reward,72.0
+acute pain,127,High Reward,100.0
+acute pain,128,High Reward,96.0
+acute pain,129,High Reward,93.5
+acute pain,130,High Reward,94.5
+acute pain,131,High Reward,84.5
+no pain,132,High Reward,93.0
+no pain,133,High Reward,90.5
+no pain,134,High Reward,98.5
+no pain,135,High Reward,92.0
+no pain,136,High Reward,100.0
+no pain,137,High Reward,95.0
+no pain,138,High Reward,93.5
+no pain,139,High Reward,73.5
+no pain,140,High Reward,92.5
+no pain,141,High Reward,92.0
+no pain,142,High Reward,96.0
+no pain,143,High Reward,68.0
+no pain,144,High Reward,90.0
+no pain,145,High Reward,100.0
+no pain,146,High Reward,67.0
+no pain,147,High Reward,86.0
+no pain,148,High Reward,75.0
+no pain,149,High Reward,92.0
+no pain,150,High Reward,95.0
+no pain,151,High Reward,88.5
+no pain,152,High Reward,98.0
+no pain,153,High Reward,94.0
+no pain,154,High Reward,94.0
+no pain,155,High Reward,79.5
+no pain,156,High Reward,92.0
+no pain,157,High Reward,88.5
+no pain,158,High Reward,85.0
+no pain,159,High Reward,91.0
+no pain,160,High Reward,39.5
+no pain,161,High Reward,67.0
+no pain,162,High Reward,88.0
+no pain,163,High Reward,99.0
+no pain,164,High Reward,98.5
+no pain,165,High Reward,88.0
+no pain,166,High Reward,98.5
+no pain,167,High Reward,93.0
+no pain,168,High Reward,82.0
+no pain,169,High Reward,87.0
+no pain,170,High Reward,91.0
+no pain,171,High Reward,94.5
+no pain,172,High Reward,98.0
+no pain,173,High Reward,95.5
+no pain,174,High Reward,71.5
+no pain,175,High Reward,79.0
+no pain,176,High Reward,91.5
+no pain,177,High Reward,90.0
+no pain,178,High Reward,94.5
+no pain,179,High Reward,96.0
+no pain,180,High Reward,98.0
+no pain,181,High Reward,91.5
+no pain,182,High Reward,82.5
+no pain,183,High Reward,77.5
+no pain,184,High Reward,96.0
+no pain,185,High Reward,99.0
+no pain,186,High Reward,98.0
+no pain,187,High Reward,91.5
+no pain,188,High Reward,99.0
+no pain,189,High Reward,100.0
+no pain,190,High Reward,96.5
+no pain,191,High Reward,96.5
+no pain,192,High Reward,94.0
+no pain,193,High Reward,99.0
+no pain,194,High Reward,87.5
+no pain,195,High Reward,100.0
+no pain,196,High Reward,99.0
+no pain,197,High Reward,87.0
+no pain,198,High Reward,72.0
+no pain,199,High Reward,93.0
+no pain,200,High Reward,94.0
+no pain,201,High Reward,84.0
+no pain,202,High Reward,97.0
+no pain,203,High Reward,82.5
+no pain,204,High Reward,97.5
+no pain,205,High Reward,89.5
+no pain,206,High Reward,96.0
+no pain,207,High Reward,96.5
+no pain,208,High Reward,86.5
+no pain,209,High Reward,90.5
+no pain,210,High Reward,98.0
+no pain,211,High Reward,81.0
+no pain,212,High Reward,83.5
+no pain,213,High Reward,90.5
+no pain,214,High Reward,77.5
+no pain,215,High Reward,68.0
+no pain,216,High Reward,85.5
+no pain,217,High Reward,99.0
+no pain,218,High Reward,97.5
+no pain,219,High Reward,77.0
+no pain,220,High Reward,97.0
+no pain,221,High Reward,91.0
+no pain,222,High Reward,92.5
+no pain,223,High Reward,93.0
+no pain,224,High Reward,96.5
+no pain,225,High Reward,84.0
+no pain,226,High Reward,98.0
+no pain,227,High Reward,88.5
+no pain,228,High Reward,97.0
+no pain,229,High Reward,87.5
+no pain,230,High Reward,94.0
+no pain,231,High Reward,99.0
+no pain,232,High Reward,80.5
+no pain,233,High Reward,94.5
+no pain,234,High Reward,84.5
+no pain,235,High Reward,96.0
+no pain,236,High Reward,95.0
+no pain,237,High Reward,99.0
+no pain,238,High Reward,88.0
+no pain,239,High Reward,95.0
+chronic pain,1,Low Reward,28.0
+chronic pain,2,Low Reward,48.0
+chronic pain,3,Low Reward,66.5
+chronic pain,4,Low Reward,61.0
+chronic pain,5,Low Reward,23.0
+chronic pain,6,Low Reward,38.5
+chronic pain,7,Low Reward,48.0
+chronic pain,8,Low Reward,24.5
+chronic pain,9,Low Reward,29.0
+chronic pain,10,Low Reward,66.0
+chronic pain,11,Low Reward,58.0
+chronic pain,12,Low Reward,50.0
+chronic pain,13,Low Reward,56.0
+chronic pain,14,Low Reward,68.0
+chronic pain,15,Low Reward,49.5
+chronic pain,16,Low Reward,25.0
+chronic pain,17,Low Reward,64.0
+chronic pain,18,Low Reward,43.0
+chronic pain,19,Low Reward,51.5
+chronic pain,20,Low Reward,34.0
+chronic pain,21,Low Reward,47.5
+chronic pain,22,Low Reward,75.0
+chronic pain,23,Low Reward,60.0
+chronic pain,24,Low Reward,66.0
+chronic pain,25,Low Reward,33.0
+chronic pain,26,Low Reward,67.0
+chronic pain,27,Low Reward,44.0
+chronic pain,28,Low Reward,74.5
+chronic pain,29,Low Reward,68.5
+chronic pain,30,Low Reward,62.0
+chronic pain,31,Low Reward,42.5
+chronic pain,32,Low Reward,56.0
+chronic pain,33,Low Reward,63.5
+chronic pain,34,Low Reward,76.0
+chronic pain,35,Low Reward,59.0
+chronic pain,36,Low Reward,34.0
+chronic pain,37,Low Reward,63.5
+chronic pain,38,Low Reward,30.5
+chronic pain,39,Low Reward,51.0
+chronic pain,40,Low Reward,52.5
+chronic pain,41,Low Reward,45.5
+chronic pain,42,Low Reward,48.5
+chronic pain,43,Low Reward,26.0
+chronic pain,44,Low Reward,57.5
+chronic pain,45,Low Reward,46.0
+chronic pain,46,Low Reward,26.0
+chronic pain,47,Low Reward,47.0
+chronic pain,48,Low Reward,39.0
+chronic pain,49,Low Reward,26.5
+chronic pain,50,Low Reward,53.5
+chronic pain,51,Low Reward,52.0
+chronic pain,52,Low Reward,25.5
+chronic pain,53,Low Reward,49.5
+chronic pain,54,Low Reward,26.0
+chronic pain,55,Low Reward,57.5
+chronic pain,56,Low Reward,36.5
+chronic pain,57,Low Reward,46.5
+chronic pain,58,Low Reward,66.0
+chronic pain,59,Low Reward,69.5
+chronic pain,60,Low Reward,45.5
+chronic pain,61,Low Reward,69.5
+chronic pain,62,Low Reward,27.5
+chronic pain,63,Low Reward,63.5
+chronic pain,64,Low Reward,41.0
+chronic pain,65,Low Reward,71.0
+chronic pain,66,Low Reward,43.5
+chronic pain,67,Low Reward,33.0
+chronic pain,68,Low Reward,59.5
+chronic pain,69,Low Reward,63.0
+chronic pain,70,Low Reward,37.0
+chronic pain,71,Low Reward,45.0
+chronic pain,72,Low Reward,22.5
+chronic pain,73,Low Reward,12.0
+chronic pain,74,Low Reward,59.5
+chronic pain,75,Low Reward,37.5
+chronic pain,76,Low Reward,44.5
+chronic pain,77,Low Reward,31.0
+chronic pain,78,Low Reward,69.0
+acute pain,79,Low Reward,68.5
+acute pain,80,Low Reward,41.5
+acute pain,81,Low Reward,58.0
+acute pain,82,Low Reward,67.0
+acute pain,83,Low Reward,56.0
+acute pain,84,Low Reward,39.5
+acute pain,85,Low Reward,52.0
+acute pain,86,Low Reward,51.0
+acute pain,87,Low Reward,62.0
+acute pain,88,Low Reward,45.0
+acute pain,89,Low Reward,41.5
+acute pain,90,Low Reward,39.5
+acute pain,91,Low Reward,41.0
+acute pain,92,Low Reward,65.5
+acute pain,93,Low Reward,38.0
+acute pain,94,Low Reward,70.5
+acute pain,95,Low Reward,64.5
+acute pain,96,Low Reward,51.5
+acute pain,97,Low Reward,35.5
+acute pain,98,Low Reward,50.5
+acute pain,99,Low Reward,68.5
+acute pain,100,Low Reward,72.5
+acute pain,101,Low Reward,70.5
+acute pain,102,Low Reward,70.0
+acute pain,103,Low Reward,63.0
+acute pain,104,Low Reward,61.5
+acute pain,105,Low Reward,52.0
+acute pain,106,Low Reward,39.5
+acute pain,107,Low Reward,70.5
+acute pain,108,Low Reward,56.0
+acute pain,109,Low Reward,51.5
+acute pain,110,Low Reward,39.5
+acute pain,111,Low Reward,56.5
+acute pain,112,Low Reward,69.0
+acute pain,113,Low Reward,48.5
+acute pain,114,Low Reward,62.5
+acute pain,115,Low Reward,51.0
+acute pain,116,Low Reward,20.5
+acute pain,117,Low Reward,44.5
+acute pain,118,Low Reward,30.0
+acute pain,119,Low Reward,43.0
+acute pain,120,Low Reward,68.5
+acute pain,121,Low Reward,53.0
+acute pain,122,Low Reward,51.5
+acute pain,123,Low Reward,56.5
+acute pain,124,Low Reward,64.0
+acute pain,125,Low Reward,63.0
+acute pain,126,Low Reward,61.5
+acute pain,127,Low Reward,64.5
+acute pain,128,Low Reward,63.0
+acute pain,129,Low Reward,61.5
+acute pain,130,Low Reward,57.0
+acute pain,131,Low Reward,38.0
+no pain,132,Low Reward,70.0
+no pain,133,Low Reward,66.5
+no pain,134,Low Reward,66.0
+no pain,135,Low Reward,36.5
+no pain,136,Low Reward,49.5
+no pain,137,Low Reward,72.5
+no pain,138,Low Reward,61.0
+no pain,139,Low Reward,34.0
+no pain,140,Low Reward,67.5
+no pain,141,Low Reward,72.0
+no pain,142,Low Reward,28.0
+no pain,143,Low Reward,55.0
+no pain,144,Low Reward,65.5
+no pain,145,Low Reward,61.5
+no pain,146,Low Reward,51.5
+no pain,147,Low Reward,67.0
+no pain,148,Low Reward,48.0
+no pain,149,Low Reward,71.0
+no pain,150,Low Reward,52.5
+no pain,151,Low Reward,62.0
+no pain,152,Low Reward,69.5
+no pain,153,Low Reward,69.5
+no pain,154,Low Reward,56.0
+no pain,155,Low Reward,24.0
+no pain,156,Low Reward,39.5
+no pain,157,Low Reward,62.0
+no pain,158,Low Reward,63.0
+no pain,159,Low Reward,63.5
+no pain,160,Low Reward,41.0
+no pain,161,Low Reward,47.0
+no pain,162,Low Reward,27.0
+no pain,163,Low Reward,69.0
+no pain,164,Low Reward,60.5
+no pain,165,Low Reward,27.5
+no pain,166,Low Reward,70.5
+no pain,167,Low Reward,58.0
+no pain,168,Low Reward,33.5
+no pain,169,Low Reward,51.0
+no pain,170,Low Reward,53.0
+no pain,171,Low Reward,47.0
+no pain,172,Low Reward,66.5
+no pain,173,Low Reward,39.5
+no pain,174,Low Reward,71.0
+no pain,175,Low Reward,58.5
+no pain,176,Low Reward,51.0
+no pain,177,Low Reward,43.5
+no pain,178,Low Reward,55.5
+no pain,179,Low Reward,31.5
+no pain,180,Low Reward,52.5
+no pain,181,Low Reward,72.5
+no pain,182,Low Reward,49.5
+no pain,183,Low Reward,51.5
+no pain,184,Low Reward,70.0
+no pain,185,Low Reward,64.5
+no pain,186,Low Reward,62.5
+no pain,187,Low Reward,33.5
+no pain,188,Low Reward,57.5
+no pain,189,Low Reward,58.0
+no pain,190,Low Reward,71.5
+no pain,191,Low Reward,63.5
+no pain,192,Low Reward,46.0
+no pain,193,Low Reward,70.0
+no pain,194,Low Reward,33.5
+no pain,195,Low Reward,49.0
+no pain,196,Low Reward,70.5
+no pain,197,Low Reward,19.5
+no pain,198,Low Reward,39.5
+no pain,199,Low Reward,74.5
+no pain,200,Low Reward,41.0
+no pain,201,Low Reward,53.5
+no pain,202,Low Reward,69.0
+no pain,203,Low Reward,74.5
+no pain,204,Low Reward,68.5
+no pain,205,Low Reward,46.0
+no pain,206,Low Reward,63.0
+no pain,207,Low Reward,65.0
+no pain,208,Low Reward,60.0
+no pain,209,Low Reward,63.5
+no pain,210,Low Reward,68.0
+no pain,211,Low Reward,52.0
+no pain,212,Low Reward,42.5
+no pain,213,Low Reward,27.0
+no pain,214,Low Reward,13.0
+no pain,215,Low Reward,51.5
+no pain,216,Low Reward,67.5
+no pain,217,Low Reward,44.0
+no pain,218,Low Reward,68.0
+no pain,219,Low Reward,58.5
+no pain,220,Low Reward,62.0
+no pain,221,Low Reward,51.0
+no pain,222,Low Reward,55.0
+no pain,223,Low Reward,31.0
+no pain,224,Low Reward,63.0
+no pain,225,Low Reward,73.0
+no pain,226,Low Reward,30.5
+no pain,227,Low Reward,32.5
+no pain,228,Low Reward,67.5
+no pain,229,Low Reward,68.0
+no pain,230,Low Reward,29.5
+no pain,231,Low Reward,51.0
+no pain,232,Low Reward,46.5
+no pain,233,Low Reward,50.0
+no pain,234,Low Reward,55.0
+no pain,235,Low Reward,70.5
+no pain,236,Low Reward,60.0
+no pain,237,Low Reward,71.0
+no pain,238,Low Reward,56.0
+no pain,239,Low Reward,58.5
+chronic pain,1,Low Punish,69.5
+chronic pain,2,Low Punish,61.0
+chronic pain,3,Low Punish,38.0
+chronic pain,4,Low Punish,42.5
+chronic pain,5,Low Punish,83.5
+chronic pain,6,Low Punish,65.5
+chronic pain,7,Low Punish,49.0
+chronic pain,8,Low Punish,76.0
+chronic pain,9,Low Punish,80.0
+chronic pain,10,Low Punish,48.5
+chronic pain,11,Low Punish,33.0
+chronic pain,12,Low Punish,63.5
+chronic pain,13,Low Punish,56.0
+chronic pain,14,Low Punish,42.0
+chronic pain,15,Low Punish,42.0
+chronic pain,16,Low Punish,87.5
+chronic pain,17,Low Punish,30.0
+chronic pain,18,Low Punish,58.0
+chronic pain,19,Low Punish,62.5
+chronic pain,20,Low Punish,53.5
+chronic pain,21,Low Punish,60.0
+chronic pain,22,Low Punish,30.0
+chronic pain,23,Low Punish,54.5
+chronic pain,24,Low Punish,30.5
+chronic pain,25,Low Punish,59.5
+chronic pain,26,Low Punish,28.0
+chronic pain,27,Low Punish,55.5
+chronic pain,28,Low Punish,37.5
+chronic pain,29,Low Punish,41.0
+chronic pain,30,Low Punish,38.5
+chronic pain,31,Low Punish,73.5
+chronic pain,32,Low Punish,59.0
+chronic pain,33,Low Punish,49.0
+chronic pain,34,Low Punish,39.0
+chronic pain,35,Low Punish,57.5
+chronic pain,36,Low Punish,75.5
+chronic pain,37,Low Punish,33.5
+chronic pain,38,Low Punish,49.0
+chronic pain,39,Low Punish,66.5
+chronic pain,40,Low Punish,38.0
+chronic pain,41,Low Punish,67.5
+chronic pain,42,Low Punish,58.5
+chronic pain,43,Low Punish,74.5
+chronic pain,44,Low Punish,26.0
+chronic pain,45,Low Punish,50.0
+chronic pain,46,Low Punish,63.0
+chronic pain,47,Low Punish,39.0
+chronic pain,48,Low Punish,66.0
+chronic pain,49,Low Punish,64.5
+chronic pain,50,Low Punish,61.5
+chronic pain,51,Low Punish,57.5
+chronic pain,52,Low Punish,68.0
+chronic pain,53,Low Punish,42.0
+chronic pain,54,Low Punish,81.5
+chronic pain,55,Low Punish,45.0
+chronic pain,56,Low Punish,46.0
+chronic pain,57,Low Punish,60.0
+chronic pain,58,Low Punish,30.5
+chronic pain,59,Low Punish,44.0
+chronic pain,60,Low Punish,58.0
+chronic pain,61,Low Punish,30.5
+chronic pain,62,Low Punish,65.0
+chronic pain,63,Low Punish,50.0
+chronic pain,64,Low Punish,77.5
+chronic pain,65,Low Punish,45.5
+chronic pain,66,Low Punish,51.5
+chronic pain,67,Low Punish,61.0
+chronic pain,68,Low Punish,48.0
+chronic pain,69,Low Punish,28.5
+chronic pain,70,Low Punish,71.0
+chronic pain,71,Low Punish,50.5
+chronic pain,72,Low Punish,67.0
+chronic pain,73,Low Punish,73.0
+chronic pain,74,Low Punish,58.0
+chronic pain,75,Low Punish,61.0
+chronic pain,76,Low Punish,52.5
+chronic pain,77,Low Punish,81.0
+chronic pain,78,Low Punish,42.5
+acute pain,79,Low Punish,44.0
+acute pain,80,Low Punish,58.5
+acute pain,81,Low Punish,40.0
+acute pain,82,Low Punish,47.0
+acute pain,83,Low Punish,50.0
+acute pain,84,Low Punish,63.0
+acute pain,85,Low Punish,45.0
+acute pain,86,Low Punish,58.0
+acute pain,87,Low Punish,48.5
+acute pain,88,Low Punish,55.0
+acute pain,89,Low Punish,71.0
+acute pain,90,Low Punish,65.0
+acute pain,91,Low Punish,54.5
+acute pain,92,Low Punish,50.0
+acute pain,93,Low Punish,68.0
+acute pain,94,Low Punish,40.0
+acute pain,95,Low Punish,48.5
+acute pain,96,Low Punish,62.5
+acute pain,97,Low Punish,88.0
+acute pain,98,Low Punish,56.0
+acute pain,99,Low Punish,43.5
+acute pain,100,Low Punish,48.5
+acute pain,101,Low Punish,40.5
+acute pain,102,Low Punish,34.5
+acute pain,103,Low Punish,51.5
+acute pain,104,Low Punish,46.5
+acute pain,105,Low Punish,66.0
+acute pain,106,Low Punish,87.5
+acute pain,107,Low Punish,27.5
+acute pain,108,Low Punish,29.0
+acute pain,109,Low Punish,57.0
+acute pain,110,Low Punish,71.0
+acute pain,111,Low Punish,42.5
+acute pain,112,Low Punish,39.0
+acute pain,113,Low Punish,54.5
+acute pain,114,Low Punish,46.5
+acute pain,115,Low Punish,45.0
+acute pain,116,Low Punish,74.5
+acute pain,117,Low Punish,61.0
+acute pain,118,Low Punish,55.0
+acute pain,119,Low Punish,60.0
+acute pain,120,Low Punish,35.5
+acute pain,121,Low Punish,60.5
+acute pain,122,Low Punish,48.0
+acute pain,123,Low Punish,75.0
+acute pain,124,Low Punish,53.0
+acute pain,125,Low Punish,44.5
+acute pain,126,Low Punish,42.5
+acute pain,127,Low Punish,43.0
+acute pain,128,Low Punish,48.5
+acute pain,129,Low Punish,52.0
+acute pain,130,Low Punish,54.5
+acute pain,131,Low Punish,64.0
+no pain,132,Low Punish,49.0
+no pain,133,Low Punish,34.5
+no pain,134,Low Punish,30.5
+no pain,135,Low Punish,72.0
+no pain,136,Low Punish,42.5
+no pain,137,Low Punish,44.0
+no pain,138,Low Punish,54.5
+no pain,139,Low Punish,66.0
+no pain,140,Low Punish,46.0
+no pain,141,Low Punish,42.0
+no pain,142,Low Punish,65.0
+no pain,143,Low Punish,29.5
+no pain,144,Low Punish,38.0
+no pain,145,Low Punish,50.5
+no pain,146,Low Punish,49.0
+no pain,147,Low Punish,40.5
+no pain,148,Low Punish,52.0
+no pain,149,Low Punish,38.5
+no pain,150,Low Punish,37.5
+no pain,151,Low Punish,52.0
+no pain,152,Low Punish,29.5
+no pain,153,Low Punish,41.5
+no pain,154,Low Punish,48.5
+no pain,155,Low Punish,74.0
+no pain,156,Low Punish,63.5
+no pain,157,Low Punish,50.5
+no pain,158,Low Punish,40.5
+no pain,159,Low Punish,36.0
+no pain,160,Low Punish,44.5
+no pain,161,Low Punish,53.5
+no pain,162,Low Punish,72.5
+no pain,163,Low Punish,27.0
+no pain,164,Low Punish,35.5
+no pain,165,Low Punish,77.5
+no pain,166,Low Punish,36.0
+no pain,167,Low Punish,56.5
+no pain,168,Low Punish,74.5
+no pain,169,Low Punish,46.5
+no pain,170,Low Punish,37.5
+no pain,171,Low Punish,64.5
+no pain,172,Low Punish,31.5
+no pain,173,Low Punish,69.5
+no pain,174,Low Punish,42.5
+no pain,175,Low Punish,68.5
+no pain,176,Low Punish,33.0
+no pain,177,Low Punish,63.5
+no pain,178,Low Punish,23.0
+no pain,179,Low Punish,60.5
+no pain,180,Low Punish,51.5
+no pain,181,Low Punish,44.5
+no pain,182,Low Punish,58.5
+no pain,183,Low Punish,35.5
+no pain,184,Low Punish,44.0
+no pain,185,Low Punish,31.0
+no pain,186,Low Punish,49.0
+no pain,187,Low Punish,75.5
+no pain,188,Low Punish,56.5
+no pain,189,Low Punish,41.0
+no pain,190,Low Punish,29.0
+no pain,191,Low Punish,32.5
+no pain,192,Low Punish,55.5
+no pain,193,Low Punish,39.5
+no pain,194,Low Punish,64.5
+no pain,195,Low Punish,55.0
+no pain,196,Low Punish,29.0
+no pain,197,Low Punish,66.5
+no pain,198,Low Punish,65.0
+no pain,199,Low Punish,39.5
+no pain,200,Low Punish,47.0
+no pain,201,Low Punish,59.5
+no pain,202,Low Punish,27.5
+no pain,203,Low Punish,42.5
+no pain,204,Low Punish,40.0
+no pain,205,Low Punish,63.0
+no pain,206,Low Punish,41.5
+no pain,207,Low Punish,36.5
+no pain,208,Low Punish,28.5
+no pain,209,Low Punish,33.5
+no pain,210,Low Punish,41.0
+no pain,211,Low Punish,58.0
+no pain,212,Low Punish,60.0
+no pain,213,Low Punish,73.0
+no pain,214,Low Punish,45.5
+no pain,215,Low Punish,43.5
+no pain,216,Low Punish,34.5
+no pain,217,Low Punish,62.0
+no pain,218,Low Punish,32.5
+no pain,219,Low Punish,35.0
+no pain,220,Low Punish,30.5
+no pain,221,Low Punish,60.5
+no pain,222,Low Punish,40.0
+no pain,223,Low Punish,74.5
+no pain,224,Low Punish,25.5
+no pain,225,Low Punish,39.0
+no pain,226,Low Punish,62.0
+no pain,227,Low Punish,70.0
+no pain,228,Low Punish,44.0
+no pain,229,Low Punish,46.5
+no pain,230,Low Punish,40.0
+no pain,231,Low Punish,58.5
+no pain,232,Low Punish,51.0
+no pain,233,Low Punish,64.0
+no pain,234,Low Punish,58.0
+no pain,235,Low Punish,42.5
+no pain,236,Low Punish,56.0
+no pain,237,Low Punish,30.5
+no pain,238,Low Punish,40.5
+no pain,239,Low Punish,49.5
+chronic pain,1,High Punish,13.0
+chronic pain,2,High Punish,2.5
+chronic pain,3,High Punish,0.0
+chronic pain,4,High Punish,3.0
+chronic pain,5,High Punish,26.0
+chronic pain,6,High Punish,30.0
+chronic pain,7,High Punish,14.0
+chronic pain,8,High Punish,26.0
+chronic pain,9,High Punish,11.0
+chronic pain,10,High Punish,14.0
+chronic pain,11,High Punish,0.0
+chronic pain,12,High Punish,17.0
+chronic pain,13,High Punish,13.0
+chronic pain,14,High Punish,8.5
+chronic pain,15,High Punish,8.5
+chronic pain,16,High Punish,10.0
+chronic pain,17,High Punish,19.5
+chronic pain,18,High Punish,1.5
+chronic pain,19,High Punish,5.5
+chronic pain,20,High Punish,43.0
+chronic pain,21,High Punish,35.0
+chronic pain,22,High Punish,16.0
+chronic pain,23,High Punish,0.0
+chronic pain,24,High Punish,5.0
+chronic pain,25,High Punish,8.0
+chronic pain,26,High Punish,8.0
+chronic pain,27,High Punish,34.0
+chronic pain,28,High Punish,12.0
+chronic pain,29,High Punish,10.0
+chronic pain,30,High Punish,5.5
+chronic pain,31,High Punish,11.0
+chronic pain,32,High Punish,22.0
+chronic pain,33,High Punish,20.0
+chronic pain,34,High Punish,13.5
+chronic pain,35,High Punish,24.5
+chronic pain,36,High Punish,4.5
+chronic pain,37,High Punish,4.5
+chronic pain,38,High Punish,8.5
+chronic pain,39,High Punish,21.5
+chronic pain,40,High Punish,34.5
+chronic pain,41,High Punish,15.0
+chronic pain,42,High Punish,25.5
+chronic pain,43,High Punish,2.0
+chronic pain,44,High Punish,12.0
+chronic pain,45,High Punish,13.5
+chronic pain,46,High Punish,27.0
+chronic pain,47,High Punish,21.5
+chronic pain,48,High Punish,46.0
+chronic pain,49,High Punish,21.0
+chronic pain,50,High Punish,1.5
+chronic pain,51,High Punish,12.5
+chronic pain,52,High Punish,2.0
+chronic pain,53,High Punish,14.5
+chronic pain,54,High Punish,15.0
+chronic pain,55,High Punish,28.0
+chronic pain,56,High Punish,42.0
+chronic pain,57,High Punish,9.5
+chronic pain,58,High Punish,1.5
+chronic pain,59,High Punish,1.5
+chronic pain,60,High Punish,39.0
+chronic pain,61,High Punish,15.5
+chronic pain,62,High Punish,5.5
+chronic pain,63,High Punish,0.0
+chronic pain,64,High Punish,9.0
+chronic pain,65,High Punish,39.0
+chronic pain,66,High Punish,0.5
+chronic pain,67,High Punish,30.5
+chronic pain,68,High Punish,2.0
+chronic pain,69,High Punish,1.5
+chronic pain,70,High Punish,36.0
+chronic pain,71,High Punish,3.0
+chronic pain,72,High Punish,10.5
+chronic pain,73,High Punish,25.5
+chronic pain,74,High Punish,2.0
+chronic pain,75,High Punish,21.5
+chronic pain,76,High Punish,8.0
+chronic pain,77,High Punish,28.5
+chronic pain,78,High Punish,2.5
+acute pain,79,High Punish,5.0
+acute pain,80,High Punish,9.5
+acute pain,81,High Punish,35.0
+acute pain,82,High Punish,5.5
+acute pain,83,High Punish,5.5
+acute pain,84,High Punish,17.0
+acute pain,85,High Punish,3.0
+acute pain,86,High Punish,40.0
+acute pain,87,High Punish,3.5
+acute pain,88,High Punish,4.0
+acute pain,89,High Punish,9.0
+acute pain,90,High Punish,15.0
+acute pain,91,High Punish,32.5
+acute pain,92,High Punish,2.0
+acute pain,93,High Punish,16.0
+acute pain,94,High Punish,1.0
+acute pain,95,High Punish,14.5
+acute pain,96,High Punish,17.5
+acute pain,97,High Punish,13.0
+acute pain,98,High Punish,33.5
+acute pain,99,High Punish,0.0
+acute pain,100,High Punish,21.5
+acute pain,101,High Punish,15.0
+acute pain,102,High Punish,11.0
+acute pain,103,High Punish,11.5
+acute pain,104,High Punish,19.5
+acute pain,105,High Punish,13.5
+acute pain,106,High Punish,27.0
+acute pain,107,High Punish,3.0
+acute pain,108,High Punish,22.0
+acute pain,109,High Punish,0.5
+acute pain,110,High Punish,21.5
+acute pain,111,High Punish,5.0
+acute pain,112,High Punish,28.0
+acute pain,113,High Punish,46.5
+acute pain,114,High Punish,16.5
+acute pain,115,High Punish,35.5
+acute pain,116,High Punish,16.5
+acute pain,117,High Punish,34.0
+acute pain,118,High Punish,13.5
+acute pain,119,High Punish,28.5
+acute pain,120,High Punish,3.0
+acute pain,121,High Punish,14.0
+acute pain,122,High Punish,4.5
+acute pain,123,High Punish,2.0
+acute pain,124,High Punish,12.5
+acute pain,125,High Punish,5.5
+acute pain,126,High Punish,30.5
+acute pain,127,High Punish,10.5
+acute pain,128,High Punish,8.5
+acute pain,129,High Punish,19.0
+acute pain,130,High Punish,7.0
+acute pain,131,High Punish,5.0
+no pain,132,High Punish,11.0
+no pain,133,High Punish,2.5
+no pain,134,High Punish,0.0
+no pain,135,High Punish,9.0
+no pain,136,High Punish,0.0
+no pain,137,High Punish,2.5
+no pain,138,High Punish,7.0
+no pain,139,High Punish,23.0
+no pain,140,High Punish,21.0
+no pain,141,High Punish,7.0
+no pain,142,High Punish,4.0
+no pain,143,High Punish,26.5
+no pain,144,High Punish,8.0
+no pain,145,High Punish,1.0
+no pain,146,High Punish,35.5
+no pain,147,High Punish,23.0
+no pain,148,High Punish,22.5
+no pain,149,High Punish,21.0
+no pain,150,High Punish,13.0
+no pain,151,High Punish,18.0
+no pain,152,High Punish,3.5
+no pain,153,High Punish,7.5
+no pain,154,High Punish,17.0
+no pain,155,High Punish,13.5
+no pain,156,High Punish,6.0
+no pain,157,High Punish,18.5
+no pain,158,High Punish,18.0
+no pain,159,High Punish,3.5
+no pain,160,High Punish,50.5
+no pain,161,High Punish,30.5
+no pain,162,High Punish,12.0
+no pain,163,High Punish,6.0
+no pain,164,High Punish,1.5
+no pain,165,High Punish,28.0
+no pain,166,High Punish,2.0
+no pain,167,High Punish,13.0
+no pain,168,High Punish,25.0
+no pain,169,High Punish,22.0
+no pain,170,High Punish,6.0
+no pain,171,High Punish,17.5
+no pain,172,High Punish,1.0
+no pain,173,High Punish,4.0
+no pain,174,High Punish,22.5
+no pain,175,High Punish,1.5
+no pain,176,High Punish,4.0
+no pain,177,High Punish,13.5
+no pain,178,High Punish,17.5
+no pain,179,High Punish,20.5
+no pain,180,High Punish,1.0
+no pain,181,High Punish,7.0
+no pain,182,High Punish,24.5
+no pain,183,High Punish,37.0
+no pain,184,High Punish,15.5
+no pain,185,High Punish,13.5
+no pain,186,High Punish,9.5
+no pain,187,High Punish,3.0
+no pain,188,High Punish,1.5
+no pain,189,High Punish,0.5
+no pain,190,High Punish,0.0
+no pain,191,High Punish,5.5
+no pain,192,High Punish,7.0
+no pain,193,High Punish,2.5
+no pain,194,High Punish,18.0
+no pain,195,High Punish,1.5
+no pain,196,High Punish,0.5
+no pain,197,High Punish,14.5
+no pain,198,High Punish,39.0
+no pain,199,High Punish,1.5
+no pain,200,High Punish,5.5
+no pain,201,High Punish,22.5
+no pain,202,High Punish,5.5
+no pain,203,High Punish,20.0
+no pain,204,High Punish,5.0
+no pain,205,High Punish,11.5
+no pain,206,High Punish,8.5
+no pain,207,High Punish,4.5
+no pain,208,High Punish,2.5
+no pain,209,High Punish,9.0
+no pain,210,High Punish,3.5
+no pain,211,High Punish,26.0
+no pain,212,High Punish,20.5
+no pain,213,High Punish,2.0
+no pain,214,High Punish,40.5
+no pain,215,High Punish,42.0
+no pain,216,High Punish,14.0
+no pain,217,High Punish,2.5
+no pain,218,High Punish,1.5
+no pain,219,High Punish,36.5
+no pain,220,High Punish,11.5
+no pain,221,High Punish,16.5
+no pain,222,High Punish,6.5
+no pain,223,High Punish,27.0
+no pain,224,High Punish,3.0
+no pain,225,High Punish,12.5
+no pain,226,High Punish,15.0
+no pain,227,High Punish,6.5
+no pain,228,High Punish,4.0
+no pain,229,High Punish,14.5
+no pain,230,High Punish,37.0
+no pain,231,High Punish,1.0
+no pain,232,High Punish,25.0
+no pain,233,High Punish,10.0
+no pain,234,High Punish,25.0
+no pain,235,High Punish,2.5
+no pain,236,High Punish,1.5
+no pain,237,High Punish,3.5
+no pain,238,High Punish,15.0
+no pain,239,High Punish,15.0
+chronic pain,1,Novel,36.0
+chronic pain,2,Novel,33.0
+chronic pain,3,Novel,45.0
+chronic pain,4,Novel,45.0
+chronic pain,5,Novel,11.0
+chronic pain,6,Novel,19.0
+chronic pain,7,Novel,65.0
+chronic pain,8,Novel,36.0
+chronic pain,9,Novel,29.0
+chronic pain,10,Novel,12.0
+chronic pain,11,Novel,69.0
+chronic pain,12,Novel,15.0
+chronic pain,13,Novel,41.0
+chronic pain,14,Novel,38.0
+chronic pain,15,Novel,64.0
+chronic pain,16,Novel,42.0
+chronic pain,17,Novel,42.0
+chronic pain,18,Novel,47.0
+chronic pain,19,Novel,16.0
+chronic pain,20,Novel,45.0
+chronic pain,21,Novel,42.0
+chronic pain,22,Novel,27.0
+chronic pain,23,Novel,25.0
+chronic pain,24,Novel,44.0
+chronic pain,25,Novel,67.0
+chronic pain,26,Novel,53.0
+chronic pain,27,Novel,35.0
+chronic pain,28,Novel,19.0
+chronic pain,29,Novel,17.0
+chronic pain,30,Novel,45.0
+chronic pain,31,Novel,20.0
+chronic pain,32,Novel,20.0
+chronic pain,33,Novel,1.0
+chronic pain,34,Novel,20.0
+chronic pain,35,Novel,5.0
+chronic pain,36,Novel,36.0
+chronic pain,37,Novel,54.0
+chronic pain,38,Novel,84.0
+chronic pain,39,Novel,12.0
+chronic pain,40,Novel,37.0
+chronic pain,41,Novel,15.0
+chronic pain,42,Novel,17.0
+chronic pain,43,Novel,51.0
+chronic pain,44,Novel,73.0
+chronic pain,45,Novel,55.0
+chronic pain,46,Novel,65.0
+chronic pain,47,Novel,90.0
+chronic pain,48,Novel,21.0
+chronic pain,49,Novel,40.0
+chronic pain,50,Novel,30.0
+chronic pain,51,Novel,16.0
+chronic pain,52,Novel,62.0
+chronic pain,53,Novel,65.0
+chronic pain,54,Novel,32.0
+chronic pain,55,Novel,35.0
+chronic pain,56,Novel,94.0
+chronic pain,57,Novel,19.0
+chronic pain,58,Novel,56.0
+chronic pain,59,Novel,27.0
+chronic pain,60,Novel,39.0
+chronic pain,61,Novel,51.0
+chronic pain,62,Novel,52.0
+chronic pain,63,Novel,27.0
+chronic pain,64,Novel,46.0
+chronic pain,65,Novel,14.0
+chronic pain,66,Novel,61.0
+chronic pain,67,Novel,18.0
+chronic pain,68,Novel,36.0
+chronic pain,69,Novel,59.0
+chronic pain,70,Novel,21.0
+chronic pain,71,Novel,59.0
+chronic pain,72,Novel,82.0
+chronic pain,73,Novel,60.0
+chronic pain,74,Novel,21.0
+chronic pain,75,Novel,59.0
+chronic pain,76,Novel,51.0
+chronic pain,77,Novel,2.0
+chronic pain,78,Novel,30.0
+acute pain,79,Novel,17.0
+acute pain,80,Novel,50.0
+acute pain,81,Novel,22.0
+acute pain,82,Novel,23.0
+acute pain,83,Novel,29.0
+acute pain,84,Novel,25.0
+acute pain,85,Novel,51.0
+acute pain,86,Novel,34.0
+acute pain,87,Novel,22.0
+acute pain,88,Novel,40.0
+acute pain,89,Novel,21.0
+acute pain,90,Novel,56.0
+acute pain,91,Novel,3.0
+acute pain,92,Novel,31.0
+acute pain,93,Novel,13.0
+acute pain,94,Novel,29.0
+acute pain,95,Novel,10.0
+acute pain,96,Novel,17.0
+acute pain,97,Novel,43.0
+acute pain,98,Novel,27.0
+acute pain,99,Novel,30.0
+acute pain,100,Novel,1.0
+acute pain,101,Novel,35.0
+acute pain,102,Novel,21.0
+acute pain,103,Novel,18.0
+acute pain,104,Novel,26.0
+acute pain,105,Novel,29.0
+acute pain,106,Novel,13.0
+acute pain,107,Novel,47.0
+acute pain,108,Novel,68.0
+acute pain,109,Novel,43.0
+acute pain,110,Novel,8.0
+acute pain,111,Novel,50.0
+acute pain,112,Novel,8.0
+acute pain,113,Novel,20.0
+acute pain,114,Novel,19.0
+acute pain,115,Novel,48.0
+acute pain,116,Novel,39.0
+acute pain,117,Novel,4.0
+acute pain,118,Novel,67.0
+acute pain,119,Novel,33.0
+acute pain,120,Novel,37.0
+acute pain,121,Novel,22.0
+acute pain,122,Novel,55.0
+acute pain,123,Novel,50.0
+acute pain,124,Novel,12.0
+acute pain,125,Novel,32.0
+acute pain,126,Novel,35.0
+acute pain,127,Novel,16.0
+acute pain,128,Novel,18.0
+acute pain,129,Novel,1.0
+acute pain,130,Novel,22.0
+acute pain,131,Novel,62.0
+no pain,132,Novel,7.0
+no pain,133,Novel,56.0
+no pain,134,Novel,56.0
+no pain,135,Novel,30.0
+no pain,136,Novel,61.0
+no pain,137,Novel,22.0
+no pain,138,Novel,17.0
+no pain,139,Novel,54.0
+no pain,140,Novel,0.0
+no pain,141,Novel,25.0
+no pain,142,Novel,59.0
+no pain,143,Novel,84.0
+no pain,144,Novel,42.0
+no pain,145,Novel,25.0
+no pain,146,Novel,42.0
+no pain,147,Novel,16.0
+no pain,148,Novel,53.0
+no pain,149,Novel,8.0
+no pain,150,Novel,50.0
+no pain,151,Novel,11.0
+no pain,152,Novel,45.0
+no pain,153,Novel,25.0
+no pain,154,Novel,20.0
+no pain,155,Novel,62.0
+no pain,156,Novel,43.0
+no pain,157,Novel,12.0
+no pain,158,Novel,34.0
+no pain,159,Novel,55.0
+no pain,160,Novel,89.0
+no pain,161,Novel,50.0
+no pain,162,Novel,46.0
+no pain,163,Novel,44.0
+no pain,164,Novel,55.0
+no pain,165,Novel,9.0
+no pain,166,Novel,35.0
+no pain,167,Novel,10.0
+no pain,168,Novel,20.0
+no pain,169,Novel,34.0
+no pain,170,Novel,67.0
+no pain,171,Novel,6.0
+no pain,172,Novel,52.0
+no pain,173,Novel,32.0
+no pain,174,Novel,33.0
+no pain,175,Novel,34.0
+no pain,176,Novel,82.0
+no pain,177,Novel,27.0
+no pain,178,Novel,63.0
+no pain,179,Novel,32.0
+no pain,180,Novel,41.0
+no pain,181,Novel,18.0
+no pain,182,Novel,19.0
+no pain,183,Novel,43.0
+no pain,184,Novel,2.0
+no pain,185,Novel,32.0
+no pain,186,Novel,12.0
+no pain,187,Novel,39.0
+no pain,188,Novel,21.0
+no pain,189,Novel,50.0
+no pain,190,Novel,52.0
+no pain,191,Novel,50.0
+no pain,192,Novel,42.0
+no pain,193,Novel,28.0
+no pain,194,Novel,40.0
+no pain,195,Novel,38.0
+no pain,196,Novel,48.0
+no pain,197,Novel,68.0
+no pain,198,Novel,19.0
+no pain,199,Novel,32.0
+no pain,200,Novel,67.0
+no pain,201,Novel,12.0
+no pain,202,Novel,48.0
+no pain,203,Novel,12.0
+no pain,204,Novel,28.0
+no pain,205,Novel,29.0
+no pain,206,Novel,31.0
+no pain,207,Novel,42.0
+no pain,208,Novel,86.0
+no pain,209,Novel,52.0
+no pain,210,Novel,28.0
+no pain,211,Novel,16.0
+no pain,212,Novel,36.0
+no pain,213,Novel,60.0
+no pain,214,Novel,87.0
+no pain,215,Novel,38.0
+no pain,216,Novel,44.0
+no pain,217,Novel,33.0
+no pain,218,Novel,48.0
+no pain,219,Novel,35.0
+no pain,220,Novel,44.0
+no pain,221,Novel,12.0
+no pain,222,Novel,57.0
+no pain,223,Novel,2.0
+no pain,224,Novel,66.0
+no pain,225,Novel,30.0
+no pain,226,Novel,36.0
+no pain,227,Novel,52.0
+no pain,228,Novel,23.0
+no pain,229,Novel,17.0
+no pain,230,Novel,44.0
+no pain,231,Novel,30.0
+no pain,232,Novel,42.0
+no pain,233,Novel,15.0
+no pain,234,Novel,7.0
+no pain,235,Novel,27.0
+no pain,236,Novel,23.0
+no pain,237,Novel,40.0
+no pain,238,Novel,47.0
+no pain,239,Novel,15.0
