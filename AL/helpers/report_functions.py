@@ -1180,7 +1180,7 @@ class ReportFunctions:
                                                                                   '> 5 years': 90,        # 7.5 years
                                                                                   '> 10 years': 120})     # 10 years
         duration_log_data['pain_duration'] = np.log1p(duration_log_data['duration_months'].astype(float))
-        
+
         #Add it to a copy of fit_data, matching participant_id
         fit_data_log = fit_data.drop(columns=['pain_duration']).merge(duration_log_data[['pain_duration']], on='participant_id', how='left')
         ages = self.data.groupby('participant_id')['age'].first()
@@ -1201,6 +1201,29 @@ class ReportFunctions:
         self.model_parameters_duration_log = {'correlation_summary': duration_log_correlation,
                                               'lm_summary': duration_log_lm,
                                               'sample_size': {label: subset['participant_id'].nunique() for label, subset in log_subsets.items()}}
+                
+        #Model-free check: Low Reward minus Low Punish transfer choice rate vs pain duration
+        lr_lp_data = self.choice_rate.reset_index()
+        lr_lp_data = lr_lp_data[lr_lp_data['symbol'].isin(['Low Reward', 'Low Punish'])]
+        lr_lp_data = lr_lp_data.pivot(index='participant_id', columns='symbol', values='choice_rate')
+        lr_lp_data['lr_lp'] = lr_lp_data['Low Reward'].astype(float) - lr_lp_data['Low Punish'].astype(float)
+
+        model_free_data = covariate_data.merge(lr_lp_data[['lr_lp']], on='participant_id', how='left')
+
+        model_free_subsets = {'all': model_free_data,
+                              'pain': model_free_data[model_free_data['pain_group'].isin(['acute pain', 'chronic pain'])],
+                              'chronic': model_free_data[model_free_data['pain_group'] == 'chronic pain']}
+
+        model_free_spearman = {}
+        model_free_partial = {}
+        for label, subset in model_free_subsets.items():
+            model_free_spearman[label] = self.spearman_duration_table(subset, ['lr_lp'])
+            model_free_partial[f'{label}_age'] = self.partial_duration_table(subset, ['age'], ['lr_lp'])
+            model_free_partial[f'{label}_age_composite'] = self.partial_duration_table(subset, ['age', 'composite'], ['lr_lp'])
+
+        self.model_free_duration = {'spearman_summary': model_free_spearman,
+                                    'partial_summary': model_free_partial,
+                                    'sample_size': {label: subset['participant_id'].nunique() for label, subset in model_free_subsets.items()}}
         
         #Plot the correlations
         plotting.plot_model_parameters_by_pain_split(fit_data, parameter_names, pain_names)
