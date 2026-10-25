@@ -1250,3 +1250,57 @@ class ReportFunctions:
         plotting.plot_model_parameters_by_pain_split(fit_data, parameter_names, pain_names)
         plotting.plot_model_fits({'AIC': self.model_AIC, 'BIC': self.model_BIC})
         plotting.plot_param_duration(parameter_names, fit_data)
+
+        #################################################
+        ## Checks for temperature values
+        #################################################
+        '''
+        These analyses were prompted because the model validation was restricted to a temperature of 0.01 - 0.20. The fitting allows 0.01 - 1.00, so we are needing to determine the full range.
+        '''
+
+        with open('AL/modelling/fit_data_FIT.pkl', 'rb') as f:
+            fits = pickle.load(f)
+        fits = fits[self.best_model]   # or the model name as a string, e.g. 'Advantage+novel'
+        temperature_fits = fits[['participant', 'pain_group', 'temperature']].copy()
+
+        #Determine percentage of temperatures above 0.20 per group
+        temperature_fits['above_validated'] = temperature_fits['temperature'] > 0.20
+        temperature_fits['at_upper_bound'] = temperature_fits['temperature'] >= 0.999
+
+        def summarize_temperature(d):
+            return pd.Series({'n': len(d),
+                              '% above 0.20': np.round(d['above_validated'].mean() * 100, 1),
+                              '% at 1.00': np.round(d['at_upper_bound'].mean() * 100, 1),
+                              'min': np.round(d['temperature'].min(), 3),
+                              'median': np.round(d['temperature'].median(), 3),
+                              'max': np.round(d['temperature'].max(), 3)})
+        
+        temperature_summary = temperature_fits.groupby('pain_group').apply(summarize_temperature)
+        temperature_summary = temperature_summary.reindex(['no pain', 'acute pain', 'chronic pain'])
+        temperature_summary.loc['all'] = summarize_temperature(temperature_fits)
+
+        #Chi-squared test: does the proportion of temperatures above 0.20 differ across groups?
+        contingency = pd.crosstab(temperature_fits['pain_group'], temperature_fits['above_validated'])
+        contingency = contingency.reindex(index=['no pain', 'acute pain', 'chronic pain'], columns=[False, True], fill_value=0)
+        contingency.columns = ['<= 0.20', '> 0.20']
+
+        chi2, p, dof, expected = stats.chi2_contingency(contingency, correction=False)
+        n = contingency.values.sum()
+        cramers_v = np.sqrt(chi2 / (n * (min(contingency.shape) - 1)))
+
+        #Store results
+        self.temperature_summary = temperature_summary
+        self.temperature_chi2 = {'contingency': contingency,
+                                 'expected': pd.DataFrame(expected, index=contingency.index, columns=contingency.columns).round(1),
+                                 'chi2': np.round(chi2, 2),
+                                 'df': dof,
+                                 'p': np.round(p, 4),
+                                 'n': n,
+                                 'cramers_v': np.round(cramers_v, 2)}
+
+        #Print results
+        print(temperature_summary)
+        print(contingency)
+        print(f'χ²({dof}, N = {n}) = {chi2:.2f}, p = {p:.4f}, Cramér\'s V = {cramers_v:.2f}')
+        if (expected < 5).any():
+            warnings.warn('Some expected cell counts are below 5; the chi-squared approximation may be unreliable.')
