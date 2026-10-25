@@ -7,11 +7,13 @@ import pickle
 import scipy.stats as stats
 import copy
 
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+
 from markdown_pdf import Section
 from helpers.statistics import Statistics
 from helpers.processing import Processing
 from helpers.plotting import Plotting
-
 
 class ReportFunctions:
     
@@ -767,7 +769,75 @@ class ReportFunctions:
                                            blank_row, 
                                            depression_title, 
                                            self.depression_summary], axis=0)
-            
+
+    def spearman_duration_table(self, data, parameter_names):
+        table = pd.DataFrame(index=parameter_names, columns=['pain_duration'])
+        for parameter in parameter_names:
+            r, p = stats.spearmanr(data[parameter], data['pain_duration'])
+            if np.isnan(r):
+                table.loc[parameter, 'pain_duration'] = 'NA'
+                continue
+            r = str(f'{np.round(r, 2):.2f}').replace('0.','.') 
+            p = str(f'{np.round(p, 4):.4f}').replace('0.','.') if p >= 0.0001 else '< .0001'
+            table.loc[parameter, 'pain_duration'] = f'{r} ({p})'
+        return table
+
+    def pearson_duration_table(self, data, parameter_names):
+        table = pd.DataFrame(index=parameter_names, columns=['pain_duration'])
+        for parameter in parameter_names:
+            d = data[[parameter, 'pain_duration']].dropna().astype(float)
+            r, p = stats.pearsonr(d[parameter], d['pain_duration'])
+            if np.isnan(r):
+                table.loc[parameter, 'pain_duration'] = 'NA'
+                continue
+            r = str(f'{np.round(r, 2):.2f}').replace('0.','.')
+            p = str(f'{np.round(p, 4):.4f}').replace('0.','.') if p >= 0.0001 else '< .0001'
+            table.loc[parameter, 'pain_duration'] = f'{r} ({p})'
+        return table
+
+    def format_rp(self, r, p, n):
+        if np.isnan(r):
+            return 'NA'
+        r = str(f'{np.round(r, 2):.2f}').replace('0.','.')
+        p = str(f'{np.round(p, 4):.4f}').replace('0.','.') if p >= 0.0001 else '< .0001'
+        return f'{r} ({p}), n={n}'
+
+    def partial_spearman(self, data, x, y, covariates):
+        d = data[[x, y] + covariates].dropna().astype(float).rank()
+        Z = sm.add_constant(d[covariates])
+        res_x = sm.OLS(d[x], Z).fit().resid
+        res_y = sm.OLS(d[y], Z).fit().resid
+        r = np.corrcoef(res_x, res_y)[0, 1]
+        df = len(d) - 2 - len(covariates)
+        t = r * np.sqrt(df / (1 - r**2))
+        p = 2 * stats.t.sf(abs(t), df)
+        return r, p, len(d)
+
+    def partial_duration_table(self, data, covariates, parameter_names):
+        table = pd.DataFrame(index=parameter_names, columns=['pain_duration'])
+        for parameter in parameter_names:
+            r, p, n = self.partial_spearman(data, parameter, 'pain_duration', covariates)
+            table.loc[parameter, 'pain_duration'] = self.format_rp(r, p, n)
+        return table
+
+    def duration_linear_models(self, data, parameter_names):
+        predictors = ['pain_duration', 'age', 'composite']
+        rows = []
+        for parameter in parameter_names:
+            d = data[[parameter] + predictors].dropna().astype(float)
+            d = (d - d.mean()) / d.std() #standardized betas
+            model = smf.ols(f'Q("{parameter}") ~ pain_duration + age + composite', data=d).fit()
+            for term in predictors:
+                rows.append({'parameter': parameter,
+                                'term': term,
+                                'beta': np.round(model.params[term], 2),
+                                'se': np.round(model.bse[term], 2),
+                                't': np.round(model.tvalues[term], 2),
+                                'p': np.round(model.pvalues[term], 4),
+                                'n': int(model.nobs),
+                                'r2': np.round(model.rsquared, 3)})
+        return pd.DataFrame(rows)
+        
     def load_modelling_results(self, rscripts_path=None, load_stats=False):
 
         """
@@ -1030,7 +1100,6 @@ class ReportFunctions:
                     group_correlation_matrix[pain_group].loc[parameter, pain_metric] = f'{r} ({p})'
 
         #Correlation between model parameters and pain duration
-        duration_correlation_matrix = pd.DataFrame(index=parameter_names, columns=['pain_duration'])
         duration_data = pd.DataFrame(index=fit_data['participant_id'], columns=['duration'])
         for participant in fit_data['participant_id'].unique():
             duration_data.loc[participant, 'duration'] = self.data[self.data['participant_id'] == participant]['duration'].values[0]
@@ -1045,11 +1114,19 @@ class ReportFunctions:
                                                                         '> 10 years': 8})
         #Add it to fit_data, matching participant_id
         fit_data = fit_data.merge(duration_data[['pain_duration']], on='participant_id', how='left')
-        for parameter in parameter_names:
-            r, p = stats.spearmanr(fit_data[parameter], fit_data['pain_duration'])
-            r = str(f'{np.round(r, 2):.2f}').replace('0.','.') 
-            p = str(f'{np.round(p, 4):.4f}').replace('0.','.') if p >= 0.0001 else '< .0001'
-            duration_correlation_matrix.loc[parameter, 'pain_duration'] = f'{r} ({p})' 
+
+        #Version 1: all groups
+        duration_correlation_matrix = self.spearman_duration_table(fit_data, parameter_names)
+
+        #Version 2: acute and chronic pain only
+        pain_only_data = fit_data[fit_data['pain_group'].isin(['acute pain', 'chronic pain'])]
+        duration_correlation_matrix_pain = self.spearman_duration_table(pain_only_data, parameter_names)
+
+        #Version 3: chronic pain only
+        chronic_only_data = fit_data[fit_data['pain_group'] == 'chronic pain']
+        duration_correlation_matrix_chronic = self.spearman_duration_table(chronic_only_data, parameter_names)
+
+        #Populate dateframe
         self.duration_data = duration_data
 
         metadata = {'formula': 'parameter~pain_score',
@@ -1057,9 +1134,73 @@ class ReportFunctions:
                     'random_effects': '',
                     'outcome': parameter_names.tolist(),
                     'sample_size': fit_data['participant_id'].nunique(),
+                    'duration_sample_size': {'all': fit_data['participant_id'].nunique(),
+                                             'pain': pain_only_data['participant_id'].nunique(),
+                                             'chronic': chronic_only_data['participant_id'].nunique()},
                     'test': 'r',
                     'df_residual': fit_data.shape[0] - 2}
-        self.model_parameters_pain = {'metadata': metadata, 'model_summary': correlation_matrix, 'group_summary': group_correlation_matrix, 'duration_summary': duration_correlation_matrix}
+        
+        self.model_parameters_pain = {'metadata': metadata,
+                                      'model_summary': correlation_matrix,
+                                      'group_summary': group_correlation_matrix,
+                                      'duration_summary': duration_correlation_matrix,
+                                      'duration_summary_pain': duration_correlation_matrix_pain,
+                                      'duration_summary_chronic': duration_correlation_matrix_chronic}
+
+        # Duration analyses (correlations) controlling for age and pain severity (additional) 
+        covariate_data = fit_data.copy()
+        ages = self.data.groupby('participant_id')['age'].first()
+        covariate_data['age'] = covariate_data['participant_id'].map(ages)
+
+        covariate_subsets = {'all': covariate_data,
+                             'pain': covariate_data[covariate_data['pain_group'].isin(['acute pain', 'chronic pain'])],
+                             'chronic': covariate_data[covariate_data['pain_group'] == 'chronic pain']}
+
+        duration_partial_summary = {}
+        duration_lm_summary = {}
+        for label, subset in covariate_subsets.items():
+            duration_partial_summary[f'{label}_age'] = self.partial_duration_table(subset, ['age'], parameter_names)
+            duration_partial_summary[f'{label}_age_composite'] = self.partial_duration_table(subset, ['age', 'composite'], parameter_names)
+            duration_lm_summary[label] = self.duration_linear_models(subset, parameter_names)
+
+        self.model_parameters_duration_partial = duration_partial_summary
+        self.model_parameters_duration_lm = duration_lm_summary
+
+        #Correlation between model parameters and pain duration (log of midpoint in months)
+        duration_log_data = pd.DataFrame(index=fit_data['participant_id'], columns=['duration'])
+        for participant in fit_data['participant_id'].unique():
+            duration_log_data.loc[participant, 'duration'] = self.data[self.data['participant_id'] == participant]['duration'].values[0]
+        duration_log_data['duration_months'] = duration_log_data['duration'].map({'I am not in pain': 0,
+                                                                                  '< 2 weeks': 1*12/52,   # 1 week
+                                                                                  '2-4 weeks': 3*12/52,   # 3 weeks
+                                                                                  '1 – 3 months': 2,
+                                                                                  '3 – 6 months': 4.5,
+                                                                                  '6 – 12 months': 9,
+                                                                                  '1 – 5 years': 36,      # 3 years
+                                                                                  '> 5 years': 90,        # 7.5 years
+                                                                                  '> 10 years': 120})     # 10 years
+        duration_log_data['pain_duration'] = np.log1p(duration_log_data['duration_months'].astype(float))
+        
+        #Add it to a copy of fit_data, matching participant_id
+        fit_data_log = fit_data.drop(columns=['pain_duration']).merge(duration_log_data[['pain_duration']], on='participant_id', how='left')
+        ages = self.data.groupby('participant_id')['age'].first()
+        fit_data_log['age'] = fit_data_log['participant_id'].map(ages)
+
+        log_subsets = {'all': fit_data_log,
+                       'pain': fit_data_log[fit_data_log['pain_group'].isin(['acute pain', 'chronic pain'])],
+                       'chronic': fit_data_log[fit_data_log['pain_group'] == 'chronic pain']}
+
+        duration_log_correlation = {}
+        duration_log_lm = {}
+        for label, subset in log_subsets.items():
+            duration_log_correlation[label] = self.pearson_duration_table(subset, parameter_names)
+            duration_log_lm[label] = self.duration_linear_models(subset, parameter_names)
+
+        #Populate dataframe
+        self.duration_log_data = duration_log_data
+        self.model_parameters_duration_log = {'correlation_summary': duration_log_correlation,
+                                              'lm_summary': duration_log_lm,
+                                              'sample_size': {label: subset['participant_id'].nunique() for label, subset in log_subsets.items()}}
         
         #Plot the correlations
         plotting.plot_model_parameters_by_pain_split(fit_data, parameter_names, pain_names)
