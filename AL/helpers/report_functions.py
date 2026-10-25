@@ -9,6 +9,7 @@ import copy
 
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
+from statsmodels.stats.multitest import multipletests
 
 from markdown_pdf import Section
 from helpers.statistics import Statistics
@@ -838,6 +839,16 @@ class ReportFunctions:
                                 'r2': np.round(model.rsquared, 3)})
         return pd.DataFrame(rows)
         
+    def format_rho(self, r):
+        if np.isnan(r):
+            return 'NA'
+        return str(f'{np.round(r, 2):.2f}').replace('0.','.')
+
+    def format_p(self, p):
+        if np.isnan(p):
+            return 'NA'
+        return str(f'{np.round(p, 4):.4f}').replace('0.','.') if p >= 0.0001 else '< .0001'
+    
     def load_modelling_results(self, rscripts_path=None, load_stats=False):
 
         """
@@ -1077,27 +1088,37 @@ class ReportFunctions:
         fit_data = fit_data.merge(pain_scores[['participant_id', 'intensity', 'unpleasant', 'interference']], on='participant_id', how='left')
         fit_data['composite'] = fit_data.apply(lambda row: np.mean([row['intensity'], row['unpleasant'], row['interference']]), axis=1)
 
-        #Create a corellation matrix for the model parameters and pain scores
-        correlation_matrix = pd.DataFrame(index=parameter_names, columns=pain_names)
+        #Create a correlation matrix for the model parameters and pain scores (Spearman)
+        correlation_matrix = pd.DataFrame(index=parameter_names, columns=list(pain_names) + ['p (uncorrected)'])
         for parameter in parameter_names:
             for pain_metric in pain_names:
-                correlation_data = fit_data[[parameter, pain_metric]]
-                r, p = stats.pearsonr(correlation_data[parameter], correlation_data[pain_metric])
-                r = str(f'{np.round(r, 2):.2f}').replace('0.','.') 
-                p = str(f'{np.round(p, 4):.4f}').replace('0.','.') if p > 0.0001 else '> .0001'
-                correlation_matrix.loc[parameter, pain_metric] = f'{r} ({p})'
+                correlation_data = fit_data[[parameter, pain_metric]].dropna()
+                r, p = stats.spearmanr(correlation_data[parameter], correlation_data[pain_metric])
+                correlation_matrix.loc[parameter, pain_metric] = self.format_rho(r)
+                if pain_metric == 'composite':
+                    correlation_matrix.loc[parameter, 'p (uncorrected)'] = self.format_p(p)
 
-        #Correlation matrices for each pain group
-        group_correlation_matrix = {group: pd.DataFrame(index=parameter_names, columns=pain_names) for group in ['no pain', 'acute pain', 'chronic pain']}
+        #Correlation matrices for each pain group (Spearman)
+        fdr_groups = ['acute pain', 'chronic pain']
+        group_correlation_matrix = {group: pd.DataFrame(index=parameter_names, columns=list(pain_names) + ['p (uncorrected)', 'p (FDR)']) for group in ['no pain', 'acute pain', 'chronic pain']}
+        composite_pvalues = [] #(group, parameter, p) for the FDR family
         for pain_group in ['no pain', 'acute pain', 'chronic pain']:
             group_fit_data = fit_data[fit_data['pain_group'] == pain_group]
             for parameter in parameter_names:
                 for pain_metric in pain_names:
-                    correlation_data = group_fit_data[[parameter, pain_metric]]
-                    r, p = stats.pearsonr(correlation_data[parameter], correlation_data[pain_metric])
-                    r = str(f'{np.round(r, 2):.2f}').replace('0.','.') 
-                    p = str(f'{np.round(p, 4):.4f}').replace('0.','.') if p > 0.0001 else '> .0001'
-                    group_correlation_matrix[pain_group].loc[parameter, pain_metric] = f'{r} ({p})'
+                    correlation_data = group_fit_data[[parameter, pain_metric]].dropna()
+                    r, p = stats.spearmanr(correlation_data[parameter], correlation_data[pain_metric])
+                    group_correlation_matrix[pain_group].loc[parameter, pain_metric] = self.format_rho(r)
+                    if pain_metric == 'composite':
+                        group_correlation_matrix[pain_group].loc[parameter, 'p (uncorrected)'] = self.format_p(p)
+                        if pain_group in fdr_groups:
+                            composite_pvalues.append((pain_group, parameter, p))
+
+        #FDR (Benjamini-Hochberg) correction across the 10 composite tests (5 parameters x acute and chronic pain)
+        _, p_fdr, _, _ = multipletests([p for _, _, p in composite_pvalues], alpha=0.05, method='fdr_bh')
+        for (pain_group, parameter, _), q in zip(composite_pvalues, p_fdr):
+            group_correlation_matrix[pain_group].loc[parameter, 'p (FDR)'] = self.format_p(q)
+        group_correlation_matrix['no pain']['p (FDR)'] = 'n/a'
 
         #Correlation between model parameters and pain duration
         duration_data = pd.DataFrame(index=fit_data['participant_id'], columns=['duration'])
