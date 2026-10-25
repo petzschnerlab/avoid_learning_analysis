@@ -69,7 +69,7 @@ class ReportFunctions:
         if '~' in comparison:
             comparisons = comparison.split(' vs ')
             comparison = f"{comparisons[0].split('~')[0]} vs {comparisons[1].split('~')[0]}: {comparisons[0].split('~')[1]}"
-        significance = '\*' if (model_summary['p_value'].values < 0.05) else ''
+        significance = '\\*' if (model_summary['p_value'].values < 0.05) else ''
         df = round(float(model_summary['df'].values[0]))
         test_value = model_summary['t_value'].values[0].round(2)
         p = model_summary['p_value'].values[0].round(4) if (model_summary['p_value'] >= 0.0001).values else '<0.0001'
@@ -228,7 +228,7 @@ class ReportFunctions:
             case 'demo-clinical-scores':
                 depression_caption = ' and depression' if self.split_by_group == 'depression' else ''
                 caption = f'''Pain{depression_caption} metrics for each group.
-                Boxplots show the mean and 95\% confidence intervals of the corresponding metric for each group.
+                Boxplots show the mean and 95\\% confidence intervals of the corresponding metric for each group.
                 Half-violin plots show the distribution of the scores of the corresponding metric for each group.
                 Scatter points show the scores of the corresponding metric for each participant within each group.'''
 
@@ -236,29 +236,29 @@ class ReportFunctions:
                 caption = 'Behavioral performance across learning trials for the reward and punishment contexts for each group.'
                 if self.rolling_mean is not None:
                     caption += f' For visualization, the accuracy is smoothed using a rolling mean of {self.rolling_mean} trials.'
-                caption += ' Shaded regions represent 95\% confidence intervals.'
+                caption += ' Shaded regions represent 95\\% confidence intervals.'
 
             case 'learning-accuracy':
                 caption = """Averaged behavioral performance during learning for the reward and punishment contexts for each group.
-                Boxplots show the mean and 95\% confidence intervals of the accuracy for each context across participants within each group.
+                Boxplots show the mean and 95\\% confidence intervals of the accuracy for each context across participants within each group.
                 Half-violin plots show the distribution of accuracy for each context across participants within each group.
                 Scatter points show the averaged accuracy for each participant within each context."""
 
             case 'learning-accuracy-diff':
                 caption = """Averaged difference (Reward - Punish) of behavioral performance during learning for each group.
-                Boxplots show the mean and 95\% confidence intervals of the accuracy for each context across participants within each group.
+                Boxplots show the mean and 95\\% confidence intervals of the accuracy for each context across participants within each group.
                 Half-violin plots show the distribution of accuracy for each context across participants within each group.
                 Scatter points show the averaged accuracy for each participant within each symbol type."""
 
             case 'learning-rt':
                 caption = """Averaged behavioral performance during learning for the reward and punishment contexts for each group.
-                Boxplots show the mean and 95\% confidence intervals of the reaction times for each context across participants within each group.
+                Boxplots show the mean and 95\\% confidence intervals of the reaction times for each context across participants within each group.
                 Half-violin plots show the distribution of reaction times for each context across participants within each group.
                 Scatter points show the averaged reaction times for each participant within each context."""
 
             case 'learning-rt-diff':
                 caption = """Averaged difference (Reward - Punish) of behavioral performance during learning for each group.
-                Boxplots show the mean and 95\% confidence intervals of the reaction times for each context across participants within each group.
+                Boxplots show the mean and 95\\% confidence intervals of the reaction times for each context across participants within each group.
                 Half-violin plots show the distribution of reaction times for each context across participants within each group.
                 Scatter points show the averaged reaction times for each participant within each symbol type."""
 
@@ -266,49 +266,49 @@ class ReportFunctions:
                 caption = 'Behavioral performance across learning trials for each group for each context.'
                 if self.rolling_mean is not None:
                     caption += f' For visualization, the accuracy is smoothed using a rolling mean of {self.rolling_mean} trials.'
-                caption += ' Shaded regions represent 95\% confidence intervals.'
+                caption += ' Shaded regions represent 95\\% confidence intervals.'
 
             case 'learning-rt-by-group':
                 caption = 'Reaction times across learning trials for the reward and punishment contexts for each group.'
                 if self.rolling_mean is not None:
                     caption += f' For visualization, the reaction time is smoothed using a rolling mean of {self.rolling_mean} trials.'
-                caption += ' Shaded regions represent 95\% confidence intervals.'
+                caption += ' Shaded regions represent 95\\% confidence intervals.'
 
             case 'learning-rt-by-context':
                 caption = 'Reaction times across learning trials for each group for each context.'
                 if self.rolling_mean is not None:
                     caption += f' For visualization, the reaction time is smoothed using a rolling mean of {self.rolling_mean} trials.'
-                caption += ' Shaded regions represent 95\% confidence intervals.'
+                caption += ' Shaded regions represent 95\\% confidence intervals.'
 
             case 'transfer-choice-rate':
                 caption = """Choice rate for each symbol during transfer trials for each group.
                 Choice rate is computed as the percentage of times a symbol was chosen given the number of times it was presented.
-                Boxplots show the mean and 95\% confidence intervals of the choice rate for each symbol type across participants within each group.
+                Boxplots show the mean and 95\\% confidence intervals of the choice rate for each symbol type across participants within each group.
                 Half-violin plots show the distribution of choice rates for each symbol type across participants within each group.
                 Scatter points show the averaged choice rate for each participant within each symbol type."""
 
             case 'transfer-choice-rate-neutral':
                 caption = """Choice rates for cases where the low reward was compared to the low punishment symbols in the transfer trials. 
-                Choice rates represent the percentage of times the low reward was chosen, thus 50\% indicates equal choice rates for both symbols,
+                Choice rates represent the percentage of times the low reward was chosen, thus 50\\% indicates equal choice rates for both symbols,
                 while greater than 50% indicates a preference for the low reward symbol. 
-                Boxplots show the mean and 95\% confidence intervals of the choice rate for each group."""
+                Boxplots show the mean and 95\\% confidence intervals of the choice rate for each group."""
 
             case 'transfer-rt':
                 caption = """Reaction times for each symbol during transfer trials for each group.
-                Boxplots show the mean and 95\% confidence intervals of the reaction times for each symbol type across participants within each group.
+                Boxplots show the mean and 95\\% confidence intervals of the reaction times for each symbol type across participants within each group.
                 Half-violin plots show the distribution of reaction times for each symbol type across participants within each group.
                 Scatter points show the averaged reaction time for each participant within each symbol type."""
 
             case 'transfer-rt-neutral':
                 caption = """Reaction times for cases where the low reward was compared to the low punishment symbols in the transfer trials. 
-                Boxplots show the mean and 95\% confidence intervals of the reaction times for each group."""
+                Boxplots show the mean and 95\\% confidence intervals of the reaction times for each group."""
 
             case 'transfer-valence-bias':
                 caption = """Valence bias for each group. Valence bias is computed as the difference in choice rate differences in each context, 
                 specifically (High Reward - Low Reward) - (Low Punish - High Punish). 
                 Positive biases indicate that there was a larger of choice rates within the reward context, 
                 and negative biases indicate that there was a larger difference in choice rates within the punishment context.
-                Boxplots show the mean and 95\% confidence intervals of the bias for each group.
+                Boxplots show the mean and 95\\% confidence intervals of the bias for each group.
                 Half-violin plots show the distribution of biases across participants within each group.
                 Scatter points show the bias for each participant within each group.
                 """ 
@@ -353,17 +353,17 @@ class ReportFunctions:
                 """
                 if self.rolling_mean is not None:
                     caption += f'For visualization, the accuracy is smoothed using a rolling mean of {self.rolling_mean} trials. '
-                caption += 'Shaded regions represent 95\% confidence intervals. Dashed lines represent averaged empirical data. '
+                caption += 'Shaded regions represent 95\\% confidence intervals. Dashed lines represent averaged empirical data. '
                 caption += """Bottom: Choice rate for each symbol during transfer trials for each group. 
                 Choice rate is computed as the percentage of times a symbol was chosen given the number of times it was presented.
                 Bars indicate the averaged choice rate for each symbol type across participants within each group.
-                Error bars represent the 95\% confidence intervals of the choice rate for each symbol type across participants within each group.
+                Error bars represent the 95\\% confidence intervals of the choice rate for each symbol type across participants within each group.
                 Grey diamonds represent averaged empirical data.
                 """
 
             case 'model-parameters':
                 caption = f"""Best Model, {self.best_model_label}, simulated parameter fits for each group.
-                Each parameter is shown as a boxplot with the mean and 95\% confidence intervals across participants within each group.
+                Each parameter is shown as a boxplot with the mean and 95\\% confidence intervals across participants within each group.
                 Half-violin plots show the distribution of parameter fits across participants within each group.
                 Scatter points show the parameter fits for each participant within each group.
                 """
@@ -411,18 +411,18 @@ class ReportFunctions:
                 caption = 'Empirical findings for the learning phase (top) and the transfer phase (bottom). Learning Phase (Top): Behavioral performance across learning trials for the reward and punishment contexts for each group.'
                 if self.rolling_mean is not None:
                     caption += f' For visualization, the accuracy is smoothed using a rolling mean of {self.rolling_mean} trials.'
-                caption += ' Shaded regions represent 95\% confidence intervals.'
+                caption += ' Shaded regions represent 95\\% confidence intervals.'
                 caption += """ Transfer Phase (Bottom): Choice rate for each symbol during transfer trials for each group.
                 Choice rate is computed as the percentage of times a symbol was chosen given the number of times it was presented.
-                Bar plots show the mean and 95\% confidence intervals of the choice rate for each symbol type across participants within each group."""
+                Bar plots show the mean and 95\\% confidence intervals of the choice rate for each symbol type across participants within each group."""
 
             case 'empirical-rt':
                 caption = 'Empirical findings for the learning phase (top) and the transfer phase (bottom). Learning Phase (Top): Reaction times across learning trials for the reward and punishment contexts for each group.'
                 if self.rolling_mean is not None:
                     caption += f' For visualization, the reaction time is smoothed using a rolling mean of {self.rolling_mean} trials.'
-                caption += ' Shaded regions represent 95\% confidence intervals.'
+                caption += ' Shaded regions represent 95\\% confidence intervals.'
                 caption += """ Transfer Phase (Bottom): Reaction times for each symbol during transfer trials for each group.
-                Bar plots show the mean and 95\% confidence intervals of the reaction times for each symbol type across participants within each group."""
+                Bar plots show the mean and 95\\% confidence intervals of the reaction times for each symbol type across participants within each group."""
 
         if 'correlation-plot' in target:
             caption = f"""Parameter recovery correlational plot for the {target.split('-')[0].title()} model, 
@@ -572,7 +572,7 @@ class ReportFunctions:
         #Iterate through summary and format each row into a sentence
         for i, factor in enumerate(summary['factor'].unique()):
             factor_data = summary[summary['factor']==factor]
-            significance = '\*' if (factor_data['p_value'].values < 0.05) else ''
+            significance = '\\*' if (factor_data['p_value'].values < 0.05) else ''
             df_1 = round(float(factor_data['df'].values[0])) #TODO: Check these - they are not the same as k-1 but probably bc of the method used
             df_2 = round(float(df_residual)) if test == 'F' else f'N={sample_size}'
             test_value = factor_data['test_value'].values.round(2)[0]
