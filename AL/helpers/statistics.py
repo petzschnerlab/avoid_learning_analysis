@@ -382,12 +382,12 @@ class Statistics:
 
         == Pain Analyses ==
         Learning Phase:
-        1. Chronic Pain vs No Pain
-        2. Chronic Pain vs Acute Pain
+        1. Acute Pain vs No Pain
+        2. Chronic Pain vs No Pain
 
         Transfer Phase:
-        1. Chronic Pain vs No Pain
-        2. Chronic Pain vs Acute Pain
+        1. Acute Pain vs No Pain
+        2. Chronic Pain vs No Pain
 
         == Depression Analyses ==
         Learning Phase:
@@ -398,8 +398,8 @@ class Statistics:
 
         '''
 
-        comparisons = [['chronic pain', 'no pain'], 
-                       ['chronic pain', 'acute pain']]
+        comparisons = [['acute pain', 'no pain'], 
+                       ['chronic pain', 'no pain']]
         
         data = self.average_byfactor(self.learning_data, 'accuracy', self.group_code)
         self.learning_accuracy_planned_group = self.planned_ttests('accuracy', self.group_code, comparisons, data)
