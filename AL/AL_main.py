@@ -17,7 +17,7 @@ if __name__ == '__main__':
               'file_path':                      r'AL/data', #r'D:\BM_Carney_Petzschner_Lab\SOMAStudyTracking\SOMAV1\database_exports\avoid_learn_prolific',
               'file_name':                      [r'v1a_avoid_pain.csv', r'v1b_avoid_paindepression.csv'],
 
-              'accuracy_exclusion_threshold':   75,
+              'accuracy_exclusion_threshold':   55,
               'RT_low_threshold':               200,
               'RT_high_threshold':              5000,
 
