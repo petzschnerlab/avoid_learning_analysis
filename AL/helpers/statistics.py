@@ -149,6 +149,9 @@ class Statistics:
         if self.depression_scores is not None:
             self.tstats_depression = self.planned_ttests('PHQ8', self.group_code, comparisons, self.depression_scores)
 
+        #Demographic chi-squared test of independence: gender (female/N) x group
+        self.chi2_gender = self.chi_squared_test('sex', self.group_code, self.demographics, target_level='female')
+
         #Prepare summaries for statistical reporting
         factor_labels = ['Age', 'Pain Intensity', 'Pain Unpleasantness', 'Pain Interference', 'Composite', 'Depression']
         self.demo_clinical = pd.concat([self.stats_age['model_summary'],
@@ -250,7 +253,18 @@ class Statistics:
                                                filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
                                                savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_task.csv",
                                                family='binomial')
-        
+
+        #Gender covariate (coded 1 = female, 0 = not female, matching the female/N chi-squared test)
+        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+sex+(1|participant_id)'
+        learning_data_gender = self.add_gender_covariate(self.learning_data,
+                                                         filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials_gender.csv")
+        self.learning_accuracy_glmm_gender = self.generalized_linear_model(formula,
+                                               learning_data_gender,
+                                               path=self.repo_directory,
+                                               filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials_gender.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_gender.csv",
+                                               family='binomial')
+
         #Learning RT
         formula = f'rt~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)'
         assumption_data = self.average_byfactor(self.learning_data, 'rt', [self.group_code, 'symbol_name', 'binned_trial'])
@@ -342,7 +356,18 @@ class Statistics:
                                                filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_task.csv",
                                                savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_task.csv",
                                                family='gaussian')
-        
+
+        #Gender covariate (coded 1 = female, 0 = not female, matching the female/N chi-squared test)
+        formula = f'choice_rate~1+{self.group_code}*symbol+sex+(1|participant_id)'
+        choice_rate_gender = self.add_gender_covariate(self.choice_rate.reset_index(),
+                                                       filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_gender.csv")
+        self.transfer_accuracy_glmm_gender = self.generalized_linear_model(formula,
+                                               choice_rate_gender,
+                                               path=self.repo_directory,
+                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_gender.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_gender.csv",
+                                               family='gaussian')
+
         #Transfer choice RT using averaged data
         formula = f'choice_rt~1+{self.group_code}*symbol+(1|participant_id)'
         assumption_data = self.choice_rt.reset_index()
@@ -889,6 +914,149 @@ class Statistics:
             raise ValueError('test_type must be either independent or paired')
     
         return d
+
+    def add_gender_covariate(self, data: pd.DataFrame, filename: str = None, gender_column: str = 'sex', target_level: str = 'female') -> pd.DataFrame:
+
+        """
+        Merge participants' gender (from self.demographics) into a dataset as a binary covariate
+        (1 = female, 0 = not female), and save it so the R mixed effects script can load it
+
+        Parameters
+        ----------
+        data : pd.DataFrame
+            The data to add the covariate to (must contain participant_id)
+        filename : str
+            Path (relative to self.repo_directory) to save the data for the R script. If None, nothing is saved
+        gender_column : str
+            The gender column in self.demographics
+        target_level : str
+            The level coded as 1 (case-insensitive)
+
+        Returns
+        -------
+        pd.DataFrame
+            The data with a 'gender' column
+        """
+
+        gender = self.demographics[['participant_id', gender_column]].drop_duplicates(subset='participant_id').copy()
+        gender['gender'] = (gender[gender_column].astype(str).str.strip().str.lower() == target_level.lower()).astype(int)
+        if gender['gender'].sum() == 0:
+            raise ValueError(f"No '{target_level}' responses found in '{gender_column}'. Levels found: {gender[gender_column].unique().tolist()}")
+        gender.loc[gender[gender_column].isnull(), 'gender'] = np.nan
+        gender = gender[['participant_id', gender_column, 'gender']]
+
+        data = data.drop(columns=['gender', gender_column], errors='ignore').merge(gender, on='participant_id', how='left')
+        n_missing = data.loc[data['gender'].isnull(), 'participant_id'].nunique()
+        if n_missing > 0:
+            warnings.warn(f'{n_missing} participants have no gender data and will be dropped from the gender covariate model.', stacklevel=2)
+            data = data.dropna(subset=['gender'])
+
+        if filename is not None:
+            data.to_csv(os.path.join(self.repo_directory, filename), index=False)
+
+        return data
+
+    def chi_squared_test(self, metric: str, factor: str, data: pd.DataFrame, target_level: str = 'female') -> dict:
+
+        """
+        Chi-squared test of independence for the proportion of a target level (e.g., female/N) across groups,
+        followed by Bonferroni-corrected pairwise chi-squared tests between each pair of groups
+
+        Parameters
+        ----------
+        metric : str
+            The categorical column to test (e.g., 'gender')
+        factor : str
+            The grouping factor (e.g., self.group_code)
+        data : pd.DataFrame
+            The data containing the metric and factor columns (one row per participant)
+        target_level : str
+            The level counted in the proportion (case-insensitive), e.g., 'female' gives female/N.
+            All other responses are counted as not-target.
+
+        Returns
+        -------
+        dict
+            The metadata, the omnibus model summary, the pairwise comparisons, the proportions per group,
+            and the observed/expected contingency tables
+        """
+
+        #Prepare data: code each participant as target (e.g., female) or not
+        data = data.drop_duplicates(subset='participant_id') if 'participant_id' in data.columns else data
+        data = data[[metric, factor]].dropna().copy()
+        data['is_target'] = data[metric].astype(str).str.strip().str.lower() == target_level.lower()
+        if data['is_target'].sum() == 0:
+            raise ValueError(f"No '{target_level}' responses found in '{metric}'. Levels found: {data[metric].unique().tolist()}")
+
+        #Contingency table: groups x (target, not target)
+        contingency_table = pd.crosstab(data[factor], data['is_target']).reindex(columns=[True, False], fill_value=0)
+        contingency_table.columns = [target_level, f'not {target_level}']
+
+        #Proportions (e.g., female/N) per group
+        proportions = pd.DataFrame({'n_target': contingency_table[target_level],
+                                    'N': contingency_table.sum(axis=1)})
+        proportions['proportion'] = proportions['n_target'] / proportions['N']
+        proportions['summary'] = proportions.apply(lambda x: f"{int(x['n_target'])}/{int(x['N'])} ({x['proportion']*100:.1f}%)", axis=1)
+
+        #Omnibus test
+        chi2, p_value, df, expected = sp.stats.chi2_contingency(contingency_table, correction=False)
+        expected = pd.DataFrame(expected, index=contingency_table.index, columns=contingency_table.columns)
+
+        #Effect size (Cramer's V; with two columns this equals phi)
+        n = contingency_table.values.sum()
+        min_dim = min(contingency_table.shape) - 1
+        cramers_v = np.sqrt(chi2 / (n * min_dim)) if min_dim > 0 else np.nan
+
+        #Assumption check: expected counts should be >= 5 in at least 80% of cells and none < 1
+        expected_assumption = 'met' if ((expected.values >= 5).mean() >= 0.8) and (expected.values >= 1).all() else 'violated'
+
+        model_summary = pd.DataFrame({'factor': f'{factor} x {metric} ({target_level}/N)',
+                                      'df': df,
+                                      'test_value': chi2,
+                                      'p_value': p_value,
+                                      'cramers_v': cramers_v,
+                                      'n': n,
+                                      'expected_count_assumption': expected_assumption},
+                                     index=[0])
+
+        #Pairwise comparisons between groups (Bonferroni corrected)
+        groups = list(contingency_table.index)
+        pairs = [(groups[i], groups[j]) for i in range(len(groups)) for j in range(i+1, len(groups))]
+        pairwise_summary = pd.DataFrame()
+        for group1, group2 in pairs:
+            pair_table = contingency_table.loc[[group1, group2]]
+            pair_chi2, pair_p, pair_df, pair_expected = sp.stats.chi2_contingency(pair_table, correction=False)
+            pair_n = pair_table.values.sum()
+            pair_v = np.sqrt(pair_chi2 / pair_n)
+            pair_assumption = 'met' if ((pair_expected >= 5).mean() >= 0.8) and (pair_expected >= 1).all() else 'violated'
+            pairwise_summary = pd.concat([pairwise_summary, pd.DataFrame({'comparison': f'{group1} vs {group2}',
+                                                                          'proportion1': proportions.loc[group1, 'proportion'],
+                                                                          'proportion2': proportions.loc[group2, 'proportion'],
+                                                                          'df': pair_df,
+                                                                          'test_value': pair_chi2,
+                                                                          'p_value': pair_p,
+                                                                          'p_value_corrected': min(pair_p * len(pairs), 1),
+                                                                          'cramers_v': pair_v,
+                                                                          'expected_count_assumption': pair_assumption},
+                                                                         index=[0])], axis=0)
+        pairwise_summary = pairwise_summary.reset_index(drop=True)
+
+        if expected_assumption == 'violated':
+            warnings.warn(f'''Chi-squared test for {metric} x {factor}: some expected cell counts are small 
+                          (fewer than 80% of cells >= 5, or a cell < 1). Consider Fisher's exact test instead.''', stacklevel=2)
+
+        metadata = {'metric': metric,
+                    'factor': factor,
+                    'target_level': target_level,
+                    'sample_size': n,
+                    'test': 'Chisq'}
+
+        return {'metadata': metadata,
+                'model_summary': model_summary,
+                'pairwise_summary': pairwise_summary,
+                'proportions': proportions,
+                'contingency_table': contingency_table,
+                'expected_table': expected}
 
     #Statistical models
     def linear_model_categorical(self, formula: str, data: pd.DataFrame) -> dict:
