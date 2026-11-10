@@ -374,21 +374,25 @@ class ReportFunctions:
             case 'parameter-correlation':
                 caption = f"""Correlations between the best model's, {self.best_model_label}, parameters and pain scores. 
                 Scatter points show the parameter fits for each participant within each group, grey dashed lines represent the best fit line for each group.
+                Learning rate parameters are plotted on a natural log scale.
                 """
                 
             case 'parameter-correlation-no-pain':
                 caption = f"""Correlations between the best model's, {self.best_model_label}, parameters and pain scores for the No Pain group. 
                 Scatter points show the parameter fits for each participant within each group, grey dashed lines represent the best fit line for each group.
+                Learning rate parameters are plotted on a natural log scale.
                 """
 
             case 'parameter-correlation-acute-pain':
                 caption = f"""Correlations between the best model's, {self.best_model_label}, parameters and pain scores for the Acute Pain group. 
                 Scatter points show the parameter fits for each participant within each group, grey dashed lines represent the best fit line for each group.
+                Learning rate parameters are plotted on a natural log scale.
                 """
 
             case 'parameter-correlation-chronic-pain':
                 caption = f"""Correlations between the best model's, {self.best_model_label}, parameters and pain scores for the Chronic Pain group. 
                 Scatter points show the parameter fits for each participant within each group, grey dashed lines represent the best fit line for each group.
+                Learning rate parameters are plotted on a natural log scale.
                 """
             
             case 'model-parameters-correlation-table':
@@ -848,7 +852,68 @@ class ReportFunctions:
         if np.isnan(p):
             return 'NA'
         return str(f'{np.round(p, 4):.4f}').replace('0.','.') if p >= 0.0001 else '< .0001'
-    
+
+    def get_learning_rate_parameters(self, parameter_names: list) -> list:
+
+        """
+        Identify which model parameters are learning rates.
+
+        A parameter is treated as a learning rate if 'lr' appears as an underscore-separated
+        token in its name (e.g., 'factual_lr', 'critic_lr', 'factual_actor_lr').
+
+        Parameters
+        ----------
+        parameter_names : list
+            The model parameter names
+
+        Returns
+        -------
+        list
+            The subset of parameter_names that are learning rates
+        """
+
+        lr_parameters = [parameter for parameter in parameter_names if 'lr' in parameter.lower().split('_')]
+
+        if len(lr_parameters) == 0:
+            warnings.warn(f'No learning rate parameters found among {list(parameter_names)}; '
+                          'no parameters will be log-transformed in the parameter x pain plots.')
+
+        return lr_parameters
+
+    def log_transform_parameters(self, data: pd.DataFrame, parameters: list, floor: float = 1e-6) -> pd.DataFrame:
+
+        """
+        Return a copy of data with the given parameters natural log-transformed.
+
+        Values at or below zero cannot be logged, so they are clipped to `floor` before
+        transforming and a warning reports how many values were affected. (Fitted learning
+        rates are bounded at 0.01, so this should not normally occur.)
+
+        Parameters
+        ----------
+        data : pd.DataFrame
+            The data containing the parameter columns
+        parameters : list
+            The columns to log-transform
+        floor : float
+            The minimum value used before taking the log, by default 1e-6
+
+        Returns
+        -------
+        pd.DataFrame
+            A copy of data with the parameter columns log-transformed
+        """
+
+        transformed = data.copy()
+        for parameter in parameters:
+            values = transformed[parameter].astype(float)
+            n_nonpositive = int((values <= 0).sum())
+            if n_nonpositive > 0:
+                warnings.warn(f'{n_nonpositive} value(s) of {parameter} are <= 0 and were set to {floor} before log-transforming.')
+            transformed[parameter] = np.log(values.clip(lower=floor))
+
+        return transformed
+
     def load_modelling_results(self, rscripts_path=None, load_stats=False):
 
         """
@@ -1247,7 +1312,10 @@ class ReportFunctions:
                                     'sample_size': {label: subset['participant_id'].nunique() for label, subset in model_free_subsets.items()}}
         
         #Plot the correlations
-        plotting.plot_model_parameters_by_pain_split(fit_data, parameter_names, pain_names)
+        #Log-transform learning rates for the parameter x pain severity scatterplots only (correlation tables above remain Spearman on raw values)
+        log_parameters = self.get_learning_rate_parameters(parameter_names)
+        plot_data = self.log_transform_parameters(fit_data, log_parameters)
+        plotting.plot_model_parameters_by_pain_split(plot_data, parameter_names, pain_names, log_parameters=log_parameters)
         plotting.plot_model_fits({'AIC': self.model_AIC, 'BIC': self.model_BIC})
         plotting.plot_param_duration(parameter_names, fit_data)
 

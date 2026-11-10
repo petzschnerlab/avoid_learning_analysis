@@ -857,7 +857,7 @@ class Plotting:
         #Close figure
         plt.close(fig)
 
-    def plot_model_parameters_by_pain_split(self, fit_data: pd.DataFrame, parameter_names: list, pain_names: list) -> None:
+    def plot_model_parameters_by_pain_split(self, fit_data: pd.DataFrame, parameter_names: list, pain_names: list, log_parameters: list = None) -> None:
 
         """
         Plot model parameters against pain metrics for different pain groups, split by pain group.
@@ -870,6 +870,8 @@ class Plotting:
             List of model parameter names to plot.
         pain_names : list
             List of pain metric names to plot against model parameters.
+        log_parameters : list, optional
+            Parameters in fit_data that have already been log-transformed; their axis labels are prefixed with 'Log'.
 
         Returns (External)
         -------
@@ -877,6 +879,7 @@ class Plotting:
             A plot of model parameters against pain metrics for different pain groups, split by pain group.
         """
 
+        log_parameters = log_parameters or []
         cols = self.colors['group']
         colours = {'no pain': cols[0], 'chronic pain': cols[2], 'acute pain': cols[1]}
         
@@ -909,6 +912,8 @@ class Plotting:
                         axes[i, j].set_xlabel('')
                     if j == 0:
                         y_label = parameter.replace('_', ' ').replace('lr', 'learning rate').replace(' learning', '\nlearning').replace('weighing ', 'weighting\n')
+                        if parameter in log_parameters:
+                            y_label = f'log {y_label}'
                         axes[i, j].set_ylabel(y_label.title(), fontsize=18)
                     
                     axes[i, j].set_xlim(np.floor(x_min), np.ceil(x_max))
