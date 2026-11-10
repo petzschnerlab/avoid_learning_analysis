@@ -61,6 +61,7 @@ class Plotting:
         self.plot_neutral_transfer_accuracy('transfer-rt-neutral', metric='rt', colors=self.colors['group'])
         self.plot_differences_transfer('transfer-choice-rate-differences', colors=self.colors['group'])
         self.plot_differences_transfer('transfer-select-choice-rate-differences', colors=self.colors['group'], select=True)
+        self.plot_transfer_choice_matrix('transfer-choice-matrix')
 
     def compute_n_and_t(self, data: pd.DataFrame, splitting_column: str) -> tuple:
 
@@ -682,6 +683,111 @@ class Plotting:
         plt.tight_layout()
         plt.savefig(f'AL/plots/{self.split_by_group}/{save_name}.png')
         plt.close()
+
+    def compute_transfer_choice_matrix(self) -> dict:
+
+        """
+        Compute the pairwise transfer choice matrix for each group from self.select_choice_rate
+
+        Each cell (row, column) is the percentage of trials on which the row stimulus type was chosen
+        when it was presented together with the column stimulus type, averaged first within and then
+        across participants. Same-type pairs (the diagonal) were not analysed and are left empty.
+
+        Returns
+        -------
+        dict
+            {group: pd.DataFrame} of mean choice rates (rows/columns ordered HR, LR, LP, HP, N),
+            plus {'n': {group: number of participants}}
+        """
+
+        symbols = ['High Reward', 'Low Reward', 'Low Punish', 'High Punish', 'Novel']
+        matrices = {}
+        sample_sizes = {}
+        for group in self.group_labels:
+            matrix = pd.DataFrame(np.nan, index=symbols, columns=symbols)
+            for row_symbol in symbols:
+                rates = self.select_choice_rate[row_symbol].reset_index()
+                rates = rates[rates[self.group_code] == group]
+                for column_symbol in symbols:
+                    if row_symbol == column_symbol:
+                        continue
+                    cell = rates[rates['symbol'] == column_symbol]['choice_rate'].astype(float)
+                    matrix.loc[row_symbol, column_symbol] = cell.mean()
+                sample_sizes[group] = rates['participant_id'].nunique()
+            matrices[group] = matrix
+
+        matrices['n'] = sample_sizes
+        return matrices
+
+    def plot_transfer_choice_matrix(self, save_name: str) -> None:
+
+        """
+        Plot the pairwise transfer choice matrix (5x5 heatmap) for each group
+
+        Each cell shows the percentage of trials on which the row stimulus type was chosen over the column stimulus type,
+        using only trials where that exact pair was presented (pooled across stimulus exemplars and backgrounds).
+        Cells mirrored across the diagonal sum to 100%.
+
+        Parameters
+        ----------
+        save_name : str
+            The name to save the plot as
+
+        Returns (External)
+        ------------------
+        Image: PNG, SVG
+            The choice matrix for each group
+        """
+
+        from matplotlib.colors import LinearSegmentedColormap
+
+        matrices = self.compute_transfer_choice_matrix()
+        labels = ['HR', 'LR', 'LP', 'HP', 'N']
+        group_titles = {'no pain': 'No Pain', 'acute pain': 'Acute Pain', 'chronic pain': 'Chronic Pain',
+                        'healthy': 'Healthy', 'depressed': 'Depressed'}
+
+        #Diverging colour map centred on indifference (50%): red = row stimulus rarely chosen, blue = row stimulus usually chosen
+        cmap = LinearSegmentedColormap.from_list('choice', [self.colors['condition'][3], '#F7F7F7', self.colors['condition'][0]])
+        cmap.set_bad('#D9D9D9')
+
+        n_groups = len(self.group_labels)
+        fig, axes = plt.subplots(1, n_groups, figsize=(5.6 * n_groups + 1.2, 6.2), constrained_layout=True)
+        axes = np.atleast_1d(axes)
+        for ax, group in zip(axes, self.group_labels):
+            matrix = matrices[group].values
+            image = ax.imshow(np.ma.masked_invalid(matrix), cmap=cmap, vmin=0, vmax=100)
+
+            for i in range(matrix.shape[0]):
+                for j in range(matrix.shape[1]):
+                    if np.isnan(matrix[i, j]):
+                        continue
+                    text_color = 'white' if abs(matrix[i, j] - 50) > 32 else 'black'
+                    ax.text(j, i, f'{matrix[i, j]:.0f}', ha='center', va='center', fontsize=15, color=text_color)
+
+            ax.set_xticks(range(len(labels)), labels, fontsize=15)
+            ax.set_yticks(range(len(labels)), labels, fontsize=15)
+            ax.xaxis.set_ticks_position('top')
+            ax.xaxis.set_label_position('top')
+            ax.set_xlabel('Paired with', fontsize=15, labelpad=8)
+            if ax is axes[0]:
+                ax.set_ylabel('Stimulus chosen', fontsize=15)
+            ax.set_title(f"{group_titles.get(group, group.title())} (n = {matrices['n'][group]})", fontsize=17, pad=12)
+            ax.tick_params(length=0)
+            for spine in ax.spines.values():
+                spine.set_visible(False)
+
+        colorbar = fig.colorbar(image, ax=axes, shrink=0.8, pad=0.02)
+        colorbar.set_label('Choice rate (%)', fontsize=15)
+        colorbar.ax.tick_params(labelsize=13)
+
+        plt.savefig(f'AL/plots/{self.split_by_group}/{save_name}.png', dpi=300, bbox_inches='tight')
+        plt.savefig(f'AL/plots/{self.split_by_group}/{save_name}.svg', format='svg', bbox_inches='tight')
+        plt.close(fig)
+
+        #Save the group-mean matrices alongside the figure
+        table = pd.concat({group: matrices[group].rename(index=dict(zip(matrices[group].index, labels)), columns=dict(zip(matrices[group].columns, labels)))
+                           for group in self.group_labels}, names=[self.group_code, 'chosen'])
+        table.round(1).to_csv(f'AL/plots/{self.split_by_group}/{save_name}.csv')
 
     def add_difference_significance(self, ax: plt.axes, metric_data: pd.Series, symbol_pair: str) -> None:
 
