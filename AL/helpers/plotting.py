@@ -1,4 +1,5 @@
 #Import modules
+import warnings
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -185,7 +186,88 @@ class Plotting:
             CIs = CIs * t_scores
 
             #Add barplot with CIs
-            ax.bar(np.arange(1,len(mean_data['score'])+1), mean_data['score'], yerr=CIs, color=colors, alpha=alpha, capsize=5, ecolor='dimgrey')                        
+            ax.bar(np.arange(1,len(mean_data['score'])+1), mean_data['score'], yerr=CIs, color=colors, alpha=alpha, capsize=5, ecolor='dimgrey')
+
+    def p_to_stars(self, p_value: float) -> str:
+
+        """
+        Convert a p-value to significance asterisks
+
+        Parameters
+        ----------
+        p_value : float
+            The p-value
+
+        Returns
+        -------
+        str
+            '***' (p < .001), '**' (p < .01), '*' (p < .05), or 'ns'
+        """
+
+        if p_value < 0.001:
+            return '***'
+        elif p_value < 0.01:
+            return '**'
+        elif p_value < 0.05:
+            return '*'
+        return 'ns'
+
+    def add_significance_brackets(self, ax: plt.axes, comparisons: list, bar_tops: dict, show_ns: bool = False, fontsize: int = 22) -> None:
+
+        """
+        Draw significance brackets (lines with asterisks) between bars
+
+        Parameters
+        ----------
+        ax : Axes
+            The axes to draw on (the y-limits should already be set)
+        comparisons : list
+            List of (x1, x2, p_value) tuples, where x1 and x2 are bar x positions
+        bar_tops : dict
+            The top of each bar's error bar, keyed by x position, so brackets clear the error bars
+        show_ns : bool
+            Whether to draw brackets for non-significant comparisons (labelled 'ns'), by default False
+        fontsize : int
+            Font size of the asterisks
+
+        Returns
+        -------
+        None
+        """
+
+        comparisons = [c for c in comparisons if show_ns or c[2] < 0.05]
+        if len(comparisons) == 0:
+            return
+
+        y_min, y_max = ax.get_ylim()
+        y_range = y_max - y_min
+        gap = 0.04 * y_range #space between an error bar (or a lower bracket) and a bracket
+        tick = 0.02 * y_range #height of the bracket's downward ticks
+        level_height = 0.09 * y_range #vertical space a bracket and its asterisks take up
+
+        #Draw narrower comparisons first so wider ones stack above them
+        comparisons = sorted(comparisons, key=lambda c: (abs(c[1] - c[0]), min(c[0], c[1])))
+        occupied = {x: max(top, 0) for x, top in bar_tops.items()} #height already used above each bar
+        for x1, x2, p_value in comparisons:
+            x_left, x_right = min(x1, x2), max(x1, x2)
+            spanned = [x for x in occupied if x_left <= x <= x_right]
+            y = max(occupied[x] for x in spanned) + gap + tick
+            label = self.p_to_stars(p_value)
+
+            ax.plot([x_left, x_left, x_right, x_right], [y - tick, y, y, y - tick], color='black', linewidth=1.2)
+            if label == 'ns':
+                ax.text((x_left + x_right) / 2, y + 0.01 * y_range, label, ha='center', va='bottom', fontsize=fontsize * 0.7)
+            else:
+                #Asterisks sit high in their text box, so anchor the box bottom slightly below the line
+                ax.text((x_left + x_right) / 2, y - 0.025 * y_range, label, ha='center', va='bottom', fontsize=fontsize)
+
+            for x in spanned:
+                occupied[x] = y + level_height - gap - tick
+
+        #Expand the y-axis if the brackets extend beyond it
+        top_needed = max(occupied.values()) + gap
+        if top_needed > y_max:
+            ax.set_ylim(y_min, top_needed)
 
     def plot_combined_learning_and_transfer(self, save_name: str, learning_name: str, transfer_name: str) -> None:
         
@@ -590,11 +672,61 @@ class Plotting:
             ylim = [0, 50] if sub == 0 else [-10, 20]
             ax[sub].set_ylim(ylim)
             ax[sub].tick_params(axis='both')
+
+            #Add group comparison significance brackets (planned t-tests from Statistics: transfer_accuracy_planned_interaction)
+            if not select:
+                symbol_pair = 'High Reward-Low Punish' if sub == 0 else 'Low Reward-Low Punish'
+                self.add_difference_significance(ax[sub], metric_data, symbol_pair)
             plt.subplots_adjust(left=0.2)
         
         plt.tight_layout()
         plt.savefig(f'AL/plots/{self.split_by_group}/{save_name}.png')
         plt.close()
+
+    def add_difference_significance(self, ax: plt.axes, metric_data: pd.Series, symbol_pair: str) -> None:
+
+        """
+        Add group comparison brackets to a panel of the transfer choice rate differences plot,
+        using the planned t-tests in self.transfer_accuracy_planned_interaction (uncorrected p-values)
+
+        Parameters
+        ----------
+        ax : Axes
+            The panel to draw on
+        metric_data : pd.Series
+            The plotted difference scores, indexed by group
+        symbol_pair : str
+            The difference shown in the panel, as named in the statistics ('High Reward-Low Punish' or 'Low Reward-Low Punish')
+
+        Returns
+        -------
+        None
+        """
+
+        if not hasattr(self, 'transfer_accuracy_planned_interaction'):
+            warnings.warn('transfer_accuracy_planned_interaction not found; skipping significance brackets.')
+            return
+
+        #Bar x positions follow self.group_labels (1, 2, 3)
+        positions = {group: i + 1 for i, group in enumerate(self.group_labels)}
+
+        #Top of each bar's 95% CI, so the brackets clear the error bars
+        bar_tops = {}
+        for group, x in positions.items():
+            scores = metric_data[metric_data.index == group].dropna()
+            ci = scores.sem() * stats.t.ppf(0.975, len(scores) - 1)
+            bar_tops[x] = scores.mean() + ci
+
+        #Get the p-values for this panel's comparisons
+        summary = self.transfer_accuracy_planned_interaction['model_summary']
+        comparisons = []
+        for _, row in summary.iterrows():
+            group1, pair1 = row['condition1'].split('~')
+            group2, pair2 = row['condition2'].split('~')
+            if pair1 == symbol_pair and pair2 == symbol_pair:
+                comparisons.append((positions[group1], positions[group2], row['p_value']))
+
+        self.add_significance_brackets(ax, comparisons, bar_tops, show_ns=True)
 
     def plot_select_transfer(self, save_name: str, colors: list, plot_type: str = 'raincloud') -> None:
         
