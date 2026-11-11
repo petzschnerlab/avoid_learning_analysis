@@ -32,6 +32,7 @@ class Help:
             'depression_cutoff',
             'rolling_mean',
             'load_stats',
+            'random_slopes_test',
             'load_posthocs',
             'load_models',
             'hide_stats',
@@ -165,6 +166,15 @@ class Help:
                   'Make sure to re-run these stats anytime changes are made to the data. '),
                 'bool',
                 False],
+
+            'random_slopes_test':
+                [('How fixed effects are tested in the main GLMMs, which include by-participant random slopes '
+                  '(learning accuracy and RT: context x time; transfer choice and RT: stimulus type). '
+                  "'Wald' uses Type III Wald chi-square tests from a single model fit (car::Anova). "
+                  "'LRT' uses likelihood-ratio tests (afex::mixed), which refit the model once per fixed effect and can take several hours with random slopes. "
+                  'All other GLMMs keep their existing tests.'),
+                'str',
+                'Wald'],
 
             'load_posthocs':
                 [('The posthoc tests can take a long time to add to the report, so the results are saved in the backend. '

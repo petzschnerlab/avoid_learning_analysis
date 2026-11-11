@@ -1,4 +1,5 @@
 import os
+import re
 import warnings
 import numpy as np
 import pandas as pd
@@ -198,20 +199,22 @@ class Statistics:
         ## LEARNING PHASE GLMMS
         ############################################################
 
-        #Learning accuracy
-        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)'    
+        #Learning accuracy (Equation 1): trial-level binomial GLMM with by-participant random slopes for context, time, and their interaction
+        assumption_formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)' #Fixed-effects diagnostics on averaged data
         assumption_data = self.average_byfactor(self.learning_data, 'accuracy', [self.group_code, 'symbol_name', 'binned_trial'])
         assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
         assumption_data['symbol_name'] = pd.Categorical(assumption_data['symbol_name'], ['Reward', 'Punish'])
         assumption_data['binned_trial'] = pd.Categorical(assumption_data['binned_trial'], ['Early', 'Mid-Early', 'Mid-Late', 'Late'])
-        self.learning_accuracy_glmm_assumptions = self.glmm_assumption_check(assumption_data, formula, phase='learning')
+        self.learning_accuracy_glmm_assumptions = self.glmm_assumption_check(assumption_data, assumption_formula, phase='learning')
 
-        self.learning_accuracy_glmm = self.generalized_linear_model(formula, 
+        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+(1+symbol_name*binned_trial|participant_id)'
+        self.learning_accuracy_glmm = self.generalized_linear_model(formula,
                                                self.learning_data,
                                                path=self.repo_directory,
                                                filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
                                                savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials.csv",
-                                               family='binomial')
+                                               family='binomial',
+                                               method=self.random_slopes_test)
         
         #Learning with covariates
         formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+age+(1|participant_id)'
@@ -265,39 +268,46 @@ class Statistics:
                                                savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_gender.csv",
                                                family='binomial')
 
-        #Learning RT
-        formula = f'rt~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)'
+        #Learning RT (Equation 2): trial-level gamma (log link) GLMM with by-participant random slopes for context, time, and their interaction
+        assumption_formula = f'rt~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)' #Fixed-effects diagnostics on averaged data
         assumption_data = self.average_byfactor(self.learning_data, 'rt', [self.group_code, 'symbol_name', 'binned_trial'])
         assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
         assumption_data['symbol_name'] = pd.Categorical(assumption_data['symbol_name'], ['Reward', 'Punish'])
         assumption_data['binned_trial'] = pd.Categorical(assumption_data['binned_trial'], ['Early', 'Mid-Early', 'Mid-Late', 'Late'])
-        self.learning_rt_glmm_assumptions = self.glmm_assumption_check(assumption_data, formula, phase='learning')
+        self.learning_rt_glmm_assumptions = self.glmm_assumption_check(assumption_data, assumption_formula, phase='learning')
 
-        self.learning_rt_glmm = self.generalized_linear_model(formula, 
+        formula = f'rt~1+{self.group_code}*symbol_name*binned_trial+(1+symbol_name*binned_trial|participant_id)'
+        self.learning_rt_glmm = self.generalized_linear_model(formula,
                                                self.learning_data,
                                                path=self.repo_directory,
                                                filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
                                                savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials.csv",
-                                               family='Gamma')
+                                               family='Gamma',
+                                               method=self.random_slopes_test)
     
         ############################################################
         ## TRANSFER PHASE GLMMS
         ############################################################
 
-        #Transfer choice rate using averaged data
-        formula = f'choice_rate~1+{self.group_code}*symbol+(1|participant_id)'
+        #Transfer choice rate (Equation 3): binomial GLMM of trial-by-trial choices with by-participant random slopes for stimulus type.
+        #Each transfer trial counts as 'chosen' for one stimulus type and 'not chosen' for the other. The model is fitted to these
+        #trial outcomes grouped by participant and stimulus type (n_chosen, n_ignored), which gives the same likelihood as fitting
+        #each trial separately but runs much faster. (Averaged choice rates cannot support random slopes: one value per cell.)
+        assumption_formula = f'choice_rate~1+{self.group_code}*symbol+(1|participant_id)' #Fixed-effects diagnostics on averaged data
         assumption_data = self.choice_rate.reset_index()
         assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
         assumption_data['symbol'] = pd.Categorical(assumption_data['symbol'], ['High Reward', 'Low Reward', 'Low Punish', 'High Punish', 'Novel'])
         assumption_data['choice_rate'] = assumption_data['choice_rate'].astype(float)
-        self.transfer_accuracy_glmm_assumptions = self.glmm_assumption_check(assumption_data, formula, phase='transfer')        
-        
-        self.transfer_accuracy_glmm = self.generalized_linear_model(formula, 
-                                               self.choice_rate.reset_index(),
+        self.transfer_accuracy_glmm_assumptions = self.glmm_assumption_check(assumption_data, assumption_formula, phase='transfer')
+
+        formula = f'cbind(n_chosen,n_ignored)~1+{self.group_code}*symbol+(1+symbol|participant_id)'
+        self.transfer_accuracy_glmm = self.generalized_linear_model(formula,
+                                               self.choice_counts,
                                                path=self.repo_directory,
-                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_rates.csv",
-                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates.csv",
-                                               family='gaussian')
+                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_counts.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_counts.csv",
+                                               family='binomial',
+                                               method=self.random_slopes_test)
 
         #Transfer with covariates
         formula = f'choice_rate~1+{self.group_code}*symbol+age+(1|participant_id)'
@@ -368,20 +378,23 @@ class Statistics:
                                                savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_gender.csv",
                                                family='gaussian')
 
-        #Transfer choice RT using averaged data
-        formula = f'choice_rt~1+{self.group_code}*symbol+(1|participant_id)'
+        #Transfer choice RT (Equation 4): trial-level gamma (log link) GLMM of each trial's RT by the stimulus type chosen,
+        #with by-participant random slopes for stimulus type. (Averaged RTs cannot support random slopes: one value per cell.)
+        assumption_formula = f'choice_rt~1+{self.group_code}*symbol+(1|participant_id)' #Fixed-effects diagnostics on averaged data
         assumption_data = self.choice_rt.reset_index()
         assumption_data[self.group_code] = pd.Categorical(assumption_data[self.group_code], self.group_labels)
         assumption_data['symbol'] = pd.Categorical(assumption_data['symbol'], ['High Reward', 'Low Reward', 'Low Punish', 'High Punish', 'Novel'])
         assumption_data['choice_rt'] = assumption_data['choice_rt'].astype(float)
-        self.transfer_rt_glmm_assumptions = self.glmm_assumption_check(assumption_data, formula, phase='transfer')        
-        
-        self.transfer_rt_glmm = self.generalized_linear_model(formula, 
-                                               self.choice_rt.reset_index(),
+        self.transfer_rt_glmm_assumptions = self.glmm_assumption_check(assumption_data, assumption_formula, phase='transfer')
+
+        formula = f'rt~1+{self.group_code}*symbol+(1+symbol|participant_id)'
+        self.transfer_rt_glmm = self.generalized_linear_model(formula,
+                                               self.choice_rt_trials,
                                                path=self.repo_directory,
-                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_rt.csv",
-                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rt.csv",
-                                               family='Gamma')
+                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_rt_trials.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rt_trials.csv",
+                                               family='Gamma',
+                                               method=self.random_slopes_test)
         
         #Transfer valence bias
         formula = f'valence_bias~1+{self.group_code}'
@@ -1105,13 +1118,14 @@ class Statistics:
 
         return smf.ols(formula=formula, data=data).fit()
 
-    def generalized_linear_model(self, formula: str, data: pd.DataFrame, path: str = None, filename: str = None, savename: str = None, family: str = 'gaussian') -> dict:
+    def generalized_linear_model(self, formula: str, data: pd.DataFrame, path: str = None, filename: str = None, savename: str = None, family: str = 'gaussian', method: str = 'LRT') -> dict:
         """
         Linear mixed effects model
 
         data: pandas DataFrame
         formula: string,
-            formula structure: "y ~ x1 + x2 + x3 + (1|Group)"
+            formula structure: "y ~ x1 + x2 + x3 + (1|Group)", or with random slopes: "y ~ x1 * x2 + (1 + x2|Group)".
+            Binomial count outcomes can be given as "cbind(successes,failures) ~ ...".
         path: string,
             path to ...
         filename: string,
@@ -1119,7 +1133,10 @@ class Statistics:
         savename: string,
             name of the file to save the results
         family: string,
-            family of the model
+            family of the model ('gaussian', 'binomial', or 'Gamma'; Gamma models use a log link)
+        method: string,
+            how fixed effects are tested in non-gaussian mixed models: 'LRT' (likelihood-ratio tests, default) or 'Wald' (Type III Wald chi-square).
+            Gaussian mixed models always use Type III Wald chi-square tests.
 
         Returns
         -------
@@ -1130,10 +1147,10 @@ class Statistics:
         #Format formula
         formula = formula.replace(' ', '')
 
-        #Find random effect variable
-        random_effect = [random_effect.split(')')[0].replace('1|','') for random_effect in formula.split('(')[1:]]
-        if random_effect:
-            random_effect = random_effect[0] #This only allows for a single random effect, which should be sufficient for our purposes
+        #Find random effects: the grouping variable and the random slopes, e.g. (1+symbol|participant_id)
+        random_terms = re.findall(r'\(([^()|]*)\|([^()|]*)\)', formula)
+        random_effect = random_terms[0][1] if random_terms else [] #This only allows for a single random effect, which should be sufficient for our purposes
+        random_slopes = [term for term in random_terms[0][0].split('+') if term not in ('1', '0')] if random_terms else []
 
         #Remove random effect variable from formula
         fixed_formula = formula.split('+(')[0]
@@ -1146,6 +1163,7 @@ class Statistics:
             #The reason this is done in R is because the statsmodels package in Python does not provide factor level p-values for (generalized) linear mixed effects models.
             #This is worth looking into further, as there might be a parameter I have overlooked, or else there could be a different package that fits our needs.
             outcome = formula.split('~')[0]
+            outcome = re.sub(r'^cbind\(([^,]+),.*$', r'\1', outcome) #For cbind(a,b) outcomes, files are labelled by the first column
             file_exists = os.path.isfile(savename.replace('.csv', f'_{outcome}_results.csv'))
             if not self.load_stats or not file_exists:
                 if self.load_stats and not file_exists:
@@ -1158,8 +1176,14 @@ class Statistics:
                                     filename,
                                     savename, 
                                     formula,
-                                    family])
+                                    family,
+                                    method])
             model_summary = pd.read_csv(savename.replace('.csv', f'_{outcome}_results.csv'))
+            diagnostics_file = savename.replace('.csv', f'_{outcome}_diagnostics.csv')
+            if os.path.isfile(diagnostics_file):
+                diagnostics = pd.read_csv(diagnostics_file).iloc[0].to_dict()
+                if diagnostics['convergence'] != 'converged' or diagnostics['singular']:
+                    warnings.warn(f"Model {formula} (family: {family}): singular fit = {diagnostics['singular']}; convergence: {diagnostics['convergence']}", stacklevel=2)
             df_residual = None
             if False: #family == 'gaussian': #TODO: I am overhauling guassian..
                 model_summary = model_summary[['Unnamed: 0', 'NumDF', 'F value', 'Pr(>F)']]
@@ -1202,9 +1226,10 @@ class Statistics:
                     'filename': filename, 
                     'family': family, 
                     'formula': formula,
-                    'outcome': formula.split('~')[0],
+                    'outcome': re.sub(r'^cbind\(([^,]+),([^)]+)\)$', r'\1 vs. \2', formula.split('~')[0]),
                     'fixed_effects': fixed_effects,
                     'random_effects': random_effect,
+                    'random_slopes': random_slopes,
                     'sample_size': data['participant_id'].nunique(),
                     'df_residual': df_residual,
                     'test': test}

@@ -69,6 +69,8 @@ class Parameters:
             Whether to hide the statistics in the report.
         self.load_stats : bool
             Whether to load the statistics from the backend.
+        self.random_slopes_test : str
+            How fixed effects are tested in the random slopes GLMMs (Equations 1-4): 'Wald' or 'LRT'.
         self.hide_posthocs : bool
             Whether to hide the posthocs in the report.
         self.load_posthocs : bool
@@ -100,6 +102,7 @@ class Parameters:
                            'test_context_type',
                            'hide_stats',
                            'load_stats',
+                           'random_slopes_test',
                            'hide_posthocs',
                            'load_posthocs',
                            'load_models',
@@ -147,6 +150,7 @@ class Parameters:
             'test_context_type': 'context',
             'hide_stats': False,
             'load_stats': False,
+            'random_slopes_test': 'Wald',
             'hide_posthocs': False,
             'load_posthocs': False,
             'load_models': False,
@@ -158,6 +162,8 @@ class Parameters:
         #Format parameters
         self.split_by_group = self.split_by_group if ',' not in self.split_by_group else self.split_by_group
         self.hide_posthocs = True if self.hide_stats == True else self.hide_posthocs
+        if self.random_slopes_test not in ('Wald', 'LRT'):
+            raise ValueError(f"random_slopes_test must be 'Wald' or 'LRT', not {self.random_slopes_test}")
         self.print_filename = self.print_filename.replace('.pdf', f'_{self.split_by_group_id}.pdf')
         self.group_code = 'group_code' if self.split_by_group == 'pain' else 'depression'
         if self.split_by_group == 'pain':

@@ -807,6 +807,27 @@ class Processing:
             self.choice_rate_task = choice_rate_task
             self.choice_rt = choice_rt
 
+            #Trial-level transfer data for the GLMMs with random slopes (same trials as the choice rates and RTs above)
+            symbol_names = {0: 'Novel', 1: 'High Punish', 2: 'Low Punish', 3: 'Low Reward', 4: 'High Reward'}
+            symbol_codes = {name: code for code, name in symbol_names.items()}
+
+            #Choice counts: on each trial one stimulus type is chosen and the other is not.
+            #n_chosen / (n_chosen + n_ignored) reproduces choice_rate exactly.
+            n_chosen = data.groupby(['participant_id', 'symbol_chosen']).size()
+            n_ignored = data.groupby(['participant_id', 'symbol_ignored']).size()
+            choice_counts = choice_rate.reset_index()[[self.group_code, 'participant_id', 'symbol']].copy()
+            codes = choice_counts['symbol'].map(symbol_codes)
+            choice_counts['n_chosen'] = [int(n_chosen.get((participant, code), 0)) for participant, code in zip(choice_counts['participant_id'], codes)]
+            choice_counts['n_ignored'] = [int(n_ignored.get((participant, code), 0)) for participant, code in zip(choice_counts['participant_id'], codes)]
+            self.choice_counts = choice_counts
+
+            #Trial RTs labelled by the stimulus type chosen (their per-participant means reproduce choice_rt exactly)
+            choice_rt_trials = data[[self.group_code, 'participant_id', 'symbol_chosen', 'rt']].copy()
+            choice_rt_trials['symbol'] = choice_rt_trials['symbol_chosen'].map(symbol_names)
+            self.choice_rt_trials = choice_rt_trials.drop(columns='symbol_chosen').reset_index(drop=True)
+
+            self.choice_counts.to_csv(f'AL/stats/{self.split_by_group}_stats_choice_counts.csv', index=False)
+            self.choice_rt_trials.to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rt_trials.csv', index=False)
             self.choice_rate.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rates.csv', index=False)
             self.choice_rate_age.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rates_age.csv', index=False)
             self.choice_rate_pain.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rates_pain.csv', index=False)
