@@ -22,7 +22,7 @@ if __name__ == '__main__':
               'RT_high_threshold':              5000,
 
               'load_stats':                     False, 
-              'load_posthocs':                  False,
+              'load_posthocs':                  True,
               'load_models':                    False,
     }
 

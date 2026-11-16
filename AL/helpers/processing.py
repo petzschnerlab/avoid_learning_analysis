@@ -819,7 +819,26 @@ class Processing:
             codes = choice_counts['symbol'].map(symbol_codes)
             choice_counts['n_chosen'] = [int(n_chosen.get((participant, code), 0)) for participant, code in zip(choice_counts['participant_id'], codes)]
             choice_counts['n_ignored'] = [int(n_ignored.get((participant, code), 0)) for participant, code in zip(choice_counts['participant_id'], codes)]
+
+            #Participant-level covariates for the covariate GLMMs (same values as choice_rate_age/pain/task above)
+            participant_covariates = data.groupby('participant_id').agg(age=('age', 'first'),
+                                                                        pain=('composite_pain', 'first'),
+                                                                        task=('task', 'first')).reset_index()
+            choice_counts = choice_counts.merge(participant_covariates, on='participant_id', how='left')
             self.choice_counts = choice_counts
+
+            #Choice counts split by background context, for the context covariate GLMM
+            #(n_chosen / (n_chosen + n_ignored) reproduces choice_rate_context exactly)
+            context_data = data.copy()
+            context_data['context_val'] = context_data['context_val'].replace({1: 'Reward', -1: 'Punish', 0: 'Neutral'})
+            n_chosen_context = context_data.groupby(['participant_id', 'context_val', 'symbol_chosen']).size()
+            n_ignored_context = context_data.groupby(['participant_id', 'context_val', 'symbol_ignored']).size()
+            choice_counts_context = choice_rate_context.reset_index()[[self.group_code, 'participant_id', 'symbol', 'context_val']].copy()
+            codes = choice_counts_context['symbol'].map(symbol_codes)
+            keys = list(zip(choice_counts_context['participant_id'], choice_counts_context['context_val'], codes))
+            choice_counts_context['n_chosen'] = [int(n_chosen_context.get(key, 0)) for key in keys]
+            choice_counts_context['n_ignored'] = [int(n_ignored_context.get(key, 0)) for key in keys]
+            self.choice_counts_context = choice_counts_context
 
             #Trial RTs labelled by the stimulus type chosen (their per-participant means reproduce choice_rt exactly)
             choice_rt_trials = data[[self.group_code, 'participant_id', 'symbol_chosen', 'rt']].copy()
@@ -827,6 +846,7 @@ class Processing:
             self.choice_rt_trials = choice_rt_trials.drop(columns='symbol_chosen').reset_index(drop=True)
 
             self.choice_counts.to_csv(f'AL/stats/{self.split_by_group}_stats_choice_counts.csv', index=False)
+            self.choice_counts_context.to_csv(f'AL/stats/{self.split_by_group}_stats_choice_counts_context.csv', index=False)
             self.choice_rt_trials.to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rt_trials.csv', index=False)
             self.choice_rate.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rates.csv', index=False)
             self.choice_rate_age.reset_index().to_csv(f'AL/stats/{self.split_by_group}_stats_choice_rates_age.csv', index=False)

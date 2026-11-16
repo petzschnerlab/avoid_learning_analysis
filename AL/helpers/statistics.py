@@ -216,14 +216,15 @@ class Statistics:
                                                family='binomial',
                                                method=self.random_slopes_test)
         
-        #Learning with covariates
-        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+age+(1|participant_id)'
+        #Learning with covariates: same model as Equation 1 (incl. random slopes for context, time, and their interaction) plus each covariate
+        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+age+(1+symbol_name*binned_trial|participant_id)'
         self.learning_accuracy_glmm_age = self.generalized_linear_model(formula, 
                                                self.learning_data,
                                                path=self.repo_directory,
                                                filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
                                                savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_age.csv",
-                                               family='binomial')
+                                               family='binomial',
+                                               method=self.random_slopes_test)
         '''
         formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial*age+(1|participant_id)'
         self.learning_accuracy_glmm_age_interaction = self.generalized_linear_model(formula, 
@@ -233,13 +234,14 @@ class Statistics:
                                                savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_age_interaction.csv",
                                                family='binomial')
         '''
-        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+composite_pain+(1|participant_id)'
+        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+composite_pain+(1+symbol_name*binned_trial|participant_id)'
         self.learning_accuracy_glmm_pain = self.generalized_linear_model(formula, 
                                                self.learning_data,
                                                path=self.repo_directory,
                                                filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
                                                savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_pain.csv",
-                                               family='binomial')
+                                               family='binomial',
+                                               method=self.random_slopes_test)
         '''
         formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial*composite_pain+(1|participant_id)'
         self.learning_accuracy_glmm_pain_interaction = self.generalized_linear_model(formula, 
@@ -249,16 +251,17 @@ class Statistics:
                                                savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_pain_interaction.csv",
                                                family='binomial')
         '''
-        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+task+(1|participant_id)'
+        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+task+(1+symbol_name*binned_trial|participant_id)'
         self.learning_accuracy_glmm_task = self.generalized_linear_model(formula, 
                                                self.learning_data,
                                                path=self.repo_directory,
                                                filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials.csv",
                                                savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_task.csv",
-                                               family='binomial')
+                                               family='binomial',
+                                               method=self.random_slopes_test)
 
         #Gender covariate (coded 1 = female, 0 = not female, matching the female/N chi-squared test)
-        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+sex+(1|participant_id)'
+        formula = f'accuracy~1+{self.group_code}*symbol_name*binned_trial+sex+(1+symbol_name*binned_trial|participant_id)'
         learning_data_gender = self.add_gender_covariate(self.learning_data,
                                                          filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials_gender.csv")
         self.learning_accuracy_glmm_gender = self.generalized_linear_model(formula,
@@ -266,7 +269,8 @@ class Statistics:
                                                path=self.repo_directory,
                                                filename=f"AL/stats/{self.split_by_group}_stats_learning_data_trials_gender.csv",
                                                savename=f"AL/stats/{self.split_by_group_id}_stats_learning_data_trials_gender.csv",
-                                               family='binomial')
+                                               family='binomial',
+                                               method=self.random_slopes_test)
 
         #Learning RT (Equation 2): trial-level gamma (log link) GLMM with by-participant random slopes for context, time, and their interaction
         assumption_formula = f'rt~1+{self.group_code}*symbol_name*binned_trial+(1|participant_id)' #Fixed-effects diagnostics on averaged data
@@ -309,14 +313,15 @@ class Statistics:
                                                family='binomial',
                                                method=self.random_slopes_test)
 
-        #Transfer with covariates
-        formula = f'choice_rate~1+{self.group_code}*symbol+age+(1|participant_id)'
+        #Transfer with covariates: same model as Equation 3 (binomial GLMM of choice counts with random slopes for stimulus type) plus each covariate
+        formula = f'cbind(n_chosen,n_ignored)~1+{self.group_code}*symbol+age+(1+symbol|participant_id)'
         self.transfer_accuracy_glmm_age = self.generalized_linear_model(formula, 
-                                        self.choice_rate_age.reset_index(),
+                                        self.choice_counts,
                                         path=self.repo_directory,
-                                        filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_age.csv",
-                                        savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_age.csv",
-                                        family='gaussian')
+                                        filename=f"AL/stats/{self.split_by_group}_stats_choice_counts.csv",
+                                        savename=f"AL/stats/{self.split_by_group_id}_stats_choice_counts_age.csv",
+                                        family='binomial',
+                                        method=self.random_slopes_test)
         '''
         formula = f'choice_rate~1+{self.group_code}*symbol*age+(1|participant_id)'
         self.transfer_accuracy_glmm_age_interaction = self.generalized_linear_model(formula, 
@@ -326,13 +331,14 @@ class Statistics:
                                         savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_age_interaction.csv",
                                         family='gaussian')
         '''
-        formula = f'choice_rate~1+{self.group_code}*symbol+pain+(1|participant_id)'
+        formula = f'cbind(n_chosen,n_ignored)~1+{self.group_code}*symbol+pain+(1+symbol|participant_id)'
         self.transfer_accuracy_glmm_pain = self.generalized_linear_model(formula, 
-                                        self.choice_rate_pain.reset_index(),
+                                        self.choice_counts,
                                         path=self.repo_directory,
-                                        filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_pain.csv",
-                                        savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_pain.csv",
-                                        family='gaussian')
+                                        filename=f"AL/stats/{self.split_by_group}_stats_choice_counts.csv",
+                                        savename=f"AL/stats/{self.split_by_group_id}_stats_choice_counts_pain.csv",
+                                        family='binomial',
+                                        method=self.random_slopes_test)
         '''
         formula = f'choice_rate~1+{self.group_code}*symbol*pain+(1|participant_id)'
         self.transfer_accuracy_glmm_pain_interaction = self.generalized_linear_model(formula, 
@@ -342,13 +348,14 @@ class Statistics:
                                         savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_pain_interaction.csv",
                                         family='gaussian')
         '''
-        formula = f'choice_rate~1+{self.group_code}*symbol+context_val+(1|participant_id)'
+        formula = f'cbind(n_chosen,n_ignored)~1+{self.group_code}*symbol+context_val+(1+symbol|participant_id)'
         self.transfer_accuracy_glmm_context = self.generalized_linear_model(formula, 
-                                               self.choice_rate_context.reset_index(),
+                                               self.choice_counts_context,
                                                path=self.repo_directory,
-                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_context.csv",
-                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_context.csv",
-                                               family='gaussian')
+                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_counts_context.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_counts_context.csv",
+                                               family='binomial',
+                                               method=self.random_slopes_test)
 
         '''
         formula = f'choice_rate~1+{self.group_code}*symbol*context_val+(1|participant_id)'
@@ -359,24 +366,26 @@ class Statistics:
                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_context_interaction.csv",
                                               family='gaussian')
         '''
-        formula = f'choice_rate~1+{self.group_code}*symbol+task+(1|participant_id)'
+        formula = f'cbind(n_chosen,n_ignored)~1+{self.group_code}*symbol+task+(1+symbol|participant_id)'
         self.transfer_accuracy_glmm_task = self.generalized_linear_model(formula, 
-                                               self.choice_rate_task.reset_index(),
+                                               self.choice_counts,
                                                path=self.repo_directory,
-                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_task.csv",
-                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_task.csv",
-                                               family='gaussian')
+                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_counts.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_counts_task.csv",
+                                               family='binomial',
+                                               method=self.random_slopes_test)
 
         #Gender covariate (coded 1 = female, 0 = not female, matching the female/N chi-squared test)
-        formula = f'choice_rate~1+{self.group_code}*symbol+sex+(1|participant_id)'
-        choice_rate_gender = self.add_gender_covariate(self.choice_rate.reset_index(),
-                                                       filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_gender.csv")
+        formula = f'cbind(n_chosen,n_ignored)~1+{self.group_code}*symbol+sex+(1+symbol|participant_id)'
+        choice_counts_gender = self.add_gender_covariate(self.choice_counts,
+                                                         filename=f"AL/stats/{self.split_by_group}_stats_choice_counts_gender.csv")
         self.transfer_accuracy_glmm_gender = self.generalized_linear_model(formula,
-                                               choice_rate_gender,
+                                               choice_counts_gender,
                                                path=self.repo_directory,
-                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_rates_gender.csv",
-                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_rates_gender.csv",
-                                               family='gaussian')
+                                               filename=f"AL/stats/{self.split_by_group}_stats_choice_counts_gender.csv",
+                                               savename=f"AL/stats/{self.split_by_group_id}_stats_choice_counts_gender.csv",
+                                               family='binomial',
+                                               method=self.random_slopes_test)
 
         #Transfer choice RT (Equation 4): trial-level gamma (log link) GLMM of each trial's RT by the stimulus type chosen,
         #with by-participant random slopes for stimulus type. (Averaged RTs cannot support random slopes: one value per cell.)
