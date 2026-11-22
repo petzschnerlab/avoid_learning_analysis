@@ -841,9 +841,12 @@ class Processing:
             self.choice_counts_context = choice_counts_context
 
             #Trial RTs labelled by the stimulus type chosen (their per-participant means reproduce choice_rt exactly)
-            choice_rt_trials = data[[self.group_code, 'participant_id', 'symbol_chosen', 'rt']].copy()
+            #Includes the trial's background context and participant-level covariates (age, pain, task) for the RT covariate GLMMs
+            choice_rt_trials = data[[self.group_code, 'participant_id', 'symbol_chosen', 'rt', 'context_val']].copy()
             choice_rt_trials['symbol'] = choice_rt_trials['symbol_chosen'].map(symbol_names)
-            self.choice_rt_trials = choice_rt_trials.drop(columns='symbol_chosen').reset_index(drop=True)
+            choice_rt_trials['context_val'] = choice_rt_trials['context_val'].replace({1: 'Reward', -1: 'Punish', 0: 'Neutral'})
+            choice_rt_trials = choice_rt_trials.drop(columns='symbol_chosen').merge(participant_covariates, on='participant_id', how='left')
+            self.choice_rt_trials = choice_rt_trials.reset_index(drop=True)
 
             self.choice_counts.to_csv(f'AL/stats/{self.split_by_group}_stats_choice_counts.csv', index=False)
             self.choice_counts_context.to_csv(f'AL/stats/{self.split_by_group}_stats_choice_counts_context.csv', index=False)
