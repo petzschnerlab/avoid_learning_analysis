@@ -414,6 +414,11 @@ class ReportFunctions:
                 Each cell represents the Pearson's r value (p-value) for the correlation between the parameter and pain score.
                 """
 
+            case 'model-parameters-correlation-table-combined':
+                caption = f"""Correlation table between the best model's, {self.best_model_label}, parameters and pain scores for the acute and chronic pain groups combined.
+                Each cell represents the Spearman's rho value. P-values are shown for the composite pain score only, uncorrected and Holm-corrected across the five parameters.
+                """
+
             case 'empirical-performance':
                 caption = 'Empirical findings for the learning phase (top) and the transfer phase (bottom). Learning Phase (Top): Behavioral performance across learning trials for the reward and punishment contexts for each group.'
                 if self.rolling_mean is not None:
@@ -1164,9 +1169,9 @@ class ReportFunctions:
                     correlation_matrix.loc[parameter, 'p (uncorrected)'] = self.format_p(p)
 
         #Correlation matrices for each pain group (Spearman)
-        fdr_groups = ['acute pain', 'chronic pain']
-        group_correlation_matrix = {group: pd.DataFrame(index=parameter_names, columns=list(pain_names) + ['p (uncorrected)', 'p (FDR)']) for group in ['no pain', 'acute pain', 'chronic pain']}
-        composite_pvalues = [] #(group, parameter, p) for the FDR family
+        holm_groups = ['acute pain', 'chronic pain']
+        group_correlation_matrix = {group: pd.DataFrame(index=parameter_names, columns=list(pain_names) + ['p (uncorrected)', 'p (Holm)']) for group in ['no pain', 'acute pain', 'chronic pain']}
+        composite_pvalues = [] #(group, parameter, p) for the Holm family
         for pain_group in ['no pain', 'acute pain', 'chronic pain']:
             group_fit_data = fit_data[fit_data['pain_group'] == pain_group]
             for parameter in parameter_names:
@@ -1176,14 +1181,31 @@ class ReportFunctions:
                     group_correlation_matrix[pain_group].loc[parameter, pain_metric] = self.format_rho(r)
                     if pain_metric == 'composite':
                         group_correlation_matrix[pain_group].loc[parameter, 'p (uncorrected)'] = self.format_p(p)
-                        if pain_group in fdr_groups:
+                        if pain_group in holm_groups:
                             composite_pvalues.append((pain_group, parameter, p))
 
-        #FDR (Benjamini-Hochberg) correction across the 10 composite tests (5 parameters x acute and chronic pain)
-        _, p_fdr, _, _ = multipletests([p for _, _, p in composite_pvalues], alpha=0.05, method='fdr_bh')
-        for (pain_group, parameter, _), q in zip(composite_pvalues, p_fdr):
-            group_correlation_matrix[pain_group].loc[parameter, 'p (FDR)'] = self.format_p(q)
-        group_correlation_matrix['no pain']['p (FDR)'] = 'n/a'
+        #Holm correction across the 10 composite tests (5 parameters x acute and chronic pain)
+        _, p_holm, _, _ = multipletests([p for _, _, p in composite_pvalues], alpha=0.05, method='holm')
+        for (pain_group, parameter, _), q in zip(composite_pvalues, p_holm):
+            group_correlation_matrix[pain_group].loc[parameter, 'p (Holm)'] = self.format_p(q)
+        group_correlation_matrix['no pain']['p (Holm)'] = 'n/a'
+
+        #Combined pain group (acute + chronic pain together), Spearman
+        #Holm correction across its own 5 composite tests (one per parameter)
+        combined_fit_data = fit_data[fit_data['pain_group'].isin(['acute pain', 'chronic pain'])]
+        combined_matrix = pd.DataFrame(index=parameter_names, columns=list(pain_names) + ['p (uncorrected)', 'p (Holm)'])
+        combined_pvalues = []
+        for parameter in parameter_names:
+            for pain_metric in pain_names:
+                correlation_data = combined_fit_data[[parameter, pain_metric]].dropna()
+                r, p = stats.spearmanr(correlation_data[parameter], correlation_data[pain_metric])
+                combined_matrix.loc[parameter, pain_metric] = self.format_rho(r)
+                if pain_metric == 'composite':
+                    combined_matrix.loc[parameter, 'p (uncorrected)'] = self.format_p(p)
+                    combined_pvalues.append(p)
+        _, combined_p_holm, _, _ = multipletests(combined_pvalues, alpha=0.05, method='holm')
+        combined_matrix['p (Holm)'] = [self.format_p(q) for q in combined_p_holm]
+        group_correlation_matrix['acute and chronic pain'] = combined_matrix
 
         #Correlation between model parameters and pain duration
         duration_data = pd.DataFrame(index=fit_data['participant_id'], columns=['duration'])

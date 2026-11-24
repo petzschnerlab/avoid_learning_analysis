@@ -150,6 +150,7 @@ class Report(ReportFunctions):
             section_text.extend(self.insert_table(self.model_parameters_pain['group_summary']['no pain'], 'model-parameters-correlation-table-no'))
             section_text.extend(self.insert_table(self.model_parameters_pain['group_summary']['acute pain'], 'model-parameters-correlation-table-acute'))
             section_text.extend(self.insert_table(self.model_parameters_pain['group_summary']['chronic pain'], 'model-parameters-correlation-table-chronic'))
+            section_text.extend(self.insert_table(self.model_parameters_pain['group_summary']['acute and chronic pain'], 'model-parameters-correlation-table-combined'))
             self.add_data_pdf(section_text, center=True)
         
         #Post-hocs
