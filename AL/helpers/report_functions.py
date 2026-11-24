@@ -390,8 +390,15 @@ class ReportFunctions:
                 """
 
             case 'parameter-correlation-chronic-pain':
-                caption = f"""Correlations between the best model's, {self.best_model_label}, parameters and pain scores for the Chronic Pain group. 
+                caption = f"""Correlations between the best model's, {self.best_model_label}, parameters and pain scores for the Chronic Pain group.
                 Scatter points show the parameter fits for each participant within each group, grey dashed lines represent the best fit line for each group.
+                Learning rate parameters are plotted on a natural log scale.
+                """
+
+            case 'parameter-by-duration':
+                caption = f"""The best model's, {self.best_model_label}, parameters by self-reported pain duration (one parameter per row).
+                Grey points show each participant's parameter fit. Black points show the mean (95% CI) for each duration category,
+                joined across the pain categories. The dotted line separates the acute and chronic pain durations.
                 Learning rate parameters are plotted on a natural log scale.
                 """
             
@@ -1340,6 +1347,8 @@ class ReportFunctions:
         plotting.plot_model_parameters_by_pain_split(plot_data, parameter_names, pain_names, log_parameters=log_parameters)
         plotting.plot_model_fits({'AIC': self.model_AIC, 'BIC': self.model_BIC})
         plotting.plot_param_duration(parameter_names, fit_data)
+        duration_plot_data = self.log_transform_parameters(fit_data, log_parameters) #Learning rates log-transformed, as in the pain severity plots
+        plotting.plot_parameters_by_duration(duration_plot_data, parameter_names, save_name='parameter-by-duration', log_parameters=log_parameters)
 
         #################################################
         ## Checks for temperature values
@@ -1393,4 +1402,4 @@ class ReportFunctions:
         print(contingency)
         print(f'χ²({dof}, N = {n}) = {chi2:.2f}, p = {p:.4f}, Cramér\'s V = {cramers_v:.2f}')
         if (expected < 5).any():
-            warnings.warn('Some expected cell counts are below 5; the chi-squared approximation may be unreliable.')
+            warnings.warn('Some expected cell counts are below 5; the chi-squared approximation may be unreliable.')

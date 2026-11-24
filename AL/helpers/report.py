@@ -152,6 +152,11 @@ class Report(ReportFunctions):
             section_text.extend(self.insert_table(self.model_parameters_pain['group_summary']['chronic pain'], 'model-parameters-correlation-table-chronic'))
             section_text.extend(self.insert_table(self.model_parameters_pain['group_summary']['acute and chronic pain'], 'model-parameters-correlation-table-combined'))
             self.add_data_pdf(section_text, center=True)
+
+            section_text = []
+            section_text.append('### Model Parameters by Pain Duration')
+            section_text.extend(self.insert_image('parameter-by-duration', 'AL/plots/parameter-by-duration.png'))
+            self.add_data_pdf(section_text, center=True)
         
         #Post-hocs
         if self.hide_posthocs == False:
@@ -254,4 +259,4 @@ class Report(ReportFunctions):
                 self.add_data_pdf(section_text, center=True)
             
         #Save to pdf
-        self.save_report()
+        self.save_report()

@@ -21,6 +21,8 @@ Same computations as ReportFunctions.load_modelling_results:
         (5 parameters x 2 groups).
     Combined pain group: acute + chronic pain participants pooled; Spearman rho for each parameter x pain metric;
         p-values for the composite score only; Holm correction across its own 5 composite tests.
+    Pain duration: Spearman rho between each parameter and pain duration (coded 1-8 for the pain groups, as in the
+        pipeline), for the combined group (Holm across 5 tests) and for acute and chronic pain separately (Holm across 10).
 
 Run from the repository root (same as AL_main.py):
     python AL/lite_parameter_pain_correlations.py
@@ -33,12 +35,17 @@ Inputs (must already exist from a previous full run / the modelling package):
 Outputs (AL/stats/):
     parameter_pain_correlations_groups.csv    - Table S9 (acute and chronic pain separately)
     parameter_pain_correlations_combined.csv  - acute and chronic pain combined
+    parameter_duration_correlations.csv       - parameter x pain duration (combined, acute, chronic)
 """
 
 #Same data settings as AL_main.py
 DATA_FILE_PATH = r'AL/data'
 DATA_FILE_NAMES = [r'v1a_avoid_pain.csv', r'v1b_avoid_paindepression.csv']
 PAIN_NAMES = ['intensity', 'unpleasant', 'interference', 'composite']
+
+#Duration coding, as in ReportFunctions.load_modelling_results (ordinal: 0 = not in pain ... 8 = > 10 years)
+DURATION_CODES = {'I am not in pain': 0, '< 2 weeks': 1, '2-4 weeks': 2, '1 – 3 months': 3, '3 – 6 months': 4,
+                  '6 – 12 months': 5, '1 – 5 years': 6, '> 5 years': 7, '> 10 years': 8}
 
 
 def get_best_model() -> str:
@@ -52,13 +59,29 @@ def get_best_model() -> str:
 
 def load_pain_scores(file_path: str, file_names: list) -> pd.DataFrame:
 
-    """One pain score per participant, rescaled to 0-10 as in Processing.load_data, plus the composite score"""
+    """One pain score per participant, rescaled to 0-10 as in Processing.load_data, plus the composite score and pain duration (0-8)"""
 
     data = pd.concat([pd.read_csv(os.path.join(file_path, file_name)) for file_name in file_names], axis=0)
-    pain_scores = data.groupby('participant_id')[['intensity', 'unpleasant', 'interference']].first().reset_index()
+    pain_scores = data.groupby('participant_id')[['intensity', 'unpleasant', 'interference', 'duration']].first().reset_index()
     pain_scores[['intensity', 'unpleasant', 'interference']] = pain_scores[['intensity', 'unpleasant', 'interference']] / 10
     pain_scores['composite'] = pain_scores[['intensity', 'unpleasant', 'interference']].mean(axis=1)
-    return pain_scores
+    pain_scores['pain_duration'] = pain_scores['duration'].map(DURATION_CODES)
+    unknown = pain_scores.loc[pain_scores['pain_duration'].isna() & pain_scores['duration'].notna(), 'duration'].unique()
+    if len(unknown) > 0:
+        warnings.warn(f'Unrecognised duration labels (treated as missing): {list(unknown)}')
+    return pain_scores.drop(columns='duration')
+
+
+def duration_rows(data: pd.DataFrame, label: str, parameter_names: list) -> list:
+
+    """Spearman rho between each parameter and pain duration (uncorrected p)"""
+
+    rows = []
+    for parameter in parameter_names:
+        d = data[[parameter, 'pain_duration']].dropna()
+        r, p = stats.spearmanr(d[parameter], d['pain_duration'])
+        rows.append({'group': label, 'parameter': parameter, 'n': len(d), 'rho': r, 'p': p})
+    return rows
 
 
 def format_rho(r: float) -> str:
@@ -129,9 +152,26 @@ def main(file_path: str, file_names: list, model: str = None) -> None:
     groups.to_csv('AL/stats/parameter_pain_correlations_groups.csv', index=False)
     combined.to_csv('AL/stats/parameter_pain_correlations_combined.csv', index=False)
 
+    #Pain duration: same groups and Holm families as above (5 tests combined; 10 tests across acute and chronic)
+    duration_combined = pd.DataFrame(duration_rows(combined_data, 'acute and chronic pain', parameter_names))
+    duration_combined['p_Holm'] = multipletests(duration_combined['p'], method='holm')[1]
+    duration_groups = []
+    for group in ['acute pain', 'chronic pain']:
+        duration_groups.extend(duration_rows(fit_data[fit_data['pain_group'] == group], group, parameter_names))
+    duration_groups = pd.DataFrame(duration_groups)
+    duration_groups['p_Holm'] = multipletests(duration_groups['p'], method='holm')[1]
+    duration = pd.concat([duration_combined, duration_groups], ignore_index=True)
+    duration.to_csv('AL/stats/parameter_duration_correlations.csv', index=False)
+
     pd.set_option('display.width', 250)
     print_table(groups, 'Spearman rho, acute and chronic pain separately (Table S9; Holm across 10 composite tests)')
     print_table(combined, 'Spearman rho, acute and chronic pain combined (Holm across 5 composite tests)')
+    display = duration.copy()
+    display['rho'] = display['rho'].apply(format_rho)
+    display['p'] = display['p'].apply(format_p)
+    display['p_Holm'] = display['p_Holm'].apply(format_p)
+    print('\nSpearman rho with pain duration (Holm across 5 tests for combined; across 10 tests for acute and chronic)')
+    print(display.set_index(['group', 'parameter']).to_string())
     print('\nn: ' + ', '.join(f"{g} = {fit_data[fit_data['pain_group'] == g]['participant_id'].nunique()}" for g in ['acute pain', 'chronic pain'])
           + f", combined = {combined_data['participant_id'].nunique()}")
 

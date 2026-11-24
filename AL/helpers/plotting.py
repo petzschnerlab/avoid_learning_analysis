@@ -1169,6 +1169,84 @@ class Plotting:
             #Close figure
             plt.close(fig)
 
+    def plot_parameters_by_duration(self, fit_data: pd.DataFrame, parameter_names: list, save_name: str = 'parameter-by-duration', log_parameters: list = None, seed: int = 0) -> None:
+
+        """
+        Plot each model parameter by self-reported pain duration, one parameter per row.
+
+        Each participant is a jittered grey point; black points show the mean (95% CI) for each duration category,
+        joined across the pain categories. The dotted line separates the acute and chronic pain durations.
+
+        Parameters
+        ----------
+        fit_data : DataFrame
+            Model fits with 'pain_duration' (coded 0 = not in pain ... 8 = > 10 years) and one column per parameter.
+        parameter_names : list
+            The parameters to plot (one row each).
+        save_name : str
+            File name (no extension) in AL/plots/, by default 'parameter-by-duration'.
+        log_parameters : list, optional
+            Parameters in fit_data that have already been log-transformed; their axis labels are prefixed with 'Log'.
+        seed : int
+            Seed for the jitter, so the figure is reproducible.
+
+        Returns (External)
+        ------------------
+        Image: PNG, SVG
+            The parameters by pain duration plot.
+        """
+
+        duration_labels = ['Not in\npain', '< 2\nweeks', '2–4\nweeks', '1–3\nmonths', '3–6\nmonths',
+                           '6–12\nmonths', '1–5\nyears', '> 5\nyears', '> 10\nyears']
+        parameter_names = list(parameter_names)
+        log_parameters = log_parameters or []
+        rng = np.random.default_rng(seed)
+
+        fig, axes = plt.subplots(len(parameter_names), 1, figsize=(11, 3.4 * len(parameter_names)), sharex=True)
+        axes = np.atleast_1d(axes)
+        for ax, parameter in zip(axes, parameter_names):
+            data = fit_data[['pain_duration', parameter]].dropna().astype(float)
+            data['pain_duration'] = data['pain_duration'].astype(int)
+
+            means = {}
+            for code in range(len(duration_labels)):
+                values = data.loc[data['pain_duration'] == code, parameter]
+                if values.empty:
+                    continue
+
+                #Participants
+                ax.scatter(code + rng.normal(0, 0.08, len(values)), values, s=12, color='darkgrey', alpha=0.5, linewidths=0)
+
+                #Mean and 95% CI
+                mean = values.mean()
+                ci = values.sem() * stats.t.ppf(0.975, len(values) - 1) if len(values) > 1 else 0
+                ax.errorbar(code, mean, yerr=ci, fmt='o', color='black', markersize=6, capsize=4, linewidth=1.5, zorder=4)
+                means[code] = mean
+
+            #Line across the pain categories (excludes 'Not in pain')
+            pain_codes = sorted(code for code in means if code > 0)
+            ax.plot(pain_codes, [means[code] for code in pain_codes], color='black', linewidth=1.2, alpha=0.6, zorder=3)
+
+            #Boundary between acute and chronic duration categories (3-6 months is recoded as acute)
+            ax.axvline(4.5, linestyle=':', color='grey')
+
+            y_label = parameter.replace('_', ' ').replace('lr', 'learning rate').replace(' learning', '\nlearning').replace('weighing ', 'weighting\n').replace('weighting ', 'weighting\n')
+            if parameter in log_parameters:
+                y_label = f'log {y_label}'
+            ax.set_ylabel(y_label.title(), fontsize=15)
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.tick_params(axis='both', labelsize=12)
+
+        axes[-1].set_xticks(range(len(duration_labels)), duration_labels, fontsize=12)
+        axes[-1].set_xlim(-0.6, len(duration_labels) - 0.4)
+        axes[-1].set_xlabel('Pain Duration')
+
+        plt.tight_layout()
+        plt.savefig(f'AL/plots/{save_name}.png', dpi=300, bbox_inches='tight')
+        plt.savefig(f'AL/plots/{save_name}.svg', format='svg', bbox_inches='tight')
+        plt.close(fig)
+
     def plot_model_fits(self, fits: dict) -> None:
 
         """
